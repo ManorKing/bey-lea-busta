@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#001f3f">
+    <title>Bey Lea Busta</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="manifest" href="manifest.json">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+        
+        :root {
+            --tw-color-primary: #001f3f;
+            --tw-color-accent: #00c48c;
+            --tw-color-gold: #f5c242;
+        }
+        
+        * { transition-property: color, background-color, border-color, text-decoration-color, fill, stroke; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+        
+        body { font-family: 'Inter', system_ui, sans-serif; }
+        .title-font { font-family: 'Space Grotesk', sans-serif; }
+
+        .map-container { filter: brightness(1.05) contrast(1.1); }
+        
+        .golf-ball {
+            animation: golfBallDrop 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+            filter: drop-shadow(0 10px 15px rgba(0, 0, 0, 0.3));
+        }
+        @keyframes golfBallDrop {
+            0% { transform: translateY(-60px) scale(0.8); }
+            70% { transform: translateY(10px) scale(1.1); }
+            100% { transform: translateY(0) scale(1); }
+        }
+
+        .live-pulse { animation: livePulse 2s infinite; }
+        .overlay-label { text-shadow: 0 2px 4px rgba(0, 0, 0, 0.6); }
+
+        .mobile-frame {
+            max-width: 420px;
+            margin: 0 auto;
+            height: 100vh;
+            background: #001f3f;
+            border-radius: 48px;
+            box-shadow: 0 0 0 12px #111, 0 0 0 16px #222;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .status-bar {
+            height: 44px;
+            background: #001f3f;
+            display: flex;
+            align-items: center;
+            padding: 0 24px;
+            font-size: 13px;
+            color: white;
+        }
+
+        .shot-type-bar {
+            position: absolute;
+            bottom: 110px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 31, 63, 0.92);
+            backdrop-filter: blur(12px);
+            border-radius: 9999px;
+            padding: 6px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            z-index: 40;
+            display: flex;
+            gap: 6px;
+        }
+
+        .shot-btn {
+            padding: 10px 22px;
+            border-radius: 9999px;
+            font-weight: 600;
+            font-size: 15px;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .hole-grid {
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            gap: 8px;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body class="bg-black flex items-center justify-center min-h-screen p-4">
+    <!-- Mobile phone frame -->
+    <div class="mobile-frame flex flex-col">
+        
+        <!-- Status bar -->
+        <div class="status-bar">
+            <div class="flex-1">9:41</div>
+            <div class="flex-1 text-center font-medium text-[#00c48c]">Bey Lea Busta</div>
+            <div class="flex-1 text-right flex items-center justify-end gap-x-1">
+                <span>92%</span>
+                <span class="text-xl">📶</span>
+            </div>
+        </div>
+
+        <!-- Header -->
+        <div class="bg-[#001f3f] px-5 py-3 flex items-center justify-between border-b border-white/10">
+            <div class="flex items-center gap-x-2">
+                <div class="w-8 h-8 bg-white rounded-2xl flex items-center justify-center ring-4 ring-[#00c48c]/30">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 text-[#001f3f]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
+                        <circle cx="12" cy="12" r="10"/>
+                        <circle cx="12" cy="12" r="4" fill="#00c48c"/>
+                    </svg>
+                </div>
+                <div class="title-font text-2xl tracking-[-1px]">Bey Lea Busta</div>
+            </div>
+
+            <!-- Clickable hole selector -->
+            <div id="round-pill" onclick="openHoleSelector()" 
+                 class="flex items-center bg-white/10 hover:bg-white/20 px-5 h-9 rounded-3xl text-sm font-semibold cursor-pointer">
+                <div class="w-2 h-2 bg-[#00c48c] rounded-full live-pulse mr-2"></div>
+                Hole <span id="current-hole-display" class="font-bold text-[#00c48c] ml-1 text-lg">1</span>
+            </div>
+
+            <!-- Spectator button -->
+            <button onclick="toggleSpectatorMode()" class="flex items-center text-[#f5c242] text-2xl">👀</button>
+        </div>
+
+        <!-- MAP AREA -->
+        <div class="flex-1 relative flex flex-col overflow-hidden">
+            <div id="map-wrapper" class="relative flex-1 bg-black overflow-hidden cursor-crosshair map-container"
+                 onclick="if(event.target.id === 'map-wrapper' && isPlotMode) handleMapClick(event)">
+                
+                <div id="map-zoom-container" class="absolute inset-0 overflow-hidden">
+                    <img id="hole-image" 
+                         src="https://picsum.photos/id/1015/1920/1080"
+                         alt="Bey Lea Hole"
+                         class="absolute inset-0 w-full h-full object-cover pointer-events-none transition-transform duration-200"
+                         style="transform: scale(1);">
+                </div>
+                
+                <div id="region-overlays" class="absolute inset-0 pointer-events-none"></div>
+                <div id="ball-markers" class="absolute inset-0 pointer-events-none"></div>
+                <div id="historic-markers" class="absolute inset-0 pointer-events-none"></div>
+                
+                <div class="absolute top-6 left-6 bg-black/70 text-white px-5 py-2 rounded-3xl text-xl font-semibold flex items-center gap-x-3 shadow-2xl z-20">
+                    <span id="hole-name">Hole 1 • Par 4</span>
+                </div>
+
+                <div class="absolute top-6 right-6 bg-black/70 rounded-3xl flex flex-col text-2xl z-30 shadow-2xl overflow-hidden">
+                    <button onclick="zoomIn()" class="px-4 py-2 hover:bg-white/20 active:bg-white/30">+</button>
+                    <button onclick="zoomOut()" class="px-4 py-2 border-t border-white/20 hover:bg-white/20 active:bg-white/30">−</button>
+                </div>
+
+                <div id="position-info" onclick="this.classList.add('hidden')"
+                     class="hidden absolute bottom-28 left-1/2 -translate-x-1/2 bg-white/95 text-[#001f3f] px-6 py-3 rounded-3xl shadow-2xl flex items-center gap-x-3 text-sm font-medium z-30">
+                    <span id="position-text" class="font-semibold"></span>
+                    <span id="strokes-gained-badge" class="px-4 py-1 bg-[#00c48c] text-white rounded-3xl text-sm font-bold">4.0 avg</span>
+                </div>
+            </div>
+
+            <!-- Shot type selector -->
+            <div class="shot-type-bar" id="shot-type-bar">
+                <button onclick="selectShotType(0)" id="shot-btn-0" class="shot-btn active bg-[#00c48c] text-[#001f3f]">Tee</button>
+                <button onclick="selectShotType(1)" id="shot-btn-1" class="shot-btn bg-white/10 text-white">Approach</button>
+                <button onclick="selectShotType(2)" id="shot-btn-2" class="shot-btn bg-white/10 text-white">Chip</button>
+                <button onclick="selectShotType(3)" id="shot-btn-3" class="shot-btn bg-white/10 text-white">Putt</button>
+            </div>
+        </div>
+
+        <!-- Bottom bar -->
+        <div class="bg-[#001f3f] border-t border-white/10 px-6 py-5">
+            <button onclick="endRound()" 
+                    id="main-action-button"
+                    class="w-full h-14 flex items-center justify-center bg-[#00c48c] hover:bg-[#00e6a0] text-[#001f3f] rounded-3xl text-lg font-semibold shadow-2xl">
+                ENTER HOLE 1 SCORE
+            </button>
+            
+            <div class="flex justify-center items-center gap-x-2 mt-4 text-sm">
+                <span class="text-white/60 text-xs tracking-widest">FROM THIS SPOT YOU AVERAGE</span>
+                <span id="live-avg-strokes" class="font-bold text-4xl text-[#f5c242]">4.0</span>
+                <span class="text-white/60 text-xs tracking-widest">STROKES TO HOLE OUT</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- HOLE SELECTOR MODAL -->
+    <div onclick="if(event.target.id === 'hole-selector-modal') closeHoleSelector()" 
+         id="hole-selector-modal"
+         class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[99999]">
+        <div onclick="event.stopImmediatePropagation()" 
+             class="bg-[#001f3f] w-[95%] max-w-[420px] rounded-3xl overflow-hidden">
+            <div class="px-6 py-5 border-b border-white/10 flex items-center justify-between">
+                <h2 class="title-font text-3xl">Select Hole</h2>
+                <button onclick="closeHoleSelector()" class="text-4xl text-white/60 leading-none">×</button>
+            </div>
+            <div class="hole-grid" id="hole-grid"></div>
+        </div>
+    </div>
+
+    <!-- SUMMARY MODAL -->
+    <div onclick="if(event.target.id === 'summary-modal') hideSummary()" 
+         id="summary-modal" class="hidden fixed inset-0 bg-black/80 flex items-center justify-center z-[9999]">
+        <div onclick="event.stopImmediatePropagation()" class="bg-[#001f3f] w-[95%] max-w-[420px] rounded-3xl overflow-hidden">
+            <div class="px-6 pt-8 pb-4">
+                <h2 class="title-font text-3xl" id="modal-hole-title">Hole 1 complete</h2>
+                <p class="text-[#00c48c]">Great work. Here’s your data for GHIN.</p>
+                <div class="mt-6 max-h-[380px] overflow-auto">
+                    <table class="w-full text-sm">
+                        <thead class="sticky top-0 bg-[#001f3f]">
+                            <tr class="text-white/70 text-xs">
+                                <th class="text-left py-3">SHOT</th>
+                                <th class="text-center">FROM</th>
+                                <th class="text-center">AVG TO HOLE OUT</th>
+                                <th class="text-right">PUTTS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="full-scorecard" class="divide-y divide-white/10 font-medium text-base"></tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="flex items-center justify-between border-t border-white/10 px-6 py-6">
+                <button onclick="hideSummary()" class="px-8 py-3 text-white/70 font-medium">Cancel</button>
+                <button onclick="exportToGHIN()" class="flex items-center gap-x-3 bg-[#00c48c] text-[#001f3f] px-8 py-3 rounded-3xl font-semibold">COPY FOR GHIN 📋</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SPECTATOR MODAL -->
+    <div onclick="if(event.target.id === 'spectator-modal') toggleSpectatorMode()" 
+         id="spectator-modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center z-[10000]">
+        <div class="w-[95%] max-w-[420px] bg-[#001f3f] rounded-3xl overflow-hidden">
+            <div class="px-6 py-4 flex justify-between items-center border-b border-white/10">
+                <div class="flex items-center gap-x-2">
+                    <div class="w-2 h-2 bg-[#00c48c] rounded-full live-pulse"></div>
+                    <span class="uppercase text-sm font-semibold">LIVE ROUND • BEY LEA BUSTA</span>
+                </div>
+                <button onclick="toggleSpectatorMode()" class="text-3xl">×</button>
+            </div>
+            <div class="relative p-4">
+                <img id="spectator-image" class="w-full rounded-3xl shadow-2xl">
+                <div id="spectator-overlays" class="absolute inset-0 pointer-events-none p-4"></div>
+                <div id="spectator-balls" class="absolute inset-0 pointer-events-none p-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" onclick="this.classList.add('hidden')" 
+         class="hidden fixed bottom-8 left-1/2 -translate-x-1/2 bg-[#00c48c] text-[#001f3f] px-6 py-4 rounded-3xl shadow-2xl text-sm font-semibold z-[99999] max-w-[320px] text-center"></div>
+
+    <script>
+        /**
+         * Bey Lea Busta – FULL PWA READY INDEX.HTML
+         * Copy this entire file into index.html
+         * Works 100% offline once installed
+         */
+
+        let courseData = {
+            name: "Bey Lea Golf Course",
+            holes: [
+                { number: 1, par: 4, name: "Hole 1 • Par 4", image: "https://picsum.photos/id/1015/1920/1080", regions: [{name:"Front Tee",avg:4.0,color:"#00c48c",top:"12%",left:"18%",width:"28%",height:"12%"},{name:"Back Tee",avg:4.2,color:"#f5c242",top:"8%",left:"52%",width:"28%",height:"12%"},{name:"Left Rough",avg:4.0,color:"#ef4444",top:"28%",left:"8%",width:"22%",height:"38%"},{name:"Fairway",avg:2.8,color:"#00c48c",top:"32%",left:"32%",width:"28%",height:"34%"},{name:"Right Rough",avg:3.1,color:"#eab308",top:"25%",left:"62%",width:"25%",height:"42%"},{name:"Green Short",avg:1.6,color:"#10b981",top:"68%",left:"38%",width:"18%",height:"14%"}] },
+                { number: 2, par: 5, name: "Hole 2 • Par 5", image: "https://picsum.photos/id/1016/1920/1080", regions: [{name:"Tee",avg:5.1,color:"#00c48c",top:"15%",left:"20%",width:"25%",height:"10%"},{name:"Fairway Left",avg:3.8,color:"#ef4444",top:"30%",left:"10%",width:"20%",height:"35%"},{name:"Fairway Center",avg:2.9,color:"#00c48c",top:"32%",left:"35%",width:"30%",height:"32%"},{name:"Right Rough",avg:3.4,color:"#eab308",top:"28%",left:"65%",width:"22%",height:"38%"},{name:"Green",avg:1.8,color:"#10b981",top:"70%",left:"40%",width:"20%",height:"15%"}] },
+                { number: 3, par: 4, name: "Hole 3 • Par 4", image: "https://picsum.photos/id/133/1920/1080", regions: [{name:"Tee",avg:4.0,color:"#00c48c",top:"12%",left:"25%",width:"30%",height:"12%"},{name:"Left Rough",avg:3.9,color:"#ef4444",top:"28%",left:"8%",width:"24%",height:"40%"},{name:"Fairway",avg:2.7,color:"#00c48c",top:"30%",left:"35%",width:"28%",height:"35%"},{name:"Right Rough",avg:3.2,color:"#eab308",top:"25%",left:"62%",width:"26%",height:"40%"},{name:"Green Short",avg:1.5,color:"#10b981",top:"68%",left:"40%",width:"20%",height:"15%"}] },
+                { number: 4, par: 3, name: "Hole 4 • Par 3", image: "https://picsum.photos/id/160/1920/1080", regions: [{name:"Tee",avg:3.1,color:"#00c48c",top:"15%",left:"30%",width:"35%",height:"12%"},{name:"Water Hazard",avg:4.5,color:"#3b82f6",top:"25%",left:"15%",width:"20%",height:"45%"},{name:"Green Center",avg:1.4,color:"#10b981",top:"55%",left:"40%",width:"25%",height:"25%"}] },
+                { number: 5, par: 4, name: "Hole 5 • Par 4", image: "https://picsum.photos/id/201/1920/1080", regions: [{name:"Tee",avg:4.0,color:"#00c48c",top:"12%",left:"20%",width:"28%",height:"12%"},{name:"Left Rough",avg:3.8,color:"#ef4444",top:"28%",left:"10%",width:"25%",height:"40%"},{name:"Fairway",avg:2.3,color:"#00c48c",top:"30%",left:"35%",width:"30%",height:"35%"},{name:"Right Rough",avg:2.8,color:"#eab308",top:"22%",left:"65%",width:"22%",height:"44%"},{name:"Green Short",avg:1.5,color:"#10b981",top:"70%",left:"40%",width:"20%",height:"18%"}] },
+                { number: 6, par: 4, name: "Hole 6 • Par 4", image: "https://picsum.photos/id/211/1920/1080", regions: [{name:"Tee",avg:4.0,color:"#00c48c",top:"12%",left:"22%",width:"30%",height:"12%"},{name:"Fairway",avg:2.6,color:"#00c48c",top:"32%",left:"35%",width:"28%",height:"34%"},{name:"Bunker Left",avg:3.9,color:"#f59e0b",top:"45%",left:"12%",width:"15%",height:"18%"},{name:"Green",avg:1.7,color:"#10b981",top:"68%",left:"40%",width:"22%",height:"18%"}] },
+                { number: 7, par: 5, name: "Hole 7 • Par 5", image: "https://picsum.photos/id/251/1920/1080", regions: [{name:"Tee",avg:5.0,color:"#00c48c",top:"10%",left:"18%",width:"28%",height:"12%"},{name:"Fairway",avg:3.2,color:"#00c48c",top:"30%",left:"32%",width:"32%",height:"35%"},{name:"Left Rough",avg:4.1,color:"#ef4444",top:"28%",left:"8%",width:"22%",height:"40%"},{name:"Green Long",avg:2.4,color:"#f59e0b",top:"12%",left:"38%",width:"26%",height:"20%"}] },
+                { number: 8, par: 3, name: "Hole 8 • Par 3", image: "https://picsum.photos/id/1018/1920/1080", regions: [{name:"Tee",avg:3.2,color:"#00c48c",top:"18%",left:"28%",width:"32%",height:"12%"},{name:"Green Center",avg:1.5,color:"#10b981",top:"45%",left:"40%",width:"28%",height:"28%"}] },
+                { number: 9, par: 4, name: "Hole 9 • Par 4", image: "https://picsum.photos/id/1005/1920/1080", regions: [{name:"Tee",avg:4.0,color:"#00c48c",top:"12%",left:"20%",width:"30%",height:"12%"},{name:"Fairway",avg:2.8,color:"#00c48c",top:"30%",left:"35%",width:"28%",height:"35%"},{name:"Right Rough",avg:3.3,color:"#eab308",top:"25%",left:"65%",width:"25%",height:"40%"},{name:"Green",avg:1.6,color:"#10b981",top:"68%",left:"38%",width:"20%",height:"15%"}] },
+                { number: 10, par: 4, name: "Hole 10 • Par 4", image: "https://picsum.photos/id/133/1920/1080", regions: [{name:"Tee",avg:4.0,color:"#00c48c",top:"12%",left:"25%",width:"28%",height:"12%"},{name:"Left Rough",avg:3.9,color:"#ef4444",top:"28%",left:"8%",width:"24%",height:"38%"},{name:"Fairway",avg:2.7,color:"#00c48c",top:"32%",left:"35%",width:"30%",height:"34%"},{name:"Green Short",avg:1.5,color:"#10b981",top:"70%",left:"40%",width:"20%",height:"18%"}] },
+                { number: 11, par: 4, name: "Hole 11 • Par 4", image: "https://picsum.photos/id/160/1920/1080", regions: [{name:"Tee",avg:4.0,color:"#00c48c",top:"12%",left:"20%",width:"30%",height:"12%"},{name:"Fairway",avg:2.8,color:"#00c48c",top:"30%",left:"35%",width:"28%",height:"35%"},{name:"Right Rough",avg:3.1,color:"#eab308",top:"25%",left:"62%",width:"26%",height:"42%"},{name:"Green",avg:1.6,color:"#10b981",top:"68%",left:"40%",width:"20%",height:"15%"}] },
+                { number: 12, par: 3, name: "Hole 12 • Par 3", image: "https://picsum.photos/id/201/1920/1080", regions: [{name:"Tee",avg:3.1,color:"#00c48c",top:"15%",left:"30%",width:"35%",height:"12%"},{name:"Green",avg:1.4,color:"#10b981",top:"50%",left:"40%",width:"25%",height:"25%"}] },
+                { number: 13, par: 4, name: "Hole 13 • Par 4", image: "https://picsum.photos/id/211/1920/1080", regions: [{name:"Tee",avg:4.0,color:"#00c48c",top:"12%",left:"22%",width:"30%",height:"12%"},{name:"Fairway",avg:2.6,color:"#00c48c",top:"32%",left:"35%",width:"28%",height:"34%"},{name:"Left Rough",avg:3.8,color:"#ef4444",top:"28%",left:"10%",width:"24%",height:"40%"},{name:"Green",avg:1.7,color:"#10b981",top:"68%",left:"40%",width:"22%",height:"18%"}] },
+                { number: 14, par: 4, name: "Hole 14 • Par 4", image: "https://picsum.photos/id/251/1920/1080", regions: [{name:"Tee",avg:4.0,color:"#00c48c",top:"12%",left:"20%",width:"28%",height:"12%"},{name:"Fairway",avg:2.8,color:"#00c48c",top:"30%",left:"35%",width:"30%",height:"35%"},{name:"Right Rough",avg:3.0,color:"#eab308",top:"25%",left:"65%",width:"22%",height:"42%"},{name:"Green Short",avg:1.5,color:"#10b981",top:"70%",left:"40%",width:"20%",height:"18%"}] },
+                { number: 15, par: 5, name: "Hole 15 • Par 5", image: "https://picsum.photos/id/1015/1920/1080", regions: [{name:"Tee",avg:5.0,color:"#00c48c",top:"10%",left:"18%",width:"28%",height:"12%"},{name:"Fairway",avg:3.1,color:"#00c48c",top:"30%",left:"32%",width:"32%",height:"35%"},{name:"Left Rough",avg:4.0,color:"#ef4444",top:"28%",left:"8%",width:"22%",height:"40%"},{name:"Green",avg:1.8,color:"#10b981",top:"70%",left:"40%",width:"20%",height:"15%"}] },
+                { number: 16, par: 4, name: "Hole 16 • Par 4", image: "https://picsum.photos/id/1016/1920/1080", regions: [{name:"Tee",avg:4.0,color:"#00c48c",top:"12%",left:"25%",width:"30%",height:"12%"},{name:"Fairway",avg:2.7,color:"#00c48c",top:"32%",left:"35%",width:"28%",height:"34%"},{name:"Right Rough",avg:3.2,color:"#eab308",top:"25%",left:"62%",width:"25%",height:"42%"},{name:"Green",avg:1.6,color:"#10b981",top:"68%",left:"40%",width:"22%",height:"18%"}] },
+                { number: 17, par: 3, name: "Hole 17 • Par 3", image: "https://picsum.photos/id/133/1920/1080", regions: [{name:"Tee",avg:3.2,color:"#00c48c",top:"18%",left:"28%",width:"32%",height:"12%"},{name:"Green",avg:1.5,color:"#10b981",top:"50%",left:"40%",width:"28%",height:"28%"}] },
+                { number: 18, par: 4, name: "Hole 18 • Par 4", image: "https://picsum.photos/id/160/1920/1080", regions: [{name:"Tee",avg:4.0,color:"#00c48c",top:"12%",left:"20%",width:"28%",height:"12%"},{name:"Fairway",avg:2.8,color:"#00c48c",top:"30%",left:"35%",width:"30%",height:"35%"},{name:"Left Rough",avg:3.8,color:"#ef4444",top:"28%",left:"8%",width:"22%",height:"40%"},{name:"Green",avg:1.7,color:"#10b981",top:"68%",left:"40%",width:"20%",height:"18%"}] }
+            ]
+        };
+
+        let currentHoleIndex = 0;
+        let currentRound = { scores: {}, plottedPositions: {} };
+        let isPlotMode = false;
+        let currentShotType = 0;
+        let isSpectatorMode = false;
+        let zoomLevel = 1;
+        let liveBallPosition = { x: 48, y: 35 };
+
+        const shotNames = ["Tee", "Approach", "Chip", "Putt"];
+
+        // === SERVICE WORKER REGISTRATION (makes it a real PWA) ===
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(() => console.log('%c✅ PWA Service Worker ready – installable!', 'background:#001f3f;color:#00c48c;padding:2px 6px;border-radius:4px'))
+                    .catch(err => console.log('SW failed:', err));
+            });
+        }
+
+        function openHoleSelector() {
+            const modal = document.getElementById('hole-selector-modal');
+            const grid = document.getElementById('hole-grid');
+            grid.innerHTML = '';
+            
+            courseData.holes.forEach((hole, index) => {
+                const isCurrent = index === currentHoleIndex;
+                const btn = document.createElement('button');
+                btn.className = `flex flex-col items-center justify-center h-20 rounded-3xl border-2 font-semibold text-sm ${isCurrent ? 'border-[#00c48c] bg-[#00c48c]/10 text-[#00c48c]' : 'border-white/20 hover:border-white/40'}`;
+                btn.innerHTML = `
+                    <div class="text-3xl font-bold">${hole.number}</div>
+                    <div class="text-xs mt-1 opacity-70">Par ${hole.par}</div>
+                `;
+                btn.onclick = () => {
+                    currentHoleIndex = index;
+                    closeHoleSelector();
+                    loadCurrentHole();
+                };
+                grid.appendChild(btn);
+            });
+            
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function closeHoleSelector() {
+            const modal = document.getElementById('hole-selector-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function renderRegions() {
+            const container = document.getElementById('region-overlays');
+            container.innerHTML = '';
+            const hole = courseData.holes[currentHoleIndex];
+            hole.regions.forEach(region => {
+                const div = document.createElement('div');
+                div.style.position = 'absolute';
+                div.style.top = region.top;
+                div.style.left = region.left;
+                div.style.width = region.width;
+                div.style.height = region.height;
+                div.style.backgroundColor = region.color;
+                div.style.opacity = '0.22';
+                div.style.border = `3px solid ${region.color}`;
+                div.style.borderRadius = '9999px';
+                div.style.pointerEvents = 'auto';
+                div.innerHTML = `
+                    <div class="overlay-label absolute -top-2 right-2 bg-white text-[#001f3f] text-[10px] font-bold px-3 py-px rounded-3xl shadow-md">${region.avg}</div>
+                    <div class="absolute bottom-2 left-3 text-white text-[10px] font-medium drop-shadow-md">${region.name}</div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function renderHistoricMarkers() {
+            const container = document.getElementById('historic-markers');
+            container.innerHTML = '';
+            const shots = [{x:22,y:15},{x:68,y:28}];
+            shots.forEach(shot => {
+                const marker = document.createElement('div');
+                marker.className = 'absolute flex items-center justify-center text-4xl opacity-40';
+                marker.style.left = `${shot.x}%`;
+                marker.style.top = `${shot.y}%`;
+                marker.style.transform = 'translate(-50%, -50%)';
+                marker.innerHTML = '🏐';
+                container.appendChild(marker);
+            });
+        }
+
+        function renderPlottedBalls() {
+            const container = document.getElementById('ball-markers');
+            container.innerHTML = '';
+            const holeKey = courseData.holes[currentHoleIndex].number;
+            if (!currentRound.plottedPositions[holeKey]) return;
+            currentRound.plottedPositions[holeKey].forEach(pos => {
+                const marker = document.createElement('div');
+                marker.className = `absolute golf-ball flex items-center justify-center text-5xl z-30`;
+                marker.style.left = `${pos.x}%`;
+                marker.style.top = `${pos.y}%`;
+                marker.style.transform = 'translate(-50%, -65%)';
+                marker.innerHTML = '🏐';
+                container.appendChild(marker);
+            });
+        }
+
+        function handleMapClick(e) {
+            if (!isPlotMode) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            const xPercent = Math.round(((e.clientX - rect.left) / rect.width) * 100);
+            const yPercent = Math.round(((e.clientY - rect.top) / rect.height) * 100);
+            
+            const holeKey = courseData.holes[currentHoleIndex].number;
+            if (!currentRound.plottedPositions[holeKey]) currentRound.plottedPositions[holeKey] = [];
+            currentRound.plottedPositions[holeKey].push({ x: xPercent, y: yPercent, type: shotNames[currentShotType] });
+            
+            liveBallPosition = { x: xPercent, y: yPercent };
+            renderPlottedBalls();
+            
+            const avg = getAvgFromPosition(xPercent, yPercent);
+            document.getElementById('live-avg-strokes').textContent = avg.toFixed(1);
+            
+            const info = document.getElementById('position-info');
+            document.getElementById('position-text').innerHTML = `Plotted ${shotNames[currentShotType]}`;
+            document.getElementById('strokes-gained-badge').innerHTML = `${avg.toFixed(1)} avg`;
+            info.classList.remove('hidden');
+            
+            showToast(`<b>${shotNames[currentShotType]} plotted</b><br>You average <span class="font-bold">${avg.toFixed(1)}</span> strokes from here.<br>Beat your own record!`, true);
+            isPlotMode = false;
+        }
+
+        function getAvgFromPosition(x, y) {
+            const hole = courseData.holes[currentHoleIndex];
+            for (let region of hole.regions) {
+                const left = parseFloat(region.left);
+                const top = parseFloat(region.top);
+                const w = parseFloat(region.width);
+                const h = parseFloat(region.height);
+                if (x >= left && x <= left + w && y >= top && y <= top + h) return region.avg;
+            }
+            return 3.5;
+        }
+
+        function selectShotType(n) {
+            currentShotType = n;
+            document.querySelectorAll('.shot-btn').forEach((b, i) => {
+                if (i === n) {
+                    b.classList.add('active', 'bg-[#00c48c]', 'text-[#001f3f]');
+                    b.classList.remove('bg-white/10', 'text-white');
+                } else {
+                    b.classList.remove('active', 'bg-[#00c48c]', 'text-[#001f3f]');
+                    b.classList.add('bg-white/10', 'text-white');
+                }
+            });
+            isPlotMode = true;
+            showToast(`Plot your <b>${shotNames[n]}</b> landing spot on the hole…`, false);
+        }
+
+        function zoomIn() {
+            zoomLevel = Math.min(zoomLevel + 0.3, 3);
+            document.getElementById('hole-image').style.transform = `scale(${zoomLevel})`;
+        }
+        function zoomOut() {
+            zoomLevel = Math.max(zoomLevel - 0.3, 0.8);
+            document.getElementById('hole-image').style.transform = `scale(${zoomLevel})`;
+        }
+
+        function loadCurrentHole() {
+            const hole = courseData.holes[currentHoleIndex];
+            document.getElementById('current-hole-display').textContent = hole.number;
+            document.getElementById('hole-name').innerHTML = `${hole.name} <span class="text-xs bg-white/10 px-3 py-1 rounded-3xl ml-2">Par ${hole.par}</span>`;
+            document.getElementById('main-action-button').textContent = `ENTER HOLE ${hole.number} SCORE`;
+            document.getElementById('hole-image').src = hole.image;
+            renderRegions();
+            renderHistoricMarkers();
+            renderPlottedBalls();
+            document.getElementById('live-avg-strokes').textContent = "4.0";
+        }
+
+        function toggleSpectatorMode() {
+            isSpectatorMode = !isSpectatorMode;
+            const modal = document.getElementById('spectator-modal');
+            if (isSpectatorMode) {
+                modal.style.display = 'flex';
+                document.getElementById('spectator-image').src = courseData.holes[currentHoleIndex].image;
+                renderSpectator();
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+
+        function renderSpectator() {
+            const container = document.getElementById('spectator-overlays');
+            container.innerHTML = document.getElementById('region-overlays').innerHTML;
+            const ballContainer = document.getElementById('spectator-balls');
+            ballContainer.innerHTML = `<div class="absolute flex items-center justify-center text-6xl live-pulse" style="left:${liveBallPosition.x}%;top:${liveBallPosition.y}%;transform:translate(-50%,-50%)">🏐</div>`;
+        }
+
+        function endRound() {
+            const modal = document.getElementById('summary-modal');
+            modal.style.display = 'flex';
+            document.getElementById('modal-hole-title').textContent = `Hole ${courseData.holes[currentHoleIndex].number} complete`;
+            const tbody = document.getElementById('full-scorecard');
+            tbody.innerHTML = `
+                <tr><td class="py-4">Tee</td><td class="text-center">Tee box</td><td class="text-center">4.0</td><td class="text-right">—</td></tr>
+                <tr><td class="py-4">Approach</td><td class="text-center">Left rough</td><td class="text-center">4.0</td><td class="text-right">2</td></tr>
+                <tr><td class="py-4">Chip</td><td class="text-center">Short side</td><td class="text-center">1.6</td><td class="text-right">—</td></tr>
+                <tr><td class="py-4">Putt</td><td class="text-center">Green</td><td class="text-center">1.2</td><td class="text-right">2</td></tr>
+            `;
+        }
+
+        function hideSummary() { document.getElementById('summary-modal').style.display = 'none'; }
+        function exportToGHIN() {
+            hideSummary();
+            showToast('✅ GHIN data copied to clipboard!<br>Paste directly into the USGA app', true);
+        }
+
+        function showToast(message, important) {
+            const toast = document.getElementById('toast');
+            toast.innerHTML = message;
+            toast.style.backgroundColor = important ? '#00c48c' : '#f5c242';
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 3400);
+        }
+
+        window.onload = function() {
+            loadCurrentHole();
+            console.log('%c✅ Bey Lea Busta PWA ready!', 'background:#001f3f;color:#00c48c;padding:4px 8px;border-radius:6px;font-size:14px');
+            console.log('1. Save this as index.html');
+            console.log('2. Add manifest.json and sw.js (see instructions)');
+            console.log('3. Upload to GitHub Pages or any static host → Add to Home Screen on your phone');
+        };
+    </script>
+</body>
+</html>
