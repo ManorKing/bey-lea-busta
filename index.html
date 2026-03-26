@@ -755,39 +755,89 @@ function setAuthTab(mode) {
   document.getElementById('auth-error').textContent='';
 }
 
-async function handleAuth() {
-  const email = document.getElementById('field-email').value.trim();
-  const pass  = document.getElementById('field-password').value;
-  if (!email||!pass) { document.getElementById('auth-error').textContent='Please fill in all fields.'; return; }
-
+   async function handleAuth() {
+  const email = document.getElementById('field-email').value;
+  const pass = document.getElementById('field-pass').value;
   const btn = document.getElementById('auth-submit');
+  
+  if (!email || !pass) {
+    alert("Please enter an email and password first.");
+    return;
+  }
+
   btn.textContent = 'LOADING…';
   btn.disabled = true;
 
   if (!sb) {
-    // No Supabase configured — fallback to guest with name
-    continueAsGuest();
+    alert("Database connection is missing! Check your Supabase URL and Key.");
+    btn.textContent = 'SUBMIT';
+    btn.disabled = false;
     return;
   }
 
   try {
-    let result;
-    if (authMode === 'login') {
-      result = await sb.auth.signInWithPassword({email, password:pass});
+    // Assuming you have an authMode variable tracking 'login' vs 'signup'
+    if (authMode === 'signup') {
+      const { data, error } = await sb.auth.signUp({ email: email, password: pass });
+      
+      if (error) {
+        alert("Signup Error: " + error.message);
+      } else {
+        alert("Account Created! If 'Confirm Email' is on in Supabase, please check your inbox. Otherwise, you can now log in.");
+      }
     } else {
-      const name = document.getElementById('field-name').value.trim() || email.split('@')[0];
-      result = await sb.auth.signUp({email, password:pass, options:{data:{display_name:name}}});
+      // Login logic
+      const { data, error } = await sb.auth.signInWithPassword({ email: email, password: pass });
+      
+      if (error) {
+        alert("Login Error: " + error.message);
+      } else {
+        // SUCCESS: Hide auth screen, show main app
+        document.getElementById('screen-auth').style.display = 'none';
+        alert("Welcome to Bey Lea Busta!");
+      }
     }
-    if (result.error) throw result.error;
-    currentUser = result.data.user;
-    await ensureProfile();
-    enterApp();
-  } catch(err) {
-    document.getElementById('auth-error').textContent = err.message || 'Auth failed';
-    btn.textContent = authMode==='login'?'SIGN IN':'CREATE ACCOUNT';
-    btn.disabled = false;
+  } catch (err) {
+    alert("An unexpected error occurred: " + err.message);
   }
+
+  // Reset button state
+  btn.textContent = authMode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN';
+  btn.disabled = false;
 }
+//async function handleAuth() {
+//  const email = document.getElementById('field-email').value.trim();
+ // const pass  = document.getElementById('field-password').value;
+  //if (!email||!pass) { document.getElementById('auth-error').textContent='Please fill in all fields.'; return; }
+
+ // const btn = document.getElementById('auth-submit');
+//  btn.textContent = 'LOADING…';
+//  btn.disabled = true;
+//
+//  if (!sb) {
+//    // No Supabase configured — fallback to guest with name
+//    continueAsGuest();
+//    return;
+//  }
+
+//  try {
+//    let result;
+//    if (authMode === 'login') {
+//      result = await sb.auth.signInWithPassword({email, password:pass});
+//    } else {
+//      const name = document.getElementById('field-name').value.trim() || email.split('@')[0];
+//      result = await sb.auth.signUp({email, password:pass, options:{data:{display_name:name}}});
+//    }
+//    if (result.error) throw result.error;
+//    currentUser = result.data.user;
+//    await ensureProfile();
+ //   enterApp();
+//  } catch(err) {
+//    document.getElementById('auth-error').textContent = err.message || 'Auth failed';
+//    btn.textContent = authMode==='login'?'SIGN IN':'CREATE ACCOUNT';
+//    btn.disabled = false;
+//  }
+//}
 
 function continueAsGuest() {
   isGuest = true;
