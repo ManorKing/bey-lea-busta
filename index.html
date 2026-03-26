@@ -10,7 +10,9 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
   /* DESIGN TOKENS */
@@ -32,7 +34,7 @@
   /* --- SHARED UI --- */
   .auth-input { width: 100%; max-width: 300px; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--navy-light); background: var(--navy-mid); color: var(--white); font-size: 16px; }
   .action-btn { width: 100%; max-width: 300px; padding: 15px; border-radius: 8px; border: none; background: var(--gold); color: var(--navy); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; }
-  .header-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: var(--navy-mid); border-bottom: 1px solid var(--navy-light); }
+  .header-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: var(--navy-mid); border-bottom: 1px solid var(--navy-light); z-index: 1000; }
 
   /* --- AUTH SCREEN --- */
   #screen-auth { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; }
@@ -40,32 +42,36 @@
   .auth-tab { background: transparent; color: var(--muted); border: none; padding: 10px 20px; font-family: 'Syne', sans-serif; font-weight: 700; transition: 0.3s; }
   .auth-tab.active { background: var(--green); color: var(--navy); }
 
-  /* --- HOME SCREEN (NEW) --- */
+  /* --- HOME SCREEN --- */
   #screen-home { display: none; flex-direction: column; height: 100%; }
   .home-menu { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 20px; }
   .menu-btn { width: 100%; max-width: 300px; padding: 20px; border-radius: 12px; border: 2px solid var(--navy-light); background: var(--navy-mid); color: var(--white); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; transition: 0.2s; }
   .menu-btn.primary { background: var(--green); color: var(--navy); border-color: var(--green); }
 
   /* --- GAME SCREEN (MAP) --- */
-  #screen-game { display: none; flex-direction: column; height: 100%; }
+  #screen-game { display: none; flex-direction: column; height: 100%; position: relative; }
   .nav-btn { background: transparent; color: var(--gold); border: 1px solid var(--gold); border-radius: 4px; padding: 5px 15px; font-weight: bold; }
   
-  .shot-selector { display: flex; justify-content: space-between; padding: 10px; background: var(--navy); }
+  .shot-selector { display: flex; justify-content: space-between; padding: 10px; background: var(--navy); z-index: 1000; }
   .shot-btn { flex: 1; margin: 0 2px; padding: 10px 0; background: var(--navy-mid); color: var(--muted); border: 1px solid var(--navy-light); border-radius: 4px; font-size: 12px; font-weight: bold; }
   .shot-btn.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
   
-  /* Zoom/Pan Mechanics (Fixed for infinite panning) */
-  #map-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; background: #000; overflow: hidden; }
-  #zoom-wrapper { position: relative; display: inline-block; transform-origin: center center; }
-  #hole-image { display: block; max-width: 100vw; max-height: 60vh; object-fit: contain; pointer-events: none; }
+  /* Leaflet Map Target */
+  #map-container { flex-grow: 1; background: #000; width: 100%; z-index: 1; }
   
-  .shot-pin { position: absolute; width: 16px; height: 16px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; box-shadow: 0 2px 5px rgba(0,0,0,0.8); z-index: 10; }
+  /* Custom Leaflet Pins (Shrunk for precision) */
+  .leaflet-div-icon { background: transparent; border: none; }
+  .shot-pin { 
+    width: 9px; height: 9px; 
+    border: 1.5px solid white; border-radius: 50%; 
+    box-shadow: 0 2px 4px rgba(0,0,0,0.9); 
+  }
   .pin-Tee { background-color: var(--red); }
   .pin-Approach { background-color: var(--blue); }
   .pin-Chip { background-color: var(--gold); }
   .pin-Putt { background-color: var(--green); }
 
-  .data-panel { padding: 15px; text-align: center; background: var(--navy-mid); border-top: 1px solid var(--navy-light); z-index: 20; }
+  .data-panel { padding: 15px; text-align: center; background: var(--navy-mid); border-top: 1px solid var(--navy-light); z-index: 1000; }
   .avg-text { font-family: 'DM Mono', monospace; color: var(--green); font-size: 18px; margin-bottom: 10px; }
 
   /* --- SCORE ENTRY SCREEN --- */
@@ -100,7 +106,7 @@
 
   <div id="screen-auth">
     <h1 style="font-family: 'Syne', sans-serif; color: var(--green); font-size: 36px; text-align: center; line-height: 1.1; margin-bottom: 5px;">BEY LEA<br>BUSTA</h1>
-    <p style="color: var(--muted); margin-bottom: 30px;">Cause the Busta kept me outta handcuffs</p>
+    <p style="color: var(--muted); margin-bottom: 30px;">DECADE Strategy Tracker</p>
     
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</button>
@@ -143,11 +149,7 @@
       <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
     </div>
 
-    <div id="map-container">
-      <div id="zoom-wrapper" onclick="handleMapTap(event)">
-        <img id="hole-image" src="./images/Hole1.png" alt="Hole Map">
-      </div>
-    </div>
+    <div id="map-container"></div>
 
     <div class="data-panel">
       <div id="average-display" class="avg-text">Awaiting Shot Plot...</div>
@@ -216,11 +218,18 @@
     let sb = null;
     try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch (err) { console.error(err); }
 
-    // --- 2. COURSE DATA (Front 9 Mocked) ---
+    // --- 2. COURSE DATA (Bey Lea Approximate Lat/Lngs) ---
+    // These coordinates tell Leaflet where to point the camera for each hole.
     const courseData = {
-      1: { par: 4, yards: 340 }, 2: { par: 4, yards: 390 }, 3: { par: 5, yards: 500 },
-      4: { par: 3, yards: 160 }, 5: { par: 4, yards: 380 }, 6: { par: 4, yards: 410 },
-      7: { par: 3, yards: 180 }, 8: { par: 5, yards: 520 }, 9: { par: 4, yards: 400 }
+      1: { par: 4, yards: 340, lat: 39.9961, lng: -74.2120 }, 
+      2: { par: 4, yards: 390, lat: 39.9980, lng: -74.2110 }, 
+      3: { par: 5, yards: 500, lat: 39.9990, lng: -74.2090 },
+      4: { par: 3, yards: 160, lat: 39.9985, lng: -74.2070 }, 
+      5: { par: 4, yards: 380, lat: 39.9970, lng: -74.2060 }, 
+      6: { par: 4, yards: 410, lat: 39.9960, lng: -74.2040 },
+      7: { par: 3, yards: 180, lat: 39.9950, lng: -74.2030 }, 
+      8: { par: 5, yards: 520, lat: 39.9940, lng: -74.2050 }, 
+      9: { par: 4, yards: 400, lat: 39.9955, lng: -74.2080 }
     };
 
     // --- 3. UI ROUTER ---
@@ -229,18 +238,37 @@
         document.getElementById(id).style.display = 'none';
       });
       document.getElementById(screenId).style.display = 'flex';
+      
+      // Leaflet needs to know when its container becomes visible to size properly
+      if (screenId === 'screen-game' && map) {
+        setTimeout(() => map.invalidateSize(), 100);
+      }
     }
 
-    // --- 4. PANZOOM SETUP ---
-    let panzoomInstance = null;
-    function initPanzoom() {
-      const zoomWrapper = document.getElementById('zoom-wrapper');
-      // Removed 'contain' to allow infinite panning and zooming out
-      panzoomInstance = Panzoom(zoomWrapper, { 
-        maxScale: 6, 
-        minScale: 0.4, 
-        step: 0.3 
-      });
+    // --- 4. LEAFLET MAP SETUP ---
+    let map = null;
+    let markersLayer = null;
+
+    function initMap() {
+      if (map) return; // Prevent double initialization
+      
+      // Initialize map, locked reasonably close so they don't get lost
+      map = L.map('map-container', {
+        zoomControl: false, // We'll rely on pinch-zoom
+        minZoom: 16,
+        maxZoom: 21
+      }).setView([39.9961, -74.2120], 18);
+
+      // Add Esri Satellite Imagery
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri'
+      }).addTo(map);
+
+      // Layer to hold our shot pins
+      markersLayer = L.layerGroup().addTo(map);
+
+      // Listen for map taps to drop pins
+      map.on('click', handleMapTap);
     }
 
     // --- 5. AUTHENTICATION ---
@@ -270,7 +298,6 @@
           const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
           if (error) throw error;
           
-          // Successful Login: Setup Home Screen
           document.getElementById('home-user-email').textContent = data.user.email;
           switchScreen('screen-home');
         }
@@ -291,25 +318,27 @@
 
     function startRound() {
       switchScreen('screen-game');
-      if (!panzoomInstance) initPanzoom();
+      initMap();
       loadHole(1);
     }
 
     function loadHole(holeNumber) {
       currentHole = holeNumber;
+      const holeInfo = courseData[currentHole];
+      
       document.getElementById('hole-title').textContent = `Hole ${holeNumber}`;
-      document.getElementById('hole-image').src = `./images/Hole${holeNumber}.png`;
       document.getElementById('save-hole-btn').textContent = `Enter Hole ${holeNumber} Score`;
+      
+      // Pan camera to the new hole
+      if (map && holeInfo) {
+        map.setView([holeInfo.lat, holeInfo.lng], 18, { animate: true });
+      }
       
       currentShots = [];
       document.getElementById('average-display').textContent = "Awaiting Shot Plot...";
-      document.querySelectorAll('.shot-pin').forEach(pin => pin.remove());
       
-      if (panzoomInstance) {
-        panzoomInstance.reset();
-        // Slightly zoom out by default so it fits nicely
-        panzoomInstance.zoom(0.8);
-      }
+      // Clear pins from previous hole
+      if (markersLayer) markersLayer.clearLayers();
       
       document.querySelectorAll('.shot-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.shot-btn')[0].classList.add('active');
@@ -323,20 +352,25 @@
     }
 
     async function handleMapTap(event) {
+      // event.latlng contains the exact real-world GPS coordinates of the tap
+      const lat = event.latlng.lat;
+      const lng = event.latlng.lng;
+
       if (activeShotType === 'Tee' && currentShots.some(shot => shot.type === 'Tee')) {
         return alert("You have already plotted a Tee shot.");
       }
-      const wrapper = document.getElementById('zoom-wrapper');
-      const rect = wrapper.getBoundingClientRect();
-      const pctX = ((event.clientX - rect.left) / rect.width) * 100;
-      const pctY = ((event.clientY - rect.top) / rect.height) * 100;
 
-      const pin = document.createElement('div');
-      pin.className = `shot-pin pin-${activeShotType}`;
-      pin.style.left = `${pctX}%`; pin.style.top = `${pctY}%`;
-      wrapper.appendChild(pin);
+      // Create a custom HTML pin
+      const customIcon = L.divIcon({
+        className: 'custom-pin-wrapper',
+        html: `<div class="shot-pin pin-${activeShotType}"></div>`,
+        iconSize: [9, 9], // Match the shrunk CSS size
+        iconAnchor: [4.5, 4.5] // Centers the pin exactly on the tap coordinate
+      });
 
-      currentShots.push({ type: activeShotType, x: pctX, y: pctY });
+      L.marker([lat, lng], { icon: customIcon }).addTo(markersLayer);
+
+      currentShots.push({ type: activeShotType, lat: lat, lng: lng });
       document.getElementById('average-display').textContent = `Plot saved! Total Shots: ${currentShots.length}`;
     }
 
@@ -372,7 +406,7 @@
       document.querySelectorAll('.drive-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.gir-btn').forEach(btn => btn.classList.remove('active-green'));
 
-      // AUTO-CALCULATE GIR: (Total Strokes - Putts) <= (Par - 2)
+      // AUTO-CALCULATE GIR
       if (currentShots.length > 0) {
         const strokesToGreen = totalScore - totalPutts;
         const girTarget = holeInfo.par - 2;
@@ -405,14 +439,13 @@
     }
 
     async function saveScoreAndNextHole() {
-      // Data ready to push to DB
       const scoreData = {
         hole: currentHole,
         score: parseInt(document.getElementById('score-val').textContent),
         putts: parseInt(document.getElementById('putts-val').textContent),
         drive: driveState,
         gir: girState,
-        plots: currentShots
+        plots: currentShots // Now saving Lat/Lng instead of X/Y %!
       };
       
       console.log("Saving Hole Data:", scoreData);
