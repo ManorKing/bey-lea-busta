@@ -9,1777 +9,293 @@
 <title>Bey Lea Busta</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <style>
-/* ============================================================
-   DESIGN TOKENS
-   ============================================================ */
-:root{
-  --navy:#0a1628; --navy-mid:#0f2040; --navy-light:#162d55;
-  --green:#00d68f; --green-dim:#00a872;
-  --gold:#f0c040; --red:#ff4d6d; --blue:#3b82f6;
-  --white:#f0f4ff; --muted:rgba(240,244,255,.45);
-  --border:rgba(240,244,255,.08);
-  --card:rgba(255,255,255,.04);
-  --radius:14px;
-}
-*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-html,body{height:100%;overflow:hidden}
-body{font-family:'DM Sans',sans-serif;background:#000;display:flex;align-items:center;justify-content:center}
+  /* DESIGN TOKENS */
+  :root {
+    --navy: #0a1628; --navy-mid: #0f2040; --navy-light: #162d55;
+    --green: #00d68f; --green-dim: #00a872;
+    --gold: #f0c040; --red: #ff4d6d; --blue: #3b82f6;
+    --white: #f0f4ff; --muted: #8b9bb4;
+  }
+  
+  body {
+    margin: 0; padding: 0;
+    font-family: 'DM Sans', sans-serif;
+    background-color: var(--navy);
+    color: var(--white);
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+  }
 
-/* ============================================================
-   APP SHELL
-   ============================================================ */
-.app{width:100%;max-width:430px;height:100dvh;background:var(--navy);display:flex;flex-direction:column;position:relative;overflow:hidden}
+  /* AUTH SCREEN STYLES */
+  #screen-auth {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 20px;
+  }
 
-/* ============================================================
-   SCREENS — only one visible at a time
-   ============================================================ */
-.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--navy);opacity:0;pointer-events:none;transition:opacity .25s}
-.screen.active{opacity:1;pointer-events:all;position:relative}
+  .auth-tabs {
+    display: flex;
+    margin-bottom: 20px;
+    background: var(--navy-mid);
+    border-radius: 8px;
+    overflow: hidden;
+  }
 
-/* ============================================================
-   STATUS BAR
-   ============================================================ */
-.status-bar{height:44px;background:var(--navy);display:flex;align-items:center;justify-content:space-between;padding:0 22px;font-size:13px;font-weight:500;color:var(--white);flex-shrink:0}
+  .auth-tab {
+    background: transparent;
+    color: var(--muted);
+    border: none;
+    padding: 10px 20px;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.3s;
+  }
 
-/* ============================================================
-   AUTH SCREEN
-   ============================================================ */
-#screen-auth{justify-content:center;align-items:center;padding:32px 28px;gap:28px}
-.auth-logo{display:flex;flex-direction:column;align-items:center;gap:12px}
-.auth-icon{width:72px;height:72px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;box-shadow:0 0 40px rgba(0,214,143,.35)}
-.auth-title{font-family:'Syne',sans-serif;font-size:32px;font-weight:800;color:var(--white);letter-spacing:-1px}
-.auth-sub{font-size:13px;color:var(--muted);letter-spacing:.04em}
-.auth-card{width:100%;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:24px;display:flex;flex-direction:column;gap:14px}
-.auth-tabs{display:flex;gap:0;background:rgba(255,255,255,.06);border-radius:10px;padding:3px;margin-bottom:4px}
-.auth-tab{flex:1;height:34px;border:none;border-radius:8px;background:transparent;color:var(--muted);font-size:13px;font-weight:600;cursor:pointer;transition:all .2s;font-family:'DM Sans',sans-serif}
-.auth-tab.active{background:var(--green);color:var(--navy)}
-.field-label{font-size:11px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:4px}
-.field-input{width:100%;height:46px;background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:10px;color:var(--white);font-size:15px;font-family:'DM Sans',sans-serif;padding:0 14px;outline:none;transition:border-color .2s}
-.field-input:focus{border-color:var(--green)}
-.auth-btn{width:100%;height:50px;background:var(--green);color:var(--navy);border:none;border-radius:12px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;letter-spacing:.05em;cursor:pointer;margin-top:4px;transition:all .15s}
-.auth-btn:active{transform:scale(.97)}
-.auth-error{font-size:12px;color:var(--red);text-align:center;min-height:16px}
-.auth-divider{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px}
-.auth-divider::before,.auth-divider::after{content:'';flex:1;height:1px;background:var(--border)}
+  .auth-tab.active {
+    background: var(--green);
+    color: var(--navy);
+  }
 
-/* ============================================================
-   MAIN GAME SCREEN
-   ============================================================ */
-#screen-game{overflow:hidden}
-.header{background:var(--navy);padding:10px 16px 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border);flex-shrink:0}
-.app-logo{display:flex;align-items:center;gap:8px}
-.logo-icon{width:32px;height:32px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px}
-.app-title{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--white);letter-spacing:-.5px}
-.hole-pill{display:flex;align-items:center;gap:6px;background:rgba(0,214,143,.12);border:1px solid rgba(0,214,143,.25);padding:6px 14px;border-radius:99px;cursor:pointer;transition:all .15s}
-.hole-pill:active{transform:scale(.95)}
-.hole-pill-dot{width:7px;height:7px;background:var(--green);border-radius:50%;animation:pulse 2s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(.8)}}
-.hole-pill-label{font-size:13px;color:var(--muted)}
-.hole-pill-num{font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--green);line-height:1}
-.header-right{display:flex;gap:8px;align-items:center}
-.hdr-btn{background:rgba(255,255,255,.07);border:1px solid var(--border);color:var(--white);border-radius:10px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;letter-spacing:.04em;transition:all .15s}
-.hdr-btn:active{background:rgba(255,255,255,.15)}
+  .auth-input {
+    width: 100%;
+    max-width: 300px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    border: 1px solid var(--navy-light);
+    background: var(--navy-mid);
+    color: var(--white);
+    font-size: 16px;
+  }
 
-/* ============================================================
-   MAP AREA
-   ============================================================ */
-.map-area{flex:1;position:relative;overflow:hidden;background:#0d1e0d;touch-action:none;user-select:none}
-.map-img-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;transform-origin:center center;will-change:transform}
-.hole-img{width:100%;height:100%;object-fit:cover;pointer-events:none;user-select:none;display:block}
-.sg-overlay{position:absolute;inset:0;pointer-events:none}
-.sg-node{position:absolute;transform:translate(-50%,-50%);display:flex;flex-direction:column;align-items:center;pointer-events:none;transition:opacity .3s}
-.sg-node.no-data{opacity:0} /* hide until data threshold met */
-.sg-bubble{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;color:#fff;background:rgba(0,0,0,.75);border:1.5px solid rgba(255,255,255,.2);border-radius:6px;padding:3px 7px;line-height:1;backdrop-filter:blur(4px);white-space:nowrap;box-shadow:0 2px 8px rgba(0,0,0,.5);letter-spacing:.02em;transition:all .3s}
-.sg-bubble.low{border-color:rgba(0,214,143,.7);color:#00d68f}
-.sg-bubble.mid{border-color:rgba(240,192,64,.7);color:#f0c040}
-.sg-bubble.high{border-color:rgba(255,77,109,.7);color:#ff4d6d}
-.sg-count{font-size:9px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px;opacity:.7}
-/* Shot markers */
-.shot-marker{position:absolute;transform:translate(-50%,-50%);pointer-events:none;z-index:20;animation:markerDrop .4s cubic-bezier(.68,-.55,.27,1.55)}
-@keyframes markerDrop{0%{transform:translate(-50%,-80%) scale(.5);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
-.shot-inner{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;border:2px solid white;box-shadow:0 2px 10px rgba(0,0,0,.6)}
-.shot-inner.tee{background:var(--green);color:#001f3f}
-.shot-inner.approach{background:var(--blue);color:#fff}
-.shot-inner.chip{background:var(--gold);color:#001f3f}
-.shot-inner.putt{background:var(--red);color:#fff}
-/* Tap ring */
-.tap-ring{position:absolute;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;border:2px solid rgba(255,255,255,.7);pointer-events:none;z-index:19;animation:tapRing .5s ease forwards}
-@keyframes tapRing{0%{transform:translate(-50%,-50%) scale(.3);opacity:1}100%{transform:translate(-50%,-50%) scale(2);opacity:0}}
-/* Map overlays */
-.plot-hint{position:absolute;top:14px;left:50%;transform:translateX(-50%);background:rgba(0,0,0,.8);color:var(--white);font-size:12px;font-weight:600;padding:7px 16px;border-radius:99px;backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.15);white-space:nowrap;z-index:30;letter-spacing:.02em;display:none;pointer-events:none}
-.map-area.plot-mode .plot-hint{display:block}
-.cancel-btn{position:absolute;top:14px;right:14px;width:38px;height:38px;background:rgba(0,0,0,.75);color:white;border:1px solid rgba(255,255,255,.2);border-radius:50%;display:none;align-items:center;justify-content:center;font-size:20px;z-index:35;cursor:pointer;backdrop-filter:blur(4px)}
-.cancel-btn.visible{display:flex}
-.zoom-controls{position:absolute;bottom:14px;right:14px;display:flex;flex-direction:column;background:rgba(10,22,40,.88);border-radius:12px;border:1px solid var(--border);overflow:hidden;z-index:30}
-.zoom-btn{background:transparent;color:var(--white);border:none;width:40px;height:40px;font-size:22px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .1s}
-.zoom-btn:active{background:rgba(0,214,143,.25)}
-.zoom-btn:not(:last-child){border-bottom:1px solid var(--border)}
-.hole-info-strip{position:absolute;bottom:14px;left:14px;background:rgba(10,22,40,.88);border:1px solid var(--border);border-radius:10px;padding:6px 12px;z-index:30;backdrop-filter:blur(6px)}
-.hole-info-name{font-family:'Syne',sans-serif;font-size:13px;font-weight:800;color:var(--white)}
-.hole-info-detail{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace}
-.layer-toggle{position:absolute;top:14px;left:14px;background:rgba(10,22,40,.88);border-radius:10px;border:1px solid var(--border);padding:3px;z-index:30;display:flex;gap:3px;backdrop-filter:blur(6px)}
-.layer-btn{background:transparent;color:var(--muted);border:none;border-radius:7px;padding:5px 10px;font-size:11px;font-weight:600;font-family:'DM Sans',sans-serif;cursor:pointer;letter-spacing:.04em;transition:all .15s}
-.layer-btn.active{background:var(--green);color:var(--navy)}
+  .auth-btn {
+    width: 100%;
+    max-width: 300px;
+    padding: 15px;
+    border-radius: 8px;
+    border: none;
+    background: var(--gold);
+    color: var(--navy);
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+    cursor: pointer;
+  }
 
-/* ============================================================
-   BOTTOM BAR
-   ============================================================ */
-.bottom-bar{background:var(--navy);border-top:1px solid var(--border);padding:14px 16px 24px;flex-shrink:0}
-.shot-types{display:flex;gap:8px;margin-bottom:12px}
-.shot-btn{flex:1;height:40px;border-radius:10px;border:1.5px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);color:var(--muted);font-size:11px;font-weight:700;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .15s;letter-spacing:.04em}
-.shot-btn:active{transform:scale(.95)}
-.shot-btn.active{background:var(--green);color:var(--navy);border-color:var(--green)}
-.shot-btn.approach.active{background:var(--blue);border-color:var(--blue);color:#fff}
-.shot-btn.chip.active{background:var(--gold);border-color:var(--gold);color:var(--navy)}
-.shot-btn.putt.active{background:var(--red);border-color:var(--red);color:#fff}
-.main-btn{width:100%;height:52px;background:var(--green);color:var(--navy);border:none;border-radius:14px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;letter-spacing:.05em;cursor:pointer;transition:all .15s;margin-bottom:12px}
-.main-btn:active{transform:scale(.98);background:var(--green-dim)}
-.live-strokes{display:flex;align-items:center;justify-content:center;gap:10px}
-.ls-label{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;text-align:center;line-height:1.4;max-width:80px}
-.ls-num{font-family:'DM Mono',monospace;font-size:46px;font-weight:500;color:var(--gold);line-height:1;transition:color .3s}
-.ls-num.good{color:var(--green)}
-.ls-num.bad{color:var(--red)}
+  /* GAME SCREEN STYLES */
+  #screen-game {
+    display: none; /* Hidden by default until login */
+    flex-direction: column;
+    height: 100%;
+  }
 
-/* ============================================================
-   MODALS (bottom sheets)
-   ============================================================ */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:100;display:none;align-items:flex-end;justify-content:center}
-.overlay.open{display:flex}
-.sheet{width:100%;max-width:430px;background:var(--navy-mid);border-radius:24px 24px 0 0;padding:16px 16px 40px;max-height:85vh;overflow-y:auto;animation:slideUp .3s ease}
-@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
-.handle{width:40px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;margin:0 auto 16px}
-.sheet-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:800;color:var(--white);margin-bottom:16px;text-align:center}
-
-/* Hole selector */
-.hole-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
-.hg-btn{aspect-ratio:1;border-radius:10px;background:rgba(255,255,255,.07);border:1.5px solid rgba(255,255,255,.1);color:var(--white);font-family:'Syne',sans-serif;font-weight:700;font-size:16px;cursor:pointer;transition:all .15s;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px}
-.hg-btn:active{transform:scale(.9)}
-.hg-btn.done{border-color:rgba(0,214,143,.4)}
-.hg-btn.active-hole{background:var(--green);border-color:var(--green);color:var(--navy)}
-.hg-par{font-family:'DM Sans',sans-serif;font-size:9px;font-weight:600;opacity:.7}
-
-/* ============================================================
-   GHIN-STYLE SCORE ENTRY
-   ============================================================ */
-.score-sheet{width:100%;max-width:430px;background:var(--navy-mid);border-radius:24px 24px 0 0;padding:0 0 40px;animation:slideUp .3s ease;overflow:hidden}
-.score-header{background:var(--navy-light);padding:20px 24px 16px;text-align:center;border-bottom:1px solid var(--border)}
-.score-hole-badge{display:inline-flex;align-items:center;gap:8px;background:var(--green);color:var(--navy);border-radius:99px;padding:4px 16px;font-family:'Syne',sans-serif;font-weight:800;font-size:13px;letter-spacing:.06em;margin-bottom:10px}
-.score-par-row{display:flex;justify-content:center;gap:24px;font-size:12px;color:var(--muted);letter-spacing:.06em}
-.score-par-row span{display:flex;flex-direction:column;align-items:center;gap:2px}
-.score-par-row strong{color:var(--white);font-family:'DM Mono',monospace;font-size:18px}
-/* Stats summary from plotted shots */
-.score-plotted-summary{padding:12px 20px;display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
-.score-plotted-summary::-webkit-scrollbar{display:none}
-.plotted-chip{background:rgba(255,255,255,.07);border:1px solid var(--border);border-radius:99px;padding:5px 12px;font-size:11px;color:var(--white);white-space:nowrap;font-family:'DM Mono',monospace}
-.plotted-chip.tee{border-color:rgba(0,214,143,.4);color:var(--green)}
-.plotted-chip.approach{border-color:rgba(59,130,246,.4);color:var(--blue)}
-.plotted-chip.chip{border-color:rgba(240,192,64,.4);color:var(--gold)}
-.plotted-chip.putt{border-color:rgba(255,77,109,.4);color:var(--red)}
-/* Stroke counter GHIN style */
-.stroke-counter{padding:8px 24px 16px;display:flex;align-items:center;justify-content:space-between;gap:16px}
-.stroke-minus,.stroke-plus{width:56px;height:56px;border-radius:50%;border:2px solid var(--border);background:rgba(255,255,255,.07);color:var(--white);font-size:28px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
-.stroke-minus:active{background:rgba(255,77,109,.25);border-color:var(--red);color:var(--red)}
-.stroke-plus:active{background:rgba(0,214,143,.25);border-color:var(--green);color:var(--green)}
-.stroke-val-wrap{flex:1;text-align:center}
-.stroke-val{font-family:'DM Mono',monospace;font-size:80px;font-weight:500;color:var(--white);line-height:1;transition:all .2s}
-.stroke-val.birdie{color:var(--green)}
-.stroke-val.eagle{color:var(--gold)}
-.stroke-val.bogey{color:#ff8099}
-.stroke-val.double{color:var(--red)}
-.stroke-result-label{font-size:13px;font-weight:600;color:var(--muted);letter-spacing:.06em;text-transform:uppercase;margin-top:4px}
-/* Quick-tap row */
-.quick-scores{display:flex;gap:6px;padding:0 20px 16px;overflow-x:auto;scrollbar-width:none}
-.quick-scores::-webkit-scrollbar{display:none}
-.qs-btn{flex-shrink:0;padding:8px 14px;border-radius:99px;border:1px solid var(--border);background:rgba(255,255,255,.06);color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;font-family:'DM Mono',monospace;white-space:nowrap;transition:all .15s}
-.qs-btn.qs-selected{background:var(--green);color:var(--navy);border-color:var(--green)}
-.qs-btn:active{transform:scale(.93)}
-/* Stat inputs */
-.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 20px 16px}
-.stat-item{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:12px;padding:10px 14px;cursor:pointer;transition:all .15s}
-.stat-item.active-stat{border-color:var(--green);background:rgba(0,214,143,.08)}
-.stat-item-label{font-size:10px;font-weight:600;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;margin-bottom:4px}
-.stat-item-val{font-family:'DM Mono',monospace;font-size:22px;font-weight:500;color:var(--white)}
-/* Save button */
-.save-score-btn{margin:0 20px;width:calc(100% - 40px);height:52px;background:var(--green);color:var(--navy);border:none;border-radius:14px;font-family:'Syne',sans-serif;font-size:15px;font-weight:800;letter-spacing:.05em;cursor:pointer;transition:all .15s}
-.save-score-btn:active{transform:scale(.98)}
-
-/* ============================================================
-   SCORECARD
-   ============================================================ */
-.sc-course-banner{background:linear-gradient(135deg,rgba(0,214,143,.12),rgba(0,0,0,0));border:1px solid rgba(0,214,143,.2);border-radius:12px;padding:12px 16px;margin-bottom:16px}
-.sc-course-name{font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:var(--white)}
-.sc-course-detail{font-size:11px;color:var(--muted);font-family:'DM Mono',monospace;margin-top:2px}
-.sc-table{width:100%;border-collapse:collapse;font-size:12px}
-.sc-table th{color:var(--muted);font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:5px 6px;text-align:center;border-bottom:1px solid var(--border)}
-.sc-table td{padding:7px 6px;text-align:center;border-top:1px solid var(--border);color:var(--white);font-family:'DM Mono',monospace;font-size:12px}
-.sc-hn{font-family:'Syne',sans-serif;font-weight:700;color:var(--green)}
-.sc-hdcp{color:var(--muted);font-size:10px}
-.sc-score-cell{border-radius:5px;padding:3px 5px;display:inline-block}
-.sc-eagle{background:rgba(240,192,64,.3);color:var(--gold);border:1px solid rgba(240,192,64,.5)}
-.sc-birdie{background:rgba(0,214,143,.25);color:var(--green)}
-.sc-par{color:var(--white)}
-.sc-bogey{background:rgba(255,128,153,.12);color:#ff8099}
-.sc-double{background:rgba(255,77,109,.25);color:var(--red)}
-.sc-worse{background:rgba(255,77,109,.4);color:var(--red)}
-/* SG breakdown section */
-.sg-breakdown{margin-top:16px}
-.sg-breakdown-title{font-family:'Syne',sans-serif;font-size:14px;font-weight:800;color:var(--white);margin-bottom:10px;padding:0 4px}
-.sg-cat-row{display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:10px;background:rgba(255,255,255,.04);margin-bottom:6px;border:1px solid var(--border)}
-.sg-cat-label{font-size:12px;color:var(--muted);font-weight:600;letter-spacing:.04em}
-.sg-cat-bar-wrap{flex:1;margin:0 12px;height:4px;background:rgba(255,255,255,.1);border-radius:2px;overflow:hidden}
-.sg-cat-bar{height:100%;border-radius:2px;transition:width .5s ease}
-.sg-cat-bar.pos{background:var(--green)}
-.sg-cat-bar.neg{background:var(--red)}
-.sg-cat-val{font-family:'DM Mono',monospace;font-size:13px;font-weight:500;min-width:40px;text-align:right}
-.sg-cat-val.pos{color:var(--green)}
-.sg-cat-val.neg{color:var(--red)}
-
-/* ============================================================
-   FRIENDS SCREEN
-   ============================================================ */
-#screen-friends{overflow-y:auto}
-.friends-header{background:var(--navy);padding:16px 20px;border-bottom:1px solid var(--border);flex-shrink:0;display:flex;align-items:center;gap:12px}
-.back-btn{width:36px;height:36px;border:1px solid var(--border);border-radius:50%;background:transparent;color:var(--white);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.friends-title{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--white)}
-.friends-list{padding:16px;display:flex;flex-direction:column;gap:10px;flex:1;overflow-y:auto}
-.friend-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;transition:all .2s}
-.friend-card:active{transform:scale(.98);background:rgba(255,255,255,.07)}
-.friend-avatar{width:44px;height:44px;border-radius:50%;background:var(--navy-light);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;position:relative}
-.friend-online{position:absolute;bottom:2px;right:2px;width:10px;height:10px;background:var(--green);border-radius:50%;border:2px solid var(--navy-mid)}
-.friend-info{flex:1}
-.friend-name{font-weight:600;color:var(--white);font-size:14px}
-.friend-status{font-size:12px;color:var(--muted);margin-top:2px;font-family:'DM Mono',monospace}
-.friend-sg{font-family:'DM Mono',monospace;font-size:16px;font-weight:500}
-.add-friend-btn{width:100%;height:48px;border:1.5px dashed rgba(255,255,255,.2);border-radius:14px;background:transparent;color:var(--muted);font-size:14px;font-weight:600;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .2s;display:flex;align-items:center;justify-content:center;gap:8px;margin-top:6px}
-.add-friend-btn:active{border-color:var(--green);color:var(--green)}
-
-/* LIVE WATCH */
-.live-watch-banner{background:linear-gradient(135deg,rgba(0,214,143,.15),rgba(0,0,0,0));border:1px solid rgba(0,214,143,.3);border-radius:12px;padding:10px 14px;margin:12px 16px 0;display:flex;align-items:center;gap:10px}
-.live-badge{background:var(--red);color:white;border-radius:99px;padding:3px 8px;font-size:10px;font-weight:700;letter-spacing:.08em;font-family:'Syne',sans-serif;animation:livePulse 1.5s infinite}
-@keyframes livePulse{0%,100%{opacity:1}50%{opacity:.6}}
-.live-watch-text{font-size:12px;color:var(--white);font-weight:500}
-/* SG compare mini */
-.sg-compare{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;margin:8px 16px 0}
-.sg-compare-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;margin-bottom:10px}
-.sg-compare-row{display:flex;align-items:center;gap:8px;margin-bottom:8px}
-.sg-compare-label{font-size:11px;color:var(--muted);width:70px;flex-shrink:0}
-.sg-compare-you,.sg-compare-them{font-family:'DM Mono',monospace;font-size:14px;font-weight:500;width:40px;text-align:center}
-.sg-compare-you{color:var(--green)}
-.sg-compare-them{color:var(--gold)}
-.sg-compare-bar-wrap{flex:1;height:6px;background:rgba(255,255,255,.1);border-radius:3px;position:relative}
-.sg-compare-bar-you{position:absolute;left:50%;height:100%;border-radius:3px;background:var(--green);transform-origin:left center}
-.sg-compare-bar-them{position:absolute;right:50%;height:100%;border-radius:3px;background:var(--gold);transform-origin:right center}
-.sg-trash-talk{background:rgba(0,214,143,.08);border:1px solid rgba(0,214,143,.2);border-radius:10px;padding:8px 12px;margin:8px 16px 0;font-size:12px;color:var(--green);font-style:italic;text-align:center}
-
-/* ============================================================
-   TOAST
-   ============================================================ */
-.toast{position:fixed;bottom:200px;left:50%;transform:translateX(-50%) translateY(16px);background:var(--navy-light);color:var(--white);padding:10px 18px;border-radius:99px;font-size:13px;font-weight:500;border:1px solid var(--border);box-shadow:0 8px 24px rgba(0,0,0,.4);z-index:300;opacity:0;transition:all .3s;white-space:nowrap;pointer-events:none;max-width:90vw;text-align:center}
-.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.toast.warn{background:#2d1020;border-color:rgba(255,77,109,.4);color:var(--red)}
-.toast.success{background:#0d2a1e;border-color:rgba(0,214,143,.4);color:var(--green)}
-
-/* Profile dot in header */
-.profile-dot{width:32px;height:32px;border-radius:50%;background:var(--navy-light);border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:14px;cursor:pointer;transition:all .15s}
-.profile-dot:active{transform:scale(.9)}
-
-/* Sync indicator */
-.sync-dot{width:8px;height:8px;border-radius:50%;background:var(--green);animation:pulse 2s infinite;transition:background .3s}
-.sync-dot.off{background:rgba(255,255,255,.2);animation:none}
+  #map-container {
+    flex-grow: 1;
+    background: var(--navy-mid);
+    position: relative;
+    /* Placeholder styles for your map */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px dashed var(--green-dim);
+    margin: 10px;
+  }
 </style>
 </head>
 <body>
-<div class="app" id="app">
 
-  <!-- ================================================================
-       SCREEN: AUTH
-       ================================================================ -->
-  <div class="screen active" id="screen-auth">
-    <div class="auth-logo">
-      <div class="auth-icon">⛳</div>
-      <div class="auth-title">Bey Lea Busta</div>
-      <div class="auth-sub">TOMS RIVER, NJ · STROKES GAINED TRACKER</div>
+  <div id="screen-auth">
+    <h1 style="font-family: 'Syne', sans-serif; color: var(--green);">BEY LEA BUSTA</h1>
+    
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup')">SIGN UP</button>
     </div>
-    <div class="auth-card">
-      <div class="auth-tabs">
-        <button class="auth-tab active" onclick="setAuthTab('login')">Sign In</button>
-        <button class="auth-tab" onclick="setAuthTab('signup')">Create Account</button>
-      </div>
-      <div id="auth-signup-name" style="display:none">
-        <div class="field-label">Display Name</div>
-        <input class="field-input" id="field-name" type="text" placeholder="Your name (shown to friends)" autocomplete="name">
-      </div>
-      <div>
-        <div class="field-label">Email</div>
-        <input class="field-input" id="field-email" type="email" placeholder="you@example.com" autocomplete="email">
-      </div>
-      <div>
-        <div class="field-label">Password</div>
-        <input class="field-input" id="field-password" type="password" placeholder="••••••••" autocomplete="current-password">
-      </div>
-      <div class="auth-error" id="auth-error"></div>
-      <button class="auth-btn" id="auth-submit" onclick="handleAuth()">SIGN IN</button>
-      <div class="auth-divider">or continue without account</div>
-      <button class="auth-btn" style="background:rgba(255,255,255,.07);color:var(--muted);border:1px solid var(--border)" onclick="continueAsGuest()">PLAY AS GUEST</button>
+
+    <input type="email" id="field-email" class="auth-input" placeholder="Email Address">
+    <input type="password" id="field-pass" class="auth-input" placeholder="Password">
+    
+    <button id="auth-submit" class="auth-btn" onclick="handleAuth()">LOGIN</button>
+  </div>
+
+  <div id="screen-game">
+    <div style="padding: 10px; display: flex; justify-content: space-between; align-items: center;">
+      <h2 id="hole-title" style="margin: 0;">Hole 1</h2>
+      <span style="font-size: 24px;">👥</span> </div>
+
+    <div id="map-container" onclick="handleMapTap(event)">
+      <p style="color: var(--muted); text-align: center;">Map Canvas Area<br>(Tap to test average calculation)</p>
+    </div>
+
+    <div id="average-display" style="padding: 15px; text-align: center; font-family: 'DM Mono', monospace; color: var(--gold);">
+      Awaiting tap...
     </div>
   </div>
 
-  <!-- ================================================================
-       SCREEN: GAME
-       ================================================================ -->
-  <div class="screen" id="screen-game" style="display:flex;flex-direction:column">
-    <div class="status-bar">
-      <span id="sb-time">9:41</span>
-      <span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--green);font-size:14px">BEY LEA BUSTA</span>
-      <div style="display:flex;align-items:center;gap:6px">
-        <div class="sync-dot" id="sync-dot"></div>
-        <span>📶</span>
-      </div>
-    </div>
-    <div class="header">
-      <div class="app-logo">
-        <div class="logo-icon">⛳</div>
-        <div class="app-title">Bey Lea Busta</div>
-      </div>
-      <div class="hole-pill" onclick="openHoleSel()">
-        <div class="hole-pill-dot"></div>
-        <span class="hole-pill-label">HOLE</span>
-        <span class="hole-pill-num" id="hole-display">1</span>
-      </div>
-      <div class="header-right">
-        <button class="hdr-btn" onclick="openScorecard()">CARD</button>
-        <div class="profile-dot" onclick="showFriends()" title="Friends">👥</div>
-      </div>
-    </div>
-
-    <div class="map-area" id="map-area">
-      <div class="map-img-wrap" id="map-wrap">
-        <img id="hole-img" class="hole-img" src="https://picsum.photos/seed/beyleahole1/900/600" alt="Hole view" draggable="false">
-      </div>
-      <div class="sg-overlay" id="sg-overlay"></div>
-      <div id="shot-markers" style="position:absolute;inset:0;pointer-events:none;z-index:20"></div>
-      <!-- friend markers layer -->
-      <div id="friend-markers" style="position:absolute;inset:0;pointer-events:none;z-index:22"></div>
-      <div class="layer-toggle">
-        <button class="layer-btn active" id="lb-avg" onclick="setLayer('avg');event.stopPropagation()">AVG</button>
-        <button class="layer-btn" id="lb-shots" onclick="setLayer('shots');event.stopPropagation()">SHOTS</button>
-      </div>
-      <div class="plot-hint">TAP THE MAP · PLOT YOUR SHOT</div>
-      <div class="cancel-btn" id="cancel-btn" onclick="cancelPlot();event.stopPropagation()">✕</div>
-      <div class="zoom-controls">
-        <button class="zoom-btn" onclick="zoomBtns(1);event.stopPropagation()">+</button>
-        <button class="zoom-btn" onclick="zoomBtns(-1);event.stopPropagation()">−</button>
-      </div>
-      <div class="hole-info-strip">
-        <div class="hole-info-name" id="strip-name">Hole 1</div>
-        <div class="hole-info-detail" id="strip-detail">Par 4 · 377 yds · Hcp 13</div>
-      </div>
-    </div>
-
-    <div class="bottom-bar">
-      <div class="shot-types">
-        <button class="shot-btn active" onclick="selectShot(0)" id="sb-0">TEE</button>
-        <button class="shot-btn approach" onclick="selectShot(1)" id="sb-1">APPR</button>
-        <button class="shot-btn chip" onclick="selectShot(2)" id="sb-2">CHIP</button>
-        <button class="shot-btn putt" onclick="selectShot(3)" id="sb-3">PUTT</button>
-      </div>
-      <button class="main-btn" id="main-btn" onclick="openScoreEntry()">ENTER HOLE 1 SCORE</button>
-      <div class="live-strokes">
-        <div class="ls-label">FROM HERE<br>YOU AVG</div>
-        <div class="ls-num" id="live-num">—</div>
-        <div class="ls-label">STROKES<br>TO HOLE</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ================================================================
-       SCREEN: FRIENDS
-       ================================================================ -->
-  <div class="screen" id="screen-friends" style="display:flex;flex-direction:column">
-    <div class="status-bar"><span>9:41</span><span style="font-family:'Syne',sans-serif;font-weight:800;color:var(--green);font-size:14px">FRIENDS</span><span>📶</span></div>
-    <div class="friends-header">
-      <button class="back-btn" onclick="showScreen('game')">←</button>
-      <div class="friends-title">Friends at Bey Lea</div>
-    </div>
-    <!-- Live watch banner (shows when a friend is mid-round) -->
-    <div class="live-watch-banner" id="live-watch-banner" style="display:none">
-      <div class="live-badge">LIVE</div>
-      <div class="live-watch-text" id="live-watch-text">Mike is on Hole 7 right now</div>
-    </div>
-    <!-- SG compare panel -->
-    <div class="sg-compare" id="sg-compare-panel">
-      <div class="sg-compare-title">SG vs Friends — Today</div>
-      <div id="sg-compare-rows"></div>
-    </div>
-    <div class="sg-trash-talk" id="trash-talk" style="display:none"></div>
-    <div class="friends-list" id="friends-list">
-      <div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">No friends yet — add someone!</div>
-    </div>
-    <div style="padding:0 16px 8px">
-      <button class="add-friend-btn" onclick="addFriendPrompt()">＋ Add Friend by Username</button>
-    </div>
-  </div>
-
-</div><!-- /app -->
-
-<!-- ================================================================
-     MODALS
-     ================================================================ -->
-
-<!-- Hole Selector -->
-<div class="overlay" id="ov-holes" onclick="if(event.target===this)closeOverlay('ov-holes')">
-  <div class="sheet">
-    <div class="handle"></div>
-    <div class="sheet-title">SELECT HOLE</div>
-    <div class="hole-grid" id="hole-grid"></div>
-  </div>
-</div>
-
-<!-- Score Entry (GHIN style) -->
-<div class="overlay" id="ov-score" onclick="if(event.target===this)closeOverlay('ov-score')">
-  <div class="score-sheet">
-    <div class="score-header">
-      <div class="handle" style="margin-bottom:8px"></div>
-      <div class="score-hole-badge" id="se-badge">HOLE 1</div>
-      <div class="score-par-row">
-        <span><div>PAR</div><strong id="se-par">4</strong></span>
-        <span><div>HCP</div><strong id="se-hcp">13</strong></span>
-        <span><div>YARDS</div><strong id="se-yds">377</strong></span>
-        <span><div>EST.</div><strong id="se-est" style="color:var(--gold)">—</strong></span>
-      </div>
-    </div>
-    <!-- Plotted shot chips -->
-    <div class="score-plotted-summary" id="se-chips"></div>
-    <!-- Stroke counter -->
-    <div class="stroke-counter">
-      <button class="stroke-minus" onclick="changeScore(-1)">−</button>
-      <div class="stroke-val-wrap">
-        <div class="stroke-val" id="se-val">4</div>
-        <div class="stroke-result-label" id="se-result">PAR</div>
-      </div>
-      <button class="stroke-plus" onclick="changeScore(1)">＋</button>
-    </div>
-    <!-- Quick tap row -->
-    <div class="quick-scores" id="se-quick"></div>
-    <!-- Stat inputs -->
-    <div class="stat-grid">
-      <div class="stat-item" id="si-fir" onclick="toggleStat('fir')">
-        <div class="stat-item-label">Fairway Hit</div>
-        <div class="stat-item-val" id="sv-fir">—</div>
-      </div>
-      <div class="stat-item" id="si-gir" onclick="toggleStat('gir')">
-        <div class="stat-item-label">Green in Reg</div>
-        <div class="stat-item-val" id="sv-gir">—</div>
-      </div>
-      <div class="stat-item" id="si-putts" onclick="cyclePutts()">
-        <div class="stat-item-label">Putts</div>
-        <div class="stat-item-val" id="sv-putts">—</div>
-      </div>
-      <div class="stat-item" id="si-updown" onclick="toggleStat('updown')">
-        <div class="stat-item-label">Up &amp; Down</div>
-        <div class="stat-item-val" id="sv-updown">—</div>
-      </div>
-    </div>
-    <button class="save-score-btn" onclick="saveScore()">SAVE SCORE →</button>
-  </div>
-</div>
-
-<!-- Scorecard -->
-<div class="overlay" id="ov-scorecard" onclick="if(event.target===this)closeOverlay('ov-scorecard')">
-  <div class="sheet" style="max-height:90vh">
-    <div class="handle"></div>
-    <div class="sheet-title">SCORECARD</div>
-    <div class="sc-course-banner">
-      <div class="sc-course-name">Bey-Lea Golf Course</div>
-      <div class="sc-course-detail">Toms River, NJ · Par 71 · 6,598 yds · Rating 70 · Slope 125</div>
-    </div>
-    <!-- Front 9 -->
-    <div style="font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);letter-spacing:.08em;margin-bottom:6px;padding:0 2px">FRONT 9</div>
-    <table class="sc-table">
-      <thead><tr><th>#</th><th>HCP</th><th>PAR</th><th>YDS</th><th>SCORE</th><th>SG</th></tr></thead>
-      <tbody id="sc-front"></tbody>
-      <tfoot id="sc-front-tot"></tfoot>
-    </table>
-    <!-- Back 9 -->
-    <div style="font-family:'Syne',sans-serif;font-size:11px;color:var(--muted);letter-spacing:.08em;margin:12px 0 6px;padding:0 2px">BACK 9</div>
-    <table class="sc-table">
-      <thead><tr><th>#</th><th>HCP</th><th>PAR</th><th>YDS</th><th>SCORE</th><th>SG</th></tr></thead>
-      <tbody id="sc-back"></tbody>
-      <tfoot id="sc-back-tot"></tfoot>
-    </table>
-    <!-- Totals -->
-    <div id="sc-total-row" style="margin-top:10px"></div>
-    <!-- SG Breakdown -->
-    <div class="sg-breakdown">
-      <div class="sg-breakdown-title">Strokes Gained Breakdown</div>
-      <div id="sg-cats"></div>
-    </div>
-  </div>
-</div>
-
-<!-- Add Friend -->
-<div class="overlay" id="ov-add-friend" onclick="if(event.target===this)closeOverlay('ov-add-friend')">
-  <div class="sheet" style="max-height:50vh">
-    <div class="handle"></div>
-    <div class="sheet-title">ADD FRIEND</div>
-    <div style="padding:0 4px 12px">
-      <div class="field-label">Friend's Username or Email</div>
-      <input class="field-input" id="friend-search-input" type="text" placeholder="username or email">
-    </div>
-    <button class="save-score-btn" style="display:block;margin:0 0 12px" onclick="submitAddFriend()">SEND REQUEST</button>
-  </div>
-</div>
-
-<div class="toast" id="toast"></div>
-
-<script>
-/* ================================================================
-   SUPABASE CONFIG
-   Replace these with your actual project URL and anon key
-   Get them from: https://supabase.com → Project Settings → API
-   ================================================================ */
-const SUPABASE_URL = 'https://nawebecmrjoyuapwhuaq.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hd2ViZWNtcmpveXVhcHdodWFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY2NjEsImV4cCI6MjA5MDEwMjY2MX0.bKOoBYFDTEw0QYvFmoSuOjcqRioN44OkqgpLfX42sG0';
-
-let sb = null;
-try {
-  sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-} catch (err) {
-  console.error("Supabase failed to initialize:", err);
-}
-
-/* ================================================================
-   REAL BEY LEA SCORECARD DATA (from 18birdies.com)
-   Par 71 · Gold Tees 6,598 yds · Rating 70 · Slope 125
-   ================================================================ */
-const HOLES = [
-  {num:1,  par:4, yds:377, hcp:13},
-  {num:2,  par:5, yds:467, hcp:9 },
-  {num:3,  par:4, yds:392, hcp:7 },
-  {num:4,  par:3, yds:172, hcp:15},
-  {num:5,  par:4, yds:462, hcp:1 },
-  {num:6,  par:4, yds:347, hcp:17},
-  {num:7,  par:5, yds:564, hcp:3 },
-  {num:8,  par:3, yds:203, hcp:5 },
-  {num:9,  par:4, yds:383, hcp:11},
-  {num:10, par:4, yds:413, hcp:10},
-  {num:11, par:4, yds:341, hcp:18},
-  {num:12, par:3, yds:203, hcp:12},
-  {num:13, par:4, yds:367, hcp:16},
-  {num:14, par:4, yds:434, hcp:4 },
-  {num:15, par:5, yds:516, hcp:8 },
-  {num:16, par:4, yds:394, hcp:2 },
-  {num:17, par:3, yds:190, hcp:14},
-  {num:18, par:4, yds:373, hcp:6 },
-];
-
-/* ================================================================
-   DEFAULT SG ZONES PER HOLE
-   Zones store default avg — gets replaced by real data over time.
-   Each zone: {x, y (%), label, avg, shotType}
-   shotType: 0=tee,1=approach,2=chip,3=putt — used for SG category
-   ================================================================ */
-function buildZones(hole) {
-  const p = hole.par;
-  if (p === 3) {
-    return [
-      {x:50,y:90,label:"Tee",       avg:p+0.1, n:0, shotType:0},
-      {x:25,y:55,label:"L rough",   avg:p+0.7, n:0, shotType:1},
-      {x:75,y:55,label:"R rough",   avg:p+0.6, n:0, shotType:1},
-      {x:20,y:40,label:"Deep L",    avg:p+1.1, n:0, shotType:1},
-      {x:80,y:40,label:"Deep R",    avg:p+1.0, n:0, shotType:1},
-      {x:50,y:30,label:"Long",      avg:p+0.4, n:0, shotType:2},
-      {x:50,y:22,label:"Front grn", avg:p-0.8, n:0, shotType:3},
-      {x:50,y:14,label:"Back grn",  avg:p-0.7, n:0, shotType:3},
-      {x:37,y:17,label:"L grn",     avg:p-0.8, n:0, shotType:3},
-      {x:63,y:17,label:"R grn",     avg:p-0.8, n:0, shotType:3},
-      {x:30,y:24,label:"L bunker",  avg:p-0.1, n:0, shotType:2},
-      {x:70,y:24,label:"R bunker",  avg:p+0.0, n:0, shotType:2},
-    ];
-  }
-  if (p === 5) {
-    return [
-      {x:50,y:92,label:"Tee front",  avg:p+0.0, n:0, shotType:0},
-      {x:43,y:92,label:"Tee back",   avg:p+0.2, n:0, shotType:0},
-      {x:50,y:75,label:"Fw far",     avg:p-0.2, n:0, shotType:1},
-      {x:50,y:60,label:"Fw mid",     avg:p-0.5, n:0, shotType:1},
-      {x:50,y:45,label:"Fw close",   avg:p-0.8, n:0, shotType:1},
-      {x:22,y:65,label:"L rough",    avg:p+0.4, n:0, shotType:1},
-      {x:78,y:65,label:"R rough",    avg:p+0.4, n:0, shotType:1},
-      {x:18,y:50,label:"Deep L",     avg:p+1.0, n:0, shotType:1},
-      {x:82,y:50,label:"Deep R",     avg:p+1.0, n:0, shotType:1},
-      {x:50,y:32,label:"Layup zone", avg:p-0.6, n:0, shotType:1},
-      {x:50,y:22,label:"Front grn",  avg:p-1.2, n:0, shotType:3},
-      {x:50,y:13,label:"Back grn",   avg:p-1.1, n:0, shotType:3},
-      {x:37,y:16,label:"L grn",      avg:p-1.2, n:0, shotType:3},
-      {x:63,y:16,label:"R grn",      avg:p-1.2, n:0, shotType:3},
-      {x:30,y:25,label:"L bunker",   avg:p-0.4, n:0, shotType:2},
-      {x:70,y:25,label:"R bunker",   avg:p-0.3, n:0, shotType:2},
-      {x:22,y:30,label:"L rough grn",avg:p+0.1, n:0, shotType:2},
-      {x:78,y:30,label:"R rough grn",avg:p+0.1, n:0, shotType:2},
-    ];
-  }
-  // Par 4
-  return [
-    {x:50,y:90,label:"Tee front",   avg:p+0.0, n:0, shotType:0},
-    {x:43,y:90,label:"Tee back",    avg:p+0.2, n:0, shotType:0},
-    {x:50,y:72,label:"Fw far",      avg:p-0.3, n:0, shotType:1},
-    {x:50,y:56,label:"Fw mid",      avg:p-0.6, n:0, shotType:1},
-    {x:50,y:40,label:"Fw close",    avg:p-0.8, n:0, shotType:1},
-    {x:22,y:62,label:"L rough",     avg:p+0.3, n:0, shotType:1},
-    {x:78,y:62,label:"R rough",     avg:p+0.3, n:0, shotType:1},
-    {x:18,y:47,label:"Deep L",      avg:p+0.9, n:0, shotType:1},
-    {x:82,y:47,label:"Deep R",      avg:p+0.9, n:0, shotType:1},
-    {x:50,y:22,label:"Front grn",   avg:p-1.0, n:0, shotType:3},
-    {x:50,y:13,label:"Back grn",    avg:p-0.9, n:0, shotType:3},
-    {x:37,y:16,label:"L grn",       avg:p-1.0, n:0, shotType:3},
-    {x:63,y:16,label:"R grn",       avg:p-1.0, n:0, shotType:3},
-    {x:30,y:25,label:"L bunker",    avg:p-0.3, n:0, shotType:2},
-    {x:70,y:25,label:"R bunker",    avg:p-0.2, n:0, shotType:2},
-    {x:22,y:30,label:"L rough grn", avg:p+0.1, n:0, shotType:2},
-    {x:78,y:30,label:"R rough grn", avg:p+0.1, n:0, shotType:2},
-  ];
-}
-
-let holeZones = {};  // {holeIdx: [...zones]}
-
-// ================================================================
-// STATE
-// ================================================================
-let currentHole = 0;
-let activeShotType = 0;
-let isPlotMode = false;
-let currentLayer = 'avg';
-let scores = {};  // {holeIdx: {score, fir, gir, putts, updown, plotted:[{x,y,type,avg}]}}
-
-// Pinch zoom state
-let mapScale = 1;
-let mapOffsetX = 0;
-let mapOffsetY = 0;
-let lastTouchDist = 0;
-let lastTouchX = 0;
-let lastTouchY = 0;
-let touchStartX = 0;
-let touchStartY = 0;
-let isPinching = false;
-let isDragging = false;
-
-// Score entry temp
-let seScore = 0;
-let seStats = {fir: null, gir: null, putts: null, updown: null};
-
-// Friends (simulated/Supabase)
-let friends = [];
-let activeFriendWatch = null;
-
-const SHOT_NAMES  = ["Tee","Appr","Chip","Putt"];
-const SHOT_COLORS = ["tee","approach","chip","putt"];
-const SHOT_EMOJIS = ["T","A","C","P"];
-
-const SG_CATS = [
-  {key:'drive',   label:'Off the Tee',        shotTypes:[0]},
-  {key:'approach',label:'Approach',            shotTypes:[1]},
-  {key:'atg',     label:'Around the Green',   shotTypes:[2]},
-  {key:'putting', label:'Putting',             shotTypes:[3]},
-];
-
-// ================================================================
-// INIT
-// ================================================================
-window.addEventListener('DOMContentLoaded', async () => {
-  initSupabase();
-  loadLocalData();
-  buildHoleGrid();
-  setupMapTouch();
-  updateClock();
-  setInterval(updateClock, 30000);
-
-  // Check if already logged in
-  if (sb) {
-    const { data: { session } } = await sb.auth.getSession().catch(()=>({data:{session:null}}));
-    if (session) {
-      currentUser = session.user;
-      enterApp();
-    }
-  }
-});
-
-function updateClock() {
-  const now = new Date();
-  const h = now.getHours(), m = now.getMinutes().toString().padStart(2,'0');
-  const ampm = h >= 12 ? 'PM' : 'AM';
-  document.getElementById('sb-time').textContent = `${h%12||12}:${m}`;
-}
-
-// ================================================================
-// LOCAL DATA
-// ================================================================
-function loadLocalData() {
-  for (let i=0;i<18;i++) {
+  <script>
+    // --- 1. SUPABASE INITIALIZATION ---
+    const SUPABASE_URL = 'https://nawebecmrjoyuapwhuaq.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hd2ViZWNtcmpveXVhcHdodWFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY2NjEsImV4cCI6MjA5MDEwMjY2MX0.bKOoBYFDTEw0QYvFmoSuOjcqRioN44OkqgpLfX42sG0';
+    
+    let sb = null;
     try {
-      const z = localStorage.getItem(`blb3-zones-${i}`);
-      holeZones[i] = z ? JSON.parse(z) : buildZones(HOLES[i]);
-    } catch(e) { holeZones[i] = buildZones(HOLES[i]); }
-  }
-  try {
-    const s = localStorage.getItem('blb3-scores');
-    if (s) scores = JSON.parse(s);
-  } catch(e) {}
-  try {
-    const f = localStorage.getItem('blb3-friends');
-    if (f) friends = JSON.parse(f);
-  } catch(e) {}
-}
-
-function saveLocalScores() {
-  try { localStorage.setItem('blb3-scores', JSON.stringify(scores)); } catch(e){}
-}
-
-function saveLocalZones(idx) {
-  try { localStorage.setItem(`blb3-zones-${idx}`, JSON.stringify(holeZones[idx])); } catch(e){}
-}
-
-// ================================================================
-// AUTH SCREEN
-// ================================================================
-let authMode = 'login';
-
-function setAuthTab(mode) {
-  authMode = mode;
-  document.querySelectorAll('.auth-tab').forEach((t,i)=>{
-    t.classList.toggle('active', (i===0&&mode==='login')||(i===1&&mode==='signup'));
-  });
-  document.getElementById('auth-signup-name').style.display = mode==='signup'?'block':'none';
-  document.getElementById('auth-submit').textContent = mode==='login'?'SIGN IN':'CREATE ACCOUNT';
-  document.getElementById('auth-error').textContent='';
-}
-
-   async function handleAuth() {
-  const email = document.getElementById('field-email').value;
-  const pass = document.getElementById('field-pass').value;
-  const btn = document.getElementById('auth-submit');
-  
-  if (!email || !pass) {
-    alert("Please enter an email and password first.");
-    return;
-  }
-
-  btn.textContent = 'LOADING…';
-  btn.disabled = true;
-
-  if (!sb) {
-    alert("Database connection is missing! Check your Supabase URL and Key.");
-    btn.textContent = 'SUBMIT';
-    btn.disabled = false;
-    return;
-  }
-
-  try {
-    // Assuming you have an authMode variable tracking 'login' vs 'signup'
-    if (authMode === 'signup') {
-      const { data, error } = await sb.auth.signUp({ email: email, password: pass });
-      
-      if (error) {
-        alert("Signup Error: " + error.message);
-      } else {
-        alert("Account Created! If 'Confirm Email' is on in Supabase, please check your inbox. Otherwise, you can now log in.");
-      }
-    } else {
-      // Login logic
-      const { data, error } = await sb.auth.signInWithPassword({ email: email, password: pass });
-      
-      if (error) {
-        alert("Login Error: " + error.message);
-      } else {
-        // SUCCESS: Hide auth screen, show main app
-        document.getElementById('screen-auth').style.display = 'none';
-        alert("Welcome to Bey Lea Busta!");
-      }
+      sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+    } catch (err) {
+      console.error("Supabase failed to initialize:", err);
     }
-  } catch (err) {
-    alert("An unexpected error occurred: " + err.message);
-  }
 
-  // Reset button state
-  btn.textContent = authMode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN';
-  btn.disabled = false;
-}
-//async function handleAuth() {
-//  const email = document.getElementById('field-email').value.trim();
- // const pass  = document.getElementById('field-password').value;
-  //if (!email||!pass) { document.getElementById('auth-error').textContent='Please fill in all fields.'; return; }
+    // --- 2. AUTHENTICATION LOGIC ---
+    let authMode = 'login'; // Defaults to login
 
- // const btn = document.getElementById('auth-submit');
-//  btn.textContent = 'LOADING…';
-//  btn.disabled = true;
-//
-//  if (!sb) {
-//    // No Supabase configured — fallback to guest with name
-//    continueAsGuest();
-//    return;
-//  }
-
-//  try {
-//    let result;
-//    if (authMode === 'login') {
-//      result = await sb.auth.signInWithPassword({email, password:pass});
-//    } else {
-//      const name = document.getElementById('field-name').value.trim() || email.split('@')[0];
-//      result = await sb.auth.signUp({email, password:pass, options:{data:{display_name:name}}});
-//    }
-//    if (result.error) throw result.error;
-//    currentUser = result.data.user;
-//    await ensureProfile();
- //   enterApp();
-//  } catch(err) {
-//    document.getElementById('auth-error').textContent = err.message || 'Auth failed';
-//    btn.textContent = authMode==='login'?'SIGN IN':'CREATE ACCOUNT';
-//    btn.disabled = false;
-//  }
-//}
-
-function continueAsGuest() {
-  isGuest = true;
-  currentUser = {id:'guest', email:'guest', user_metadata:{display_name:'You'}};
-  enterApp();
-}
-
-async function ensureProfile() {
-  if (!sb || !currentUser) return;
-  const name = currentUser.user_metadata?.display_name || currentUser.email.split('@')[0];
-  try {
-    await sb.from('profiles').upsert({
-      id: currentUser.id,
-      display_name: name,
-      updated_at: new Date().toISOString()
-    });
-  } catch(e) {}
-}
-
-function enterApp() {
-  loadHole(0);
-  loadFriendsData();
-  showScreen('game');
-  syncScoresToCloud();
-}
-
-// ================================================================
-// CLOUD SYNC
-// ================================================================
-async function syncScoresToCloud() {
-  if (!sb || isGuest || !currentUser) {
-    document.getElementById('sync-dot').classList.add('off');
-    return;
-  }
-  try {
-    // Upsert all scores for this session
-    const rows = Object.keys(scores).map(idx => ({
-      user_id: currentUser.id,
-      hole_number: HOLES[parseInt(idx)].num,
-      score: scores[idx].score,
-      plotted: JSON.stringify(scores[idx].plotted || []),
-      fir: scores[idx].fir,
-      gir: scores[idx].gir,
-      putts: scores[idx].putts,
-      updown: scores[idx].updown,
-      played_at: new Date().toISOString().split('T')[0],
-    }));
-    if (rows.length) {
-      await sb.from('rounds').upsert(rows, {onConflict:'user_id,hole_number,played_at'});
+    function switchAuthTab(mode) {
+      authMode = mode;
+      const tabs = document.querySelectorAll('.auth-tab');
+      tabs[0].classList.toggle('active', mode === 'login');
+      tabs[1].classList.toggle('active', mode === 'signup');
+      
+      const btn = document.getElementById('auth-submit');
+      btn.textContent = mode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN';
     }
-    document.getElementById('sync-dot').classList.remove('off');
-  } catch(e) {
-    console.warn('Sync error:', e);
-    document.getElementById('sync-dot').classList.add('off');
-  }
-}
 
-// ================================================================
-// SCREEN ROUTING
-// ================================================================
-function showScreen(name) {
-  document.querySelectorAll('.screen').forEach(s=>{
-    s.classList.remove('active');
-    s.style.position = 'absolute';
-  });
-  const el = document.getElementById('screen-'+name);
-  el.classList.add('active');
-  el.style.position = 'relative';
-}
+    async function handleAuth() {
+      const email = document.getElementById('field-email').value;
+      const pass = document.getElementById('field-pass').value;
+      const btn = document.getElementById('auth-submit');
+      
+      if (!email || !pass) {
+        alert("Please enter an email and password first.");
+        return;
+      }
 
-function showFriends() {
-  renderFriendsList();
-  renderSGCompare();
-  showScreen('friends');
-}
+      btn.textContent = 'LOADING…';
+      btn.disabled = true;
 
-// ================================================================
-// LOAD HOLE
-// ================================================================
-function loadHole(idx) {
-  currentHole = idx;
-  const h = HOLES[idx];
-  document.getElementById('hole-display').textContent = h.num;
-  document.getElementById('strip-name').textContent = `Hole ${h.num}`;
-  document.getElementById('strip-detail').textContent = `Par ${h.par} · ${h.yds} yds · Hcp ${h.hcp}`;
-  document.getElementById('main-btn').textContent = `ENTER HOLE ${h.num} SCORE`;
-  // Swap image (replace picsum with your real hole images)
-  document.getElementById('hole-img').src = `https://picsum.photos/seed/beyleahole${h.num}/900/600`;
-  // Reset zoom & offset
-  mapScale = 1; mapOffsetX = 0; mapOffsetY = 0;
-  applyMapTransform();
-  renderSGOverlay();
-  renderShotMarkers();
-  updateLiveNum(null);
-  cancelPlot();
-}
+      if (!sb) {
+        alert("Database connection is missing! Check your Supabase URL and Key.");
+        btn.textContent = authMode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN';
+        btn.disabled = false;
+        return;
+      }
 
-// ================================================================
-// SG OVERLAY — smart visibility
-// MIN_DATA_THRESHOLD: only show a zone's data label after N real shots
-// ================================================================
-const MIN_SHOTS_TO_SHOW = 2; // change to 1 to show everything immediately
-
-function renderSGOverlay() {
-  const ov = document.getElementById('sg-overlay');
-  ov.innerHTML = '';
-  const zones = holeZones[currentHole];
-  const par = HOLES[currentHole].par;
-
-  zones.forEach((z, zi) => {
-    const node = document.createElement('div');
-    node.className = 'sg-node';
-    node.style.left = z.x + '%';
-    node.style.top  = z.y + '%';
-
-    const realAvg = getRealAvg(zi);
-    const displayAvg = realAvg !== null ? realAvg : z.avg;
-    const dataCount  = getRealCount(zi);
-
-    let bubble = document.createElement('div');
-    bubble.className = 'sg-bubble';
-
-    if (currentLayer === 'shots') {
-      // show shot count
-      bubble.textContent = dataCount > 0 ? `${dataCount}×` : '·';
-      bubble.style.opacity = dataCount > 0 ? '1' : '0.35';
-      bubble.style.fontSize = '11px';
-    } else {
-      // hide if not enough data AND it's not a default visible zone
-      if (dataCount < MIN_SHOTS_TO_SHOW && dataCount === 0) {
-        // Show defaults at low opacity for reference, hide "interior" zones
-        if (['Front grn','Back grn','L grn','R grn','Tee','Tee front'].includes(z.label)) {
-          bubble.style.opacity = '0.5';
-          bubble.style.fontSize = '11px';
+      try {
+        if (authMode === 'signup') {
+          // SIGN UP
+          const { data, error } = await sb.auth.signUp({ email: email, password: pass });
+          if (error) {
+            alert("Signup Error: " + error.message);
+          } else {
+            alert("Account Created! You can now switch to LOGIN.");
+            switchAuthTab('login'); // Automatically switch them to login mode
+          }
         } else {
-          node.classList.add('no-data');
-          ov.appendChild(node);
-          return;
+          // LOGIN
+          const { data, error } = await sb.auth.signInWithPassword({ email: email, password: pass });
+          if (error) {
+            alert("Login Error: " + error.message);
+          } else {
+            // SUCCESS! 
+            showScreen('game');
+            loadHole(1); // Load Hole 1 immediately
+          }
         }
-      } else {
-        bubble.style.opacity = '1';
+      } catch (err) {
+        alert("An unexpected error occurred: " + err.message);
       }
-      bubble.textContent = displayAvg.toFixed(1);
-      let cls = 'mid';
-      if (displayAvg <= par-0.5) cls='low';
-      else if (displayAvg >= par+0.5) cls='high';
-      bubble.classList.add(cls);
+
+      // Reset button
+      btn.textContent = authMode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN';
+      btn.disabled = false;
     }
 
-    node.appendChild(bubble);
-
-    // Sample count label
-    if (dataCount > 0 && currentLayer === 'avg') {
-      const cnt = document.createElement('div');
-      cnt.className = 'sg-count';
-      cnt.textContent = `${dataCount}×`;
-      node.appendChild(cnt);
+    // --- 3. ROUTING & UI LOGIC ---
+    function showScreen(screenName) {
+      document.getElementById('screen-auth').style.display = 'none';
+      document.getElementById('screen-game').style.display = 'none';
+      
+      document.getElementById(`screen-${screenName}`).style.display = 'flex';
     }
 
-    ov.appendChild(node);
-  });
-}
+    // --- 4. GAME & MAP LOGIC ---
+    let currentHole = 1;
 
-function getRealCount(zoneIdx) {
-  const z = holeZones[currentHole][zoneIdx];
-  let count = 0;
-  const hd = scores[currentHole];
-  if (hd?.plotted) {
-    hd.plotted.forEach(p => {
-      if (Math.hypot(p.x-z.x, p.y-z.y) < 10) count++;
-    });
-  }
-  // In a real Supabase setup, this would aggregate across all rounds
-  return count;
-}
-
-function getRealAvg(zoneIdx) {
-  const z = holeZones[currentHole][zoneIdx];
-  // Collect all plotted shots near this zone that also have a final score
-  // and compute avg remaining strokes at time of plotting
-  // For now returns null (default) until enough data; will grow with rounds
-  return null;
-}
-
-// ================================================================
-// NEAREST ZONE
-// ================================================================
-function getAvgAt(x, y) {
-  const zones = holeZones[currentHole];
-  let best=null, bestD=Infinity;
-  zones.forEach(z=>{
-    const d = Math.hypot(x-z.x, y-z.y);
-    if(d<bestD){bestD=d;best=z;}
-  });
-  return best ? (getRealAvg(zones.indexOf(best)) ?? best.avg) : HOLES[currentHole].par;
-}
-
-// ================================================================
-// MAP TOUCH — PINCH ZOOM + DRAG + TAP PLOT
-// ================================================================
-function setupMapTouch() {
-  const mapArea = document.getElementById('map-area');
-
-  mapArea.addEventListener('touchstart', onTouchStart, {passive:false});
-  mapArea.addEventListener('touchmove',  onTouchMove,  {passive:false});
-  mapArea.addEventListener('touchend',   onTouchEnd,   {passive:false});
-  mapArea.addEventListener('click',      onMapClick,   false);
-}
-
-function onTouchStart(e) {
-  if (e.touches.length === 2) {
-    isPinching = true;
-    isDragging = false;
-    lastTouchDist = getTouchDist(e.touches);
-    lastTouchX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-    lastTouchY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    e.preventDefault();
-  } else if (e.touches.length === 1) {
-    isPinching = false;
-    isDragging = false;
-    touchStartX = e.touches[0].clientX;
-    touchStartY = e.touches[0].clientY;
-    lastTouchX = touchStartX;
-    lastTouchY = touchStartY;
-  }
-}
-
-function onTouchMove(e) {
-  e.preventDefault();
-  if (e.touches.length === 2) {
-    isPinching = true;
-    const dist = getTouchDist(e.touches);
-    const midX = (e.touches[0].clientX + e.touches[1].clientX) / 2;
-    const midY = (e.touches[0].clientY + e.touches[1].clientY) / 2;
-    const mapArea = document.getElementById('map-area');
-    const rect = mapArea.getBoundingClientRect();
-    // Scale about pinch midpoint
-    const scaleFactor = dist / (lastTouchDist || dist);
-    const newScale = Math.min(Math.max(mapScale * scaleFactor, 1), 5);
-    // Adjust offset to zoom toward midpoint
-    const originX = midX - rect.left - rect.width/2;
-    const originY = midY - rect.top - rect.height/2;
-    mapOffsetX = originX + (mapOffsetX - originX) * (newScale / mapScale);
-    mapOffsetY = originY + (mapOffsetY - originY) * (newScale / mapScale);
-    mapScale = newScale;
-    // Pan with finger drift
-    mapOffsetX += midX - lastTouchX;
-    mapOffsetY += midY - lastTouchY;
-    lastTouchDist = dist;
-    lastTouchX = midX; lastTouchY = midY;
-    clampOffset();
-    applyMapTransform();
-  } else if (e.touches.length === 1 && !isPinching && mapScale > 1) {
-    isDragging = true;
-    const dx = e.touches[0].clientX - lastTouchX;
-    const dy = e.touches[0].clientY - lastTouchY;
-    mapOffsetX += dx; mapOffsetY += dy;
-    lastTouchX = e.touches[0].clientX;
-    lastTouchY = e.touches[0].clientY;
-    clampOffset();
-    applyMapTransform();
-  }
-}
-
-function onTouchEnd(e) {
-  if (e.touches.length === 0) {
-    isPinching = false;
-    // If barely moved, treat as tap for plotting
-    const dx = Math.abs(lastTouchX - touchStartX);
-    const dy = Math.abs(lastTouchY - touchStartY);
-    if (!isDragging && dx < 8 && dy < 8 && isPlotMode) {
-      // synthetic click handled by onMapClick
+    function loadHole(holeNumber) {
+      currentHole = holeNumber;
+      document.getElementById('hole-title').textContent = `Hole ${holeNumber}`;
+      // *Insert your specific Bey Lea map drawing/canvas logic here*
     }
-    isDragging = false;
-  }
-  if (e.touches.length < 2) isPinching = false;
-}
 
-function onMapClick(e) {
-  if (!isPlotMode || isPinching || isDragging) return;
-  // Ignore clicks on control buttons
-  if (e.target.closest('.cancel-btn')||e.target.closest('.zoom-controls')||
-      e.target.closest('.layer-toggle')||e.target.closest('.hole-info-strip')) return;
+    async function handleMapTap(event) {
+      // Get rough coordinates of the tap relative to the container
+      const rect = event.target.getBoundingClientRect();
+      const tapX = event.clientX - rect.left;
+      const tapY = event.clientY - rect.top;
 
-  const mapArea = document.getElementById('map-area');
-  const rect = mapArea.getBoundingClientRect();
-  // Compute percent position accounting for current zoom/pan
-  const rawX = e.clientX - rect.left;
-  const rawY = e.clientY - rect.top;
-  // Inverse transform
-  const cx = rect.width/2, cy = rect.height/2;
-  const imgX = (rawX - cx - mapOffsetX) / mapScale + cx;
-  const imgY = (rawY - cy - mapOffsetY) / mapScale + cy;
-  const x = Math.round((imgX / rect.width) * 100);
-  const y = Math.round((imgY / rect.height) * 100);
-  const xClamped = Math.max(0, Math.min(100, x));
-  const yClamped = Math.max(0, Math.min(100, y));
+      const display = document.getElementById('average-display');
+      display.textContent = "Calculating average...";
 
-  const avg = getAvgAt(xClamped, yClamped);
+      // Call the Supabase function
+      const averageText = await getAverageFromSpot(currentHole, tapX, tapY);
+      display.textContent = averageText;
+    }
 
-  if (!scores[currentHole]) scores[currentHole] = {score:null, plotted:[]};
-  scores[currentHole].plotted.push({x:xClamped, y:yClamped, type:activeShotType, avg});
-  saveLocalScores();
+    async function getAverageFromSpot(holeNumber, tapX, tapY) {
+      if (!sb) return "Database offline.";
+      
+      const tolerance = 20; // Pixel radius to search for previous shots
 
-  // Tap ring
-  const ring = document.createElement('div');
-  ring.className = 'tap-ring';
-  ring.style.left = rawX+'px';
-  ring.style.top  = rawY+'px';
-  document.getElementById('shot-markers').appendChild(ring);
-  setTimeout(()=>ring.remove(), 550);
+      // Fetch previous rounds for this hole
+      const { data: previousRounds, error } = await sb
+        .from('rounds')
+        .select('score, plotted')
+        .eq('hole_number', holeNumber)
+        .not('plotted', 'is', null);
 
-  updateLiveNum(avg);
-  renderShotMarkers();
-  renderSGOverlay();
-  showToast(`${SHOT_NAMES[activeShotType]} plotted · avg ${avg.toFixed(1)} to hole`, 'success');
+      if (error || !previousRounds || previousRounds.length === 0) {
+        return "No prior data here. Good luck!";
+      }
 
-  // Auto-advance shot type after tee shot
-  if (activeShotType === 0 && HOLES[currentHole].par >= 4) {
-    setTimeout(()=>selectShot(1), 300);
-  }
-}
+      let totalStrokesRemaining = 0;
+      let matchingShotsCount = 0;
 
-function getTouchDist(touches) {
-  const dx = touches[0].clientX - touches[1].clientX;
-  const dy = touches[0].clientY - touches[1].clientY;
-  return Math.sqrt(dx*dx + dy*dy);
-}
+      // Loop through past rounds to find nearby shots
+      previousRounds.forEach(round => {
+        if (!round.plotted || !Array.isArray(round.plotted)) return;
+        
+        round.plotted.forEach((shot, index) => {
+           if (Math.abs(shot.x - tapX) <= tolerance && Math.abs(shot.y - tapY) <= tolerance) {
+               // Total score minus strokes taken to reach this spot
+               const strokesRemaining = round.score - index; 
+               totalStrokesRemaining += strokesRemaining;
+               matchingShotsCount++;
+           }
+        });
+      });
 
-function applyMapTransform() {
-  document.getElementById('map-wrap').style.transform =
-    `translate(${mapOffsetX}px, ${mapOffsetY}px) scale(${mapScale})`;
-}
+      if (matchingShotsCount > 0) {
+        const average = totalStrokesRemaining / matchingShotsCount;
+        return `Avg to Hole Out: ${average.toFixed(1)} (from ${matchingShotsCount} prior shots)`;
+      } else {
+        return "First time hitting from here!";
+      }
+    }
 
-function clampOffset() {
-  const mapArea = document.getElementById('map-area');
-  const w = mapArea.offsetWidth, h = mapArea.offsetHeight;
-  const maxX = (mapScale-1)*w/2, maxY = (mapScale-1)*h/2;
-  mapOffsetX = Math.max(-maxX, Math.min(maxX, mapOffsetX));
-  mapOffsetY = Math.max(-maxY, Math.min(maxY, mapOffsetY));
-}
-
-function zoomBtns(dir) {
-  const newScale = Math.min(Math.max(mapScale + dir*0.4, 1), 5);
-  mapScale = newScale;
-  if (mapScale === 1) { mapOffsetX=0; mapOffsetY=0; }
-  clampOffset();
-  applyMapTransform();
-}
-
-// ================================================================
-// SHOT MARKERS
-// ================================================================
-function renderShotMarkers() {
-  const c = document.getElementById('shot-markers');
-  Array.from(c.children).forEach(ch=>{ if(!ch.classList.contains('tap-ring')) ch.remove(); });
-  const hd = scores[currentHole];
-  if (!hd?.plotted) return;
-  hd.plotted.forEach(p=>{
-    const m = document.createElement('div');
-    m.className = 'shot-marker';
-    m.style.left = p.x+'%'; m.style.top = p.y+'%';
-    const i = document.createElement('div');
-    i.className = `shot-inner ${SHOT_COLORS[p.type]}`;
-    i.textContent = SHOT_EMOJIS[p.type];
-    m.appendChild(i);
-    c.appendChild(m);
-  });
-}
-
-// ================================================================
-// SHOT TYPE SELECT
-// ================================================================
-function selectShot(n) {
-  activeShotType = n;
-  ['sb-0','sb-1','sb-2','sb-3'].forEach((id,i)=>{
-    document.getElementById(id).classList.toggle('active', i===n);
-  });
-  isPlotMode = true;
-  document.getElementById('map-area').classList.add('plot-mode');
-  document.getElementById('cancel-btn').classList.add('visible');
-  showToast(`Tap map to plot ${SHOT_NAMES[n]} location`);
-}
-
-function cancelPlot() {
-  isPlotMode = false;
-  document.getElementById('map-area').classList.remove('plot-mode');
-  document.getElementById('cancel-btn').classList.remove('visible');
-}
-
-// ================================================================
-// LIVE NUM
-// ================================================================
-function updateLiveNum(avg) {
-  const el = document.getElementById('live-num');
-  if (avg===null){el.textContent='—';el.className='ls-num';return;}
-  el.textContent = avg.toFixed(1);
-  const par = HOLES[currentHole].par;
-  el.className = 'ls-num' + (avg<=par-0.5?' good':avg>=par+0.5?' bad':'');
-}
-
-// ================================================================
-// LAYER TOGGLE
-// ================================================================
-function setLayer(l) {
-  currentLayer = l;
-  document.getElementById('lb-avg').classList.toggle('active', l==='avg');
-  document.getElementById('lb-shots').classList.toggle('active', l==='shots');
-  renderSGOverlay();
-}
-
-// ================================================================
-// HOLE SELECTOR
-// ================================================================
-function buildHoleGrid() {
-  const grid = document.getElementById('hole-grid');
-  HOLES.forEach((h,i)=>{
-    const btn = document.createElement('button');
-    btn.className = 'hg-btn' + (i===0?' active-hole':'');
-    btn.id = `hg-${i}`;
-    const hd = scores[i];
-    if (hd?.score) btn.classList.add('done');
-    btn.innerHTML = `<span>${h.num}</span><span class="hg-par">P${h.par}</span>`;
-    btn.onclick=()=>{
-      closeOverlay('ov-holes');
-      loadHole(i);
-      document.querySelectorAll('.hg-btn').forEach((b,j)=>b.classList.toggle('active-hole',j===i));
-    };
-    grid.appendChild(btn);
-  });
-}
-
-function openHoleSel() { document.getElementById('ov-holes').classList.add('open'); }
-
-// ================================================================
-// GHIN-STYLE SCORE ENTRY
-// ================================================================
-function openScoreEntry() {
-  const h = HOLES[currentHole];
-  seScore = h.par;
-  seStats = { fir:null, gir:null, putts:null, updown:null };
-
-  // Pre-fill from plotted data
-  const hd = scores[currentHole];
-  if (hd?.plotted?.length) {
-    // estimate putts from number of putt-type plots
-    const puttPlots = hd.plotted.filter(p=>p.type===3).length;
-    if (puttPlots > 0) seStats.putts = puttPlots;
-    // estimate score from last avg
-    const lastAvg = hd.plotted[hd.plotted.length-1].avg;
-    seScore = Math.round(lastAvg);
-  }
-  if (hd?.score) {
-    seScore = hd.score;
-    seStats = {fir:hd.fir, gir:hd.gir, putts:hd.putts, updown:hd.updown};
-  }
-
-  document.getElementById('se-badge').textContent = `HOLE ${h.num}`;
-  document.getElementById('se-par').textContent = h.par;
-  document.getElementById('se-hcp').textContent = h.hcp;
-  document.getElementById('se-yds').textContent = h.yds;
-
-  // estimated score from last plot
-  const lastPlotAvg = hd?.plotted?.length ? hd.plotted[hd.plotted.length-1].avg : null;
-  document.getElementById('se-est').textContent = lastPlotAvg ? lastPlotAvg.toFixed(1) : '—';
-
-  // Plotted shot chips
-  const chipsEl = document.getElementById('se-chips');
-  chipsEl.innerHTML = '';
-  if (hd?.plotted?.length) {
-    hd.plotted.forEach(p=>{
-      const c = document.createElement('div');
-      c.className = `plotted-chip ${SHOT_COLORS[p.type]}`;
-      c.textContent = `${SHOT_NAMES[p.type]} avg ${p.avg.toFixed(1)}`;
-      chipsEl.appendChild(c);
-    });
-  } else {
-    chipsEl.innerHTML = '<div style="font-size:12px;color:var(--muted);padding:0 4px">No shots plotted this hole yet</div>';
-  }
-
-  // Quick scores
-  buildQuickScores(h.par);
-  updateScoreDisplay();
-  updateStatDisplay();
-
-  document.getElementById('ov-score').classList.add('open');
-}
-
-function buildQuickScores(par) {
-  const qs = document.getElementById('se-quick');
-  qs.innerHTML = '';
-  const labels = [
-    {s:par-2, l:'Eagle'},
-    {s:par-1, l:'Birdie'},
-    {s:par,   l:'Par'},
-    {s:par+1, l:'Bogey'},
-    {s:par+2, l:'Dbl Bogey'},
-    {s:par+3, l:'+3'},
-  ].filter(x=>x.s>0);
-  labels.forEach(item=>{
-    const btn = document.createElement('button');
-    btn.className = 'qs-btn' + (item.s===seScore?' qs-selected':'');
-    btn.textContent = `${item.s} · ${item.l}`;
-    btn.onclick = ()=>{ seScore=item.s; updateScoreDisplay(); refreshQuickScores(par); };
-    qs.appendChild(btn);
-  });
-}
-
-function refreshQuickScores(par) {
-  document.querySelectorAll('.qs-btn').forEach(b=>{
-    const bScore = parseInt(b.textContent.split(' · ')[0]);
-    b.classList.toggle('qs-selected', bScore===seScore);
-  });
-}
-
-function changeScore(delta) {
-  seScore = Math.max(1, Math.min(15, seScore+delta));
-  updateScoreDisplay();
-  refreshQuickScores(HOLES[currentHole].par);
-}
-
-function updateScoreDisplay() {
-  const par = HOLES[currentHole].par;
-  const diff = seScore - par;
-  const el = document.getElementById('se-val');
-  el.textContent = seScore;
-  let cls='', label='';
-  if (diff<=-2){cls='eagle';label=diff===-2?'EAGLE':'DOUBLE EAGLE';}
-  else if (diff===-1){cls='birdie';label='BIRDIE';}
-  else if (diff===0){cls='';label='PAR';}
-  else if (diff===1){cls='bogey';label='BOGEY';}
-  else if (diff===2){cls='double';label='DOUBLE BOGEY';}
-  else{cls='double';label=`+${diff}`;}
-  el.className = 'stroke-val ' + cls;
-  document.getElementById('se-result').textContent = label;
-}
-
-function toggleStat(key) {
-  if (key==='fir') {
-    seStats.fir = seStats.fir===null?true:seStats.fir===true?false:null;
-    document.getElementById('sv-fir').textContent = seStats.fir===null?'—':seStats.fir?'✓ YES':'✗ NO';
-    document.getElementById('si-fir').classList.toggle('active-stat', seStats.fir!==null);
-  }
-  if (key==='gir') {
-    seStats.gir = seStats.gir===null?true:seStats.gir===true?false:null;
-    document.getElementById('sv-gir').textContent = seStats.gir===null?'—':seStats.gir?'✓ YES':'✗ NO';
-    document.getElementById('si-gir').classList.toggle('active-stat', seStats.gir!==null);
-  }
-  if (key==='updown') {
-    seStats.updown = seStats.updown===null?true:seStats.updown===true?false:null;
-    document.getElementById('sv-updown').textContent = seStats.updown===null?'—':seStats.updown?'✓ YES':'✗ NO';
-    document.getElementById('si-updown').classList.toggle('active-stat', seStats.updown!==null);
-  }
-}
-
-function cyclePutts() {
-  seStats.putts = seStats.putts===null?1:seStats.putts>=4?null:seStats.putts+1;
-  updateStatDisplay();
-  document.getElementById('si-putts').classList.toggle('active-stat', seStats.putts!==null);
-}
-
-function updateStatDisplay() {
-  document.getElementById('sv-putts').textContent = seStats.putts!==null?seStats.putts:'—';
-  document.getElementById('sv-fir').textContent = seStats.fir===null?'—':seStats.fir?'✓ YES':'✗ NO';
-  document.getElementById('sv-gir').textContent = seStats.gir===null?'—':seStats.gir?'✓ YES':'✗ NO';
-  document.getElementById('sv-updown').textContent = seStats.updown===null?'—':seStats.updown?'✓ YES':'✗ NO';
-}
-
-function saveScore() {
-  if (!scores[currentHole]) scores[currentHole]={score:null,plotted:[]};
-  scores[currentHole].score  = seScore;
-  scores[currentHole].fir    = seStats.fir;
-  scores[currentHole].gir    = seStats.gir;
-  scores[currentHole].putts  = seStats.putts;
-  scores[currentHole].updown = seStats.updown;
-  saveLocalScores();
-  syncScoresToCloud();
-  closeOverlay('ov-score');
-  const par = HOLES[currentHole].par;
-  const diff = seScore-par;
-  let msg = `Hole ${HOLES[currentHole].num}: ${seScore} strokes`;
-  if(diff<=-2)msg+=' 🦅';else if(diff===-1)msg+=' 🐦';else if(diff===0)msg+=' ✅';else if(diff>=2)msg+=' 😤';
-  showToast(msg, diff<=0?'success':'');
-  // Mark hole done in selector
-  const hgBtn = document.getElementById(`hg-${currentHole}`);
-  if(hgBtn) hgBtn.classList.add('done');
-  // Auto-advance
-  if (currentHole<17) {
-    setTimeout(()=>{
-      const next=currentHole+1;
-      loadHole(next);
-      document.querySelectorAll('.hg-btn').forEach((b,j)=>b.classList.toggle('active-hole',j===next));
-    }, 1200);
-  }
-}
-
-// ================================================================
-// SCORECARD
-// ================================================================
-function openScorecard() {
-  buildScorecard();
-  document.getElementById('ov-scorecard').classList.add('open');
-}
-
-function buildScorecard() {
-  const front = document.getElementById('sc-front');
-  const back  = document.getElementById('sc-back');
-  const ftot  = document.getElementById('sc-front-tot');
-  const btot  = document.getElementById('sc-back-tot');
-  const total = document.getElementById('sc-total-row');
-  front.innerHTML=back.innerHTML=ftot.innerHTML=btot.innerHTML=total.innerHTML='';
-
-  let fScore=0,fPar=0,fSG=0,bScore=0,bPar=0,bSG=0,sgCats={drive:0,approach:0,atg:0,putting:0};
-  let fN=0,bN=0;
-
-  HOLES.forEach((h,i)=>{
-    const hd=scores[i];
-    const score=hd?.score??null;
-    const par=h.par; const isF=i<9;
-    if(isF) fPar+=par; else bPar+=par;
-    let lastAvg=null;
-    if(hd?.plotted?.length) lastAvg=hd.plotted[hd.plotted.length-1].avg;
-    let sg=null;
-    if(score!==null&&lastAvg!==null){sg=lastAvg-score;}
-    if(score!==null){if(isF){fScore+=score;if(sg!==null)fSG+=sg;}else{bScore+=score;if(sg!==null)bSG+=sg;}}
-
-    // SG by category
-    if(hd?.plotted && score!==null){
-      SG_CATS.forEach(cat=>{
-        const catPlots=hd.plotted.filter(p=>cat.shotTypes.includes(p.type));
-        if(catPlots.length){
-          const avgOfCat=catPlots.reduce((s,p)=>s+p.avg,0)/catPlots.length;
-          sgCats[cat.key]+=(avgOfCat-score/hd.plotted.length);
-        }
+    // --- 5. SERVICE WORKER FOR PWA ---
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').then(registration => {
+          console.log('SW registered: ', registration.scope);
+        }).catch(registrationError => {
+          console.log('SW registration failed: ', registrationError);
+        });
       });
     }
-
-    const diff=score!==null?score-par:null;
-    let sc='sc-par';
-    if(diff===null)sc='';
-    else if(diff<=-2)sc='sc-eagle';
-    else if(diff===-1)sc='sc-birdie';
-    else if(diff===1)sc='sc-bogey';
-    else if(diff===2)sc='sc-double';
-    else if(diff>=3)sc='sc-worse';
-
-    const tr=document.createElement('tr');
-    tr.innerHTML=`
-      <td class="sc-hn">${h.num}</td>
-      <td class="sc-hdcp">${h.hcp}</td>
-      <td>${h.par}</td>
-      <td style="color:var(--muted);font-size:10px">${h.yds}</td>
-      <td><span class="sc-score-cell ${sc}">${score!==null?score:'—'}</span></td>
-      <td>${sg!==null?`<span style="color:${sg>=0?'var(--green)':'var(--red)';}">${sg>=0?'+':''}${sg.toFixed(1)}</span>`:'—'}</td>
-    `;
-    (isF?front:back).appendChild(tr);
-  });
-
-  const mkTot=(score,par,sg,n)=>`
-    <tr style="background:rgba(0,214,143,.06)">
-      <td colspan="2" style="font-family:'Syne',sans-serif;font-weight:800;font-size:11px;color:var(--green);text-align:left;padding:8px 6px">TOT</td>
-      <td style="font-family:'DM Mono',monospace">${par}</td>
-      <td style="color:var(--muted);font-size:10px"></td>
-      <td style="font-family:'DM Mono',monospace;font-size:16px;font-weight:700;color:var(--white)">${n>0?score:'—'}</td>
-      <td style="font-family:'DM Mono',monospace;font-weight:700;color:${sg>=0?'var(--green)':'var(--red)'}">${n>0?(sg>=0?'+':'')+sg.toFixed(1):'—'}</td>
-    </tr>`;
-  ftot.innerHTML=mkTot(fScore,fPar,fSG,fScore?9:0);
-  btot.innerHTML=mkTot(bScore,bPar,bSG,bScore?9:0);
-
-  const totScore=fScore+bScore, totPar=fPar+bPar, totSG=fSG+bSG;
-  const toP=totScore>0?(totScore-totPar>=0?`+${totScore-totPar}`:`${totScore-totPar}`):'—';
-  total.innerHTML=`
-    <div style="background:rgba(0,214,143,.1);border:1px solid rgba(0,214,143,.2);border-radius:12px;padding:12px 16px;display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:12px;color:var(--muted);letter-spacing:.08em">TOTAL</div>
-        <div style="font-family:'DM Mono',monospace;font-size:32px;font-weight:500;color:var(--white);line-height:1">${totScore||'—'}</div>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:11px;color:var(--muted)">TO PAR</div>
-        <div style="font-family:'DM Mono',monospace;font-size:24px;color:${!totScore?'var(--muted)':totScore-totPar<=0?'var(--green)':'var(--red)'}">${toP}</div>
-      </div>
-      <div style="text-align:right">
-        <div style="font-size:11px;color:var(--muted)">TOTAL SG</div>
-        <div style="font-family:'DM Mono',monospace;font-size:24px;color:${totSG>=0?'var(--green)':'var(--red)'}">${totScore?(totSG>=0?'+':'')+totSG.toFixed(1):'—'}</div>
-      </div>
-    </div>`;
-
-  // SG Breakdown by category
-  const sgCatsEl = document.getElementById('sg-cats');
-  sgCatsEl.innerHTML='';
-  const maxAbs = Math.max(...Object.values(sgCats).map(Math.abs), 0.1);
-  SG_CATS.forEach(cat=>{
-    const val=sgCats[cat.key];
-    const pct=Math.abs(val)/maxAbs*100;
-    const pos=val>=0;
-    const row=document.createElement('div');
-    row.className='sg-cat-row';
-    row.innerHTML=`
-      <div class="sg-cat-label">${cat.label}</div>
-      <div class="sg-cat-bar-wrap">
-        <div class="sg-cat-bar ${pos?'pos':'neg'}" style="width:${pct}%"></div>
-      </div>
-      <div class="sg-cat-val ${pos?'pos':'neg'}">${pos?'+':''}${val.toFixed(2)}</div>
-    `;
-    sgCatsEl.appendChild(row);
-  });
-}
-
-// ================================================================
-// FRIENDS & LIVE WATCH
-// ================================================================
-async function loadFriendsData() {
-  if (!sb || isGuest) {
-    // Demo friends for UX preview
-    friends = [
-      {id:'demo1', name:'Mike D.', avatar:'🏌️', hole:7, isLive:true, sgToday:+1.2,
-       sgByHole:{1:-0.3,2:+0.5,3:+1.0,4:-0.2,5:+0.4,6:-0.1,7:+0.2}},
-      {id:'demo2', name:'Tommy R.', avatar:'🎯', hole:null, isLive:false, sgToday:-0.8,
-       sgByHole:{1:+0.1,2:-0.5,3:+0.2}},
-    ];
-    return;
-  }
-  try {
-    const {data} = await sb.from('friends')
-      .select('*, profiles!friend_id(display_name, avatar_emoji)')
-      .eq('user_id', currentUser.id);
-    if (data) friends = data.map(f=>({
-      id: f.friend_id,
-      name: f.profiles?.display_name || 'Friend',
-      avatar: f.profiles?.avatar_emoji || '🏌️',
-      hole: null, isLive: false, sgToday: 0, sgByHole: {}
-    }));
-  } catch(e){}
-}
-
-function renderFriendsList() {
-  const list = document.getElementById('friends-list');
-  list.innerHTML = '';
-  if (!friends.length) {
-    list.innerHTML='<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">No friends yet — add someone!</div>';
-    return;
-  }
-  friends.forEach(f=>{
-    const card = document.createElement('div');
-    card.className='friend-card';
-    const sgColor = f.sgToday>=0?'var(--green)':'var(--red)';
-    const liveIndicator = f.isLive ? `<div class="friend-online"></div>` : '';
-    card.innerHTML=`
-      <div class="friend-avatar">${f.avatar}${liveIndicator}</div>
-      <div class="friend-info">
-        <div class="friend-name">${f.name}</div>
-        <div class="friend-status">${f.isLive?`🟢 On Hole ${f.hole} — LIVE`:'Not playing'}</div>
-      </div>
-      <div class="friend-sg" style="color:${sgColor}">${f.sgToday>=0?'+':''}${f.sgToday.toFixed(1)}</div>
-    `;
-    card.onclick=()=>watchFriend(f);
-    list.appendChild(card);
-  });
-
-  // Live banner
-  const liveF = friends.find(f=>f.isLive);
-  const banner = document.getElementById('live-watch-banner');
-  if (liveF) {
-    banner.style.display='flex';
-    document.getElementById('live-watch-text').textContent=`${liveF.name} is on Hole ${liveF.hole} right now — tap to watch`;
-    banner.onclick=()=>watchFriend(liveF);
-  } else {
-    banner.style.display='none';
-  }
-}
-
-function renderSGCompare() {
-  const rows = document.getElementById('sg-compare-rows');
-  rows.innerHTML='';
-  if (!friends.length) { document.getElementById('sg-compare-panel').style.display='none'; return; }
-  document.getElementById('sg-compare-panel').style.display='block';
-
-  const holeRange = Array.from({length:9},(_, i)=>i); // first 9 for comparison
-  holeRange.forEach(i=>{
-    const h=HOLES[i];
-    const myHd=scores[i];
-    const myScore=myHd?.score;
-    const myPar=h.par;
-    const mySG=myScore?(myHd.plotted?.length?myHd.plotted[myHd.plotted.length-1].avg-myScore:0):null;
-    friends.slice(0,1).forEach(f=>{
-      const fSG=f.sgByHole[h.num]??null;
-      if(mySG===null&&fSG===null) return;
-      const row=document.createElement('div');
-      row.className='sg-compare-row';
-      const youVal = mySG!==null?mySG:0;
-      const themVal = fSG!==null?fSG:0;
-      const maxAbs = Math.max(Math.abs(youVal), Math.abs(themVal), 0.1);
-      const youPct = (Math.abs(youVal)/maxAbs)*40;
-      const themPct = (Math.abs(themVal)/maxAbs)*40;
-      row.innerHTML=`
-        <div class="sg-compare-label">Hole ${h.num}</div>
-        <div class="sg-compare-you">${mySG!==null?(mySG>=0?'+':'')+mySG.toFixed(1):'—'}</div>
-        <div class="sg-compare-bar-wrap">
-          <div class="sg-compare-bar-you" style="width:${youPct}%;height:100%"></div>
-          <div class="sg-compare-bar-them" style="width:${themPct}%;height:100%"></div>
-        </div>
-        <div class="sg-compare-them">${fSG!==null?(fSG>=0?'+':'')+fSG.toFixed(1):'—'}</div>
-      `;
-      rows.appendChild(row);
-    });
-  });
-
-  // Trash talk
-  if (friends.length) {
-    const f = friends[0];
-    const myTotal = Object.values(scores).reduce((s,hd)=>hd.score?s+(hd.plotted?.length?hd.plotted[hd.plotted.length-1].avg-hd.score:0):s, 0);
-    const trash = document.getElementById('trash-talk');
-    if (myTotal > f.sgToday) {
-      trash.textContent = `📊 You're gaining ${(myTotal-f.sgToday).toFixed(1)} more strokes on ${f.name} today — keep it up!`;
-      trash.style.display='block';
-    } else if (myTotal < f.sgToday-0.5) {
-      trash.textContent = `📊 ${f.name} has you by ${(f.sgToday-myTotal).toFixed(1)} SG today. Time to grind!`;
-      trash.style.display='block';
-    } else {
-      trash.style.display='none';
-    }
-  }
-}
-
-function watchFriend(f) {
-  activeFriendWatch = f;
-  // Show friend's markers on the map
-  showScreen('game');
-  renderFriendMarkers(f);
-  showToast(`Watching ${f.name} live on Hole ${f.hole||'—'}`, 'success');
-}
-
-function renderFriendMarkers(f) {
-  const c = document.getElementById('friend-markers');
-  c.innerHTML='';
-  // In a real app, these positions come from Supabase realtime subscription
-  // For demo, place a marker at a plausible spot
-  const demoPosX=55, demoPosY=60;
-  const m=document.createElement('div');
-  m.style.cssText=`position:absolute;left:${demoPosX}%;top:${demoPosY}%;transform:translate(-50%,-50%);z-index:22;pointer-events:none`;
-  m.innerHTML=`
-    <div style="background:var(--gold);color:#001f3f;border:2px solid white;border-radius:50%;width:30px;height:30px;display:flex;align-items:center;justify-content:center;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,.6)">
-      ${f.avatar}
-    </div>
-    <div style="background:rgba(0,0,0,.8);color:var(--gold);font-size:9px;font-weight:700;border-radius:4px;padding:2px 5px;text-align:center;margin-top:2px;font-family:'DM Mono',monospace;white-space:nowrap">${f.name}</div>
-  `;
-  c.appendChild(m);
-}
-
-// ================================================================
-// ADD FRIEND
-// ================================================================
-function addFriendPrompt() { document.getElementById('ov-add-friend').classList.add('open'); }
-async function submitAddFriend() {
-  const input = document.getElementById('friend-search-input').value.trim();
-  if (!input) return;
-  if (!sb || isGuest) { showToast('Sign in to add friends', 'warn'); return; }
-  try {
-    const {data} = await sb.from('profiles').select('id,display_name').eq('display_name', input).single();
-    if (data) {
-      await sb.from('friends').insert({user_id:currentUser.id, friend_id:data.id});
-      showToast(`Friend request sent to ${data.display_name}!`, 'success');
-      closeOverlay('ov-add-friend');
-    } else { showToast('User not found', 'warn'); }
-  } catch(e) { showToast('Could not find user', 'warn'); }
-}
-
-// ================================================================
-// OVERLAYS
-// ================================================================
-function closeOverlay(id) { document.getElementById(id).classList.remove('open'); }
-
-// ================================================================
-// TOAST
-// ================================================================
-function showToast(msg, type='') {
-  const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.className='toast show'+(type?' '+type:'');
-  clearTimeout(t._t);
-  t._t=setTimeout(()=>t.className='toast',2800);
-}
-
-// Prevent iOS bounce
-document.addEventListener('touchmove', e=>{
-  if(!e.target.closest('.sheet')&&!e.target.closest('.friends-list')&&!e.target.closest('.scorecard-sheet')) {
-    e.preventDefault();
-  }
-}, {passive:false});
-</script>
-
-<!-- ================================================================
-     SUPABASE SCHEMA (run once in Supabase SQL editor)
-     Copy and paste this into your Supabase project's SQL Editor:
-
-CREATE TABLE IF NOT EXISTS profiles (
-  id UUID PRIMARY KEY REFERENCES auth.users,
-  display_name TEXT,
-  avatar_emoji TEXT DEFAULT '🏌️',
-  updated_at TIMESTAMPTZ
-);
-
-CREATE TABLE IF NOT EXISTS rounds (
-  id BIGSERIAL PRIMARY KEY,
-  user_id UUID REFERENCES auth.users NOT NULL,
-  hole_number INT NOT NULL,
-  score INT,
-  plotted JSONB,
-  fir BOOLEAN,
-  gir BOOLEAN,
-  putts INT,
-  updown BOOLEAN,
-  played_at DATE NOT NULL DEFAULT CURRENT_DATE,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id, hole_number, played_at)
-);
-
-CREATE TABLE IF NOT EXISTS friends (
-  id BIGSERIAL PRIMARY KEY,
-  user_id UUID REFERENCES auth.users NOT NULL,
-  friend_id UUID REFERENCES auth.users NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE(user_id, friend_id)
-);
-
--- Enable Row Level Security
-ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
-ALTER TABLE rounds   ENABLE ROW LEVEL SECURITY;
-ALTER TABLE friends  ENABLE ROW LEVEL SECURITY;
-
--- Profiles: users can read all, write own
-CREATE POLICY "profiles_read_all" ON profiles FOR SELECT USING (true);
-CREATE POLICY "profiles_write_own" ON profiles FOR ALL USING (auth.uid() = id);
-
--- Rounds: users can read all, write own
-CREATE POLICY "rounds_read_all" ON rounds FOR SELECT USING (true);
-CREATE POLICY "rounds_write_own" ON rounds FOR ALL USING (auth.uid() = user_id);
-
--- Friends: users can read/write own
-CREATE POLICY "friends_read_own" ON friends FOR SELECT USING (auth.uid() = user_id);
-CREATE POLICY "friends_write_own" ON friends FOR ALL USING (auth.uid() = user_id);
-
-     ================================================================ -->
+  </script>
 </body>
 </html>
