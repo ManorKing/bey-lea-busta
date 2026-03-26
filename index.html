@@ -55,7 +55,6 @@
   .pin-Approach { background-color: var(--blue); }
   .pin-Chip { background-color: var(--gold); }
   .pin-Putt { background-color: var(--green); }
-  .staged-glow { box-shadow: 0 0 10px 3px var(--white); } /* Highlights unconfirmed pins */
 
   /* Command Center */
   .command-center { background: var(--navy-mid); border-top: 1px solid var(--navy-light); z-index: 1000; display: flex; flex-direction: column; padding: 10px 15px 20px 15px; gap: 10px; }
@@ -160,7 +159,6 @@
         <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button>
         <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
       </div>
-      <button id="confirm-shot-btn" class="action-btn" style="display: none; background: var(--green); padding: 10px;" onclick="commitStagedShot()">CONFIRM SHOT</button>
       <div class="status-row">
         <div id="average-display" class="avg-text">Awaiting Shot Plot...</div>
         <button class="undo-btn" onclick="undoLastShot()">⟲ Undo</button>
@@ -292,8 +290,6 @@
     let map = null, markersLayer = null;
     let currentHole = 1, currentShots = [], activeShotType = null; 
     let pendingPlot = null; // Used for lie selection routing
-    let stagedMarker = null; // The temporary visual pin
-    let stagedShotData = null; // The temporary data waiting for confirm
 
     function startRound() { switchScreen('screen-game'); initMap(); loadHole(1); }
 
@@ -360,8 +356,6 @@
       // Reset Arrays and UI states
       currentShots = []; 
       markersLayer.clearLayers();
-      if (stagedMarker) { stagedMarker = null; stagedShotData = null; }
-      document.getElementById('confirm-shot-btn').style.display = 'none';
       document.getElementById('average-display').textContent = "Select a shot type below to begin.";
       
       // Deselect all buttons initially
@@ -380,7 +374,7 @@
       
       // The Golden Rule: Must plot Tee first
       const hasTee = currentShots.some(s => s.type === 'Tee');
-      if (activeShotType !== 'Tee' && !hasTee && (!stagedShotData || stagedShotData.type !== 'Tee')) {
+      if (activeShotType !== 'Tee' && !hasTee) {
         return alert("You must plot your Tee shot first for this hole!");
       }
 
@@ -392,76 +386,44 @@
         pendingPlot = { lat, lng };
         document.getElementById('lie-modal').style.display = 'block';
       } else {
-        stagePin(lat, lng, activeShotType === 'Tee' ? 'Tee Box' : 'Green');
+        plotShot(lat, lng, activeShotType === 'Tee' ? 'Tee Box' : 'Green');
       }
     }
 
     function confirmLie(lieType) {
-      if (pendingPlot) { stagePin(pendingPlot.lat, pendingPlot.lng, lieType); pendingPlot = null; }
+      if (pendingPlot) { plotShot(pendingPlot.lat, pendingPlot.lng, lieType); pendingPlot = null; }
       document.getElementById('lie-modal').style.display = 'none';
     }
 
     function cancelLie() { pendingPlot = null; document.getElementById('lie-modal').style.display = 'none'; }
 
-    // Renders the pin but waits for confirmation
-    function stagePin(lat, lng, lieType) {
-      if (stagedMarker) markersLayer.removeLayer(stagedMarker); 
-
+    function plotShot(lat, lng, lieType) {
       const customIcon = L.divIcon({
         className: 'custom-pin-wrapper',
-        html: `<div class="shot-pin pin-${activeShotType} staged-glow"></div>`, // Notice the glow class
+        html: `<div class="shot-pin pin-${activeShotType}"></div>`,
         iconSize: [11, 11], iconAnchor: [5.5, 5.5] 
       });
 
-      stagedMarker = L.marker([lat, lng], { icon: customIcon, draggable: true }).addTo(markersLayer);
-      stagedShotData = { type: activeShotType, lie: lieType, lat: lat, lng: lng, marker: stagedMarker };
+      // Create marker and make it draggable for fine-tuning without needing to undo
+      const marker = L.marker([lat, lng], { icon: customIcon, draggable: true }).addTo(markersLayer);
+      
+      // Save directly to array
+      const shotData = { type: activeShotType, lie: lieType, lat: lat, lng: lng, marker: marker };
+      currentShots.push(shotData);
 
-      stagedMarker.on('dragend', function(e) {
-        const newPos = stagedMarker.getLatLng();
-        stagedShotData.lat = newPos.lat; stagedShotData.lng = newPos.lng;
+      // Update coordinates if the user drags it after placing
+      marker.on('dragend', function(e) {
+        const newPos = marker.getLatLng();
+        shotData.lat = newPos.lat; shotData.lng = newPos.lng;
       });
 
-      document.getElementById('confirm-shot-btn').style.display = 'block';
-      document.getElementById('average-display').textContent = "Drag pin to adjust, then click Confirm.";
-    }
-
-    // Locks the staged pin into the array
-    function commitStagedShot() {
-      if (!stagedShotData) return;
-      
-      // Remove the glow
-      const finalIcon = L.divIcon({
-        className: 'custom-pin-wrapper',
-        html: `<div class="shot-pin pin-${stagedShotData.type}"></div>`,
-        iconSize: [11, 11], iconAnchor: [5.5, 5.5] 
-      });
-      stagedMarker.setIcon(finalIcon);
-      stagedMarker.dragging.disable(); // Optional: stop them from moving it after lock
-      
-      // Save to array
-      currentShots.push(stagedShotData);
-      stagedMarker = null;
-      stagedShotData = null;
-      
       // Reset UI
-      document.getElementById('confirm-shot-btn').style.display = 'none';
       document.getElementById('average-display').textContent = `Plot saved! Total Shots: ${currentShots.length}`;
-      
       activeShotType = null;
       document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
     }
 
     function undoLastShot() {
-      // First, check if there is a staged shot waiting to be cleared
-      if (stagedMarker) {
-        markersLayer.removeLayer(stagedMarker);
-        stagedMarker = null; stagedShotData = null;
-        document.getElementById('confirm-shot-btn').style.display = 'none';
-        document.getElementById('average-display').textContent = currentShots.length > 0 ? `Plot saved! Total Shots: ${currentShots.length}` : "Select a shot type below to begin.";
-        return;
-      }
-      
-      // Otherwise, pop the last locked shot
       if (currentShots.length === 0) return;
       const last = currentShots.pop();
       markersLayer.removeLayer(last.marker);
@@ -470,9 +432,6 @@
 
     // --- SCORE ENTRY & DB SAVE ---
     function openScoreScreen() {
-      // Clean up any un-confirmed pins if they jump straight to scoring
-      if (stagedMarker) { markersLayer.removeLayer(stagedMarker); stagedMarker = null; stagedShotData = null; document.getElementById('confirm-shot-btn').style.display = 'none'; }
-
       document.getElementById('score-hole-title').textContent = currentHole;
       const holeInfo = beyleaData[currentHole];
       document.getElementById('par-yardage-info').textContent = `Par ${holeInfo.par} | ${holeInfo.yards} Yds`;
