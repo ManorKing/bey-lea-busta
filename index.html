@@ -10,12 +10,10 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-  /* DESIGN TOKENS */
   :root {
     --navy: #0a1628; --navy-mid: #0f2040; --navy-light: #162d55;
     --green: #00d68f; --green-dim: #00a872;
@@ -23,153 +21,139 @@
     --white: #f0f4ff; --muted: #8b9bb4;
   }
   
-  body {
-    margin: 0; padding: 0; font-family: 'DM Sans', sans-serif;
-    background-color: var(--navy); color: var(--white);
-    display: flex; flex-direction: column; height: 100vh; overflow: hidden; 
-  }
-
+  body { margin: 0; padding: 0; font-family: 'DM Sans', sans-serif; background-color: var(--navy); color: var(--white); display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
   button { cursor: pointer; }
 
-  /* --- SHARED UI --- */
+  /* Shared UI */
   .auth-input { width: 100%; max-width: 300px; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--navy-light); background: var(--navy-mid); color: var(--white); font-size: 16px; }
-  .action-btn { width: 100%; max-width: 300px; padding: 15px; border-radius: 8px; border: none; background: var(--gold); color: var(--navy); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; }
+  .action-btn { width: 100%; padding: 15px; border-radius: 8px; border: none; background: var(--gold); color: var(--navy); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; }
   .header-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: var(--navy-mid); border-bottom: 1px solid var(--navy-light); z-index: 1000; }
 
-  /* --- AUTH SCREEN --- */
-  #screen-auth { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; }
+  /* Auth & Home */
+  #screen-auth, #screen-home { display: flex; flex-direction: column; height: 100%; }
+  #screen-auth { align-items: center; justify-content: center; padding: 20px; }
   .auth-tabs { display: flex; margin-bottom: 20px; background: var(--navy-mid); border-radius: 8px; overflow: hidden; }
   .auth-tab { background: transparent; color: var(--muted); border: none; padding: 10px 20px; font-family: 'Syne', sans-serif; font-weight: 700; transition: 0.3s; }
   .auth-tab.active { background: var(--green); color: var(--navy); }
-
-  /* --- HOME SCREEN --- */
-  #screen-home { display: none; flex-direction: column; height: 100%; }
   .home-menu { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 20px; }
-  .menu-btn { width: 100%; max-width: 300px; padding: 20px; border-radius: 12px; border: 2px solid var(--navy-light); background: var(--navy-mid); color: var(--white); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; transition: 0.2s; }
+  .menu-btn { width: 100%; max-width: 300px; padding: 20px; border-radius: 12px; border: 2px solid var(--navy-light); background: var(--navy-mid); color: var(--white); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; }
   .menu-btn.primary { background: var(--green); color: var(--navy); border-color: var(--green); }
 
-  /* --- GAME SCREEN (MAP) --- */
+  /* Game Screen & Map */
   #screen-game { display: none; flex-direction: column; height: 100%; position: relative; }
+  #map-container { flex-grow: 1; background: #000; width: 100%; z-index: 1; }
   .nav-btn { background: transparent; color: var(--gold); border: 1px solid var(--gold); border-radius: 4px; padding: 5px 15px; font-weight: bold; }
   
-  .shot-selector { display: flex; justify-content: space-between; padding: 10px; background: var(--navy); z-index: 1000; }
-  .shot-btn { flex: 1; margin: 0 2px; padding: 10px 0; background: var(--navy-mid); color: var(--muted); border: 1px solid var(--navy-light); border-radius: 4px; font-size: 12px; font-weight: bold; }
-  .shot-btn.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
-  
-  /* Leaflet Map Target */
-  #map-container { flex-grow: 1; background: #000; width: 100%; z-index: 1; }
-  
-  /* Custom Leaflet Pins (Shrunk for precision) */
+  /* Pins */
   .leaflet-div-icon { background: transparent; border: none; }
-  .shot-pin { 
-    width: 9px; height: 9px; 
-    border: 1.5px solid white; border-radius: 50%; 
-    box-shadow: 0 2px 4px rgba(0,0,0,0.9); 
-  }
+  .shot-pin { width: 11px; height: 11px; border: 1.5px solid white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.9); }
   .pin-Tee { background-color: var(--red); }
   .pin-Approach { background-color: var(--blue); }
   .pin-Chip { background-color: var(--gold); }
   .pin-Putt { background-color: var(--green); }
 
-  .data-panel { padding: 15px; text-align: center; background: var(--navy-mid); border-top: 1px solid var(--navy-light); z-index: 1000; }
-  .avg-text { font-family: 'DM Mono', monospace; color: var(--green); font-size: 18px; margin-bottom: 10px; }
+  /* Command Center */
+  .command-center { background: var(--navy-mid); border-top: 1px solid var(--navy-light); z-index: 1000; display: flex; flex-direction: column; padding: 10px 15px 20px 15px; gap: 10px; }
+  .shot-selector { display: flex; justify-content: space-between; gap: 5px; }
+  .shot-btn { flex: 1; padding: 12px 0; background: var(--navy); color: var(--muted); border: 1px solid var(--navy-light); border-radius: 6px; font-size: 12px; font-weight: bold; }
+  .shot-btn.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
+  .status-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; }
+  .avg-text { font-family: 'DM Mono', monospace; color: var(--green); font-size: 14px; }
+  .undo-btn { background: transparent; border: 1px solid var(--muted); color: var(--white); border-radius: 4px; padding: 5px 12px; font-size: 12px; font-weight: bold; }
 
-  /* --- SCORE ENTRY SCREEN --- */
+  /* Lie Selector Modal (NEW) */
+  #lie-modal { display: none; position: absolute; bottom: 0; left: 0; right: 0; background: var(--navy-mid); padding: 20px; border-top-left-radius: 16px; border-top-right-radius: 16px; z-index: 2000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
+  .lie-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+  .lie-btn { padding: 12px; background: var(--navy); border: 1px solid var(--navy-light); color: var(--white); border-radius: 8px; font-weight: bold; }
+  .lie-btn:active { background: var(--blue); }
+
+  /* Score Screen */
   #screen-score { display: none; flex-direction: column; height: 100%; background: var(--navy); overflow-y: auto; }
   .score-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--navy-mid); border-bottom: 1px solid var(--navy-light); }
   .back-btn { background: none; border: none; color: var(--blue); font-size: 16px; font-weight: bold; padding: 0; }
-  
-  .hole-indicator { display: flex; justify-content: center; gap: 5px; padding: 15px; overflow-x: auto; background: var(--navy-mid); }
-  .hole-circle { width: 30px; height: 30px; border-radius: 50%; background: var(--navy-light); display: flex; justify-content: center; align-items: center; font-size: 14px; font-weight: bold; color: var(--muted); }
-  .hole-circle.active { background: var(--green); color: var(--navy); }
-
   .score-card-section { padding: 20px; flex-grow: 1; }
   .par-info { text-align: center; font-family: 'DM Mono', monospace; color: var(--muted); margin-bottom: 25px; font-size: 14px; }
   .entry-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--navy-light); }
   .entry-label { font-size: 18px; font-weight: 600; }
-  
   .number-adjuster { display: flex; align-items: center; gap: 15px; }
   .adj-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--blue); background: transparent; color: var(--blue); font-size: 24px; display: flex; justify-content: center; align-items: center; }
   .num-display { font-size: 28px; font-weight: 800; width: 40px; text-align: center; font-family: 'DM Mono', monospace; }
-
-  .segment-group { display: flex; gap: 5px; background: var(--navy-mid); padding: 5px; border-radius: 8px; }
-  .segment-btn { flex: 1; padding: 10px 15px; background: transparent; border: none; color: var(--muted); font-weight: bold; border-radius: 4px; transition: 0.2s; }
-  .segment-btn.active { background: var(--blue); color: white; }
-  .segment-btn.active-green { background: var(--green); color: var(--navy); }
-
   .bottom-bar { padding: 20px; background: var(--navy-mid); border-top: 1px solid var(--navy-light); }
   .next-hole-btn { width: 100%; padding: 15px; border-radius: 8px; border: none; background: var(--green); color: var(--navy); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; }
-
 </style>
 </head>
 <body>
 
-  <div id="screen-auth">
-    <h1 style="font-family: 'Syne', sans-serif; color: var(--green); font-size: 36px; text-align: center; line-height: 1.1; margin-bottom: 5px;">BEY LEA<br>BUSTA</h1>
+  <div id="screen-auth" style="display: none;">
+    <h1 style="font-family: 'Syne'; color: var(--green); font-size: 36px; text-align: center; margin-bottom: 5px;">BEY LEA<br>BUSTA</h1>
     <p style="color: var(--muted); margin-bottom: 30px;">DECADE Strategy Tracker</p>
-    
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</button>
       <button class="auth-tab" onclick="switchAuthTab('signup')">SIGN UP</button>
     </div>
-
     <input type="email" id="field-email" class="auth-input" placeholder="Email Address">
     <input type="password" id="field-pass" class="auth-input" placeholder="Password">
     <button id="auth-submit" class="action-btn" onclick="handleAuth()">LOGIN</button>
   </div>
 
-
-  <div id="screen-home">
+  <div id="screen-home" style="display: none;">
     <div class="header-bar">
-      <div>
-        <span style="color: var(--muted); font-size: 12px;">Logged in as</span><br>
-        <strong id="home-user-email" style="font-family: 'DM Mono', monospace; color: var(--gold);">user@email.com</strong>
-      </div>
+      <div><span style="color: var(--muted); font-size: 12px;">Logged in as</span><br><strong id="home-user-email" style="color: var(--gold);">user@email.com</strong></div>
       <button onclick="logOut()" style="background: transparent; border: none; color: var(--red); font-weight: bold;">LOG OUT</button>
     </div>
-    
     <div class="home-menu">
       <button class="menu-btn primary" onclick="startRound()">🏌️‍♂️ PLAY GOLF</button>
       <button class="menu-btn" onclick="alert('Data Analysis module coming soon!')">📊 DATA ANALYSIS</button>
-      <button class="menu-btn" onclick="alert('Friends List coming soon!')">👥 FRIENDS LIST</button>
+      <button class="menu-btn" onclick="alert('Live Spectator mode coming soon!')">👥 WATCH FRIENDS</button>
     </div>
   </div>
 
-
-  <div id="screen-game">
+  <div id="screen-game" style="display: flex;">
     <div class="header-bar">
-      <h2 id="hole-title" style="margin: 0; font-family: 'Syne', sans-serif; font-size: 22px;">Hole 1</h2>
+      <h2 id="hole-title" style="margin: 0; font-family: 'Syne';">Hole 1</h2>
       <button class="nav-btn" onclick="switchScreen('screen-home')">QUIT</button>
-    </div>
-
-    <div class="shot-selector" id="shot-selector">
-      <button class="shot-btn active" onclick="setShotType('Tee', this)">TEE</button>
-      <button class="shot-btn" onclick="setShotType('Approach', this)">APPROACH</button>
-      <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button>
-      <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
     </div>
 
     <div id="map-container"></div>
 
-    <div class="data-panel">
-      <div id="average-display" class="avg-text">Awaiting Shot Plot...</div>
-      <button id="save-hole-btn" class="action-btn" onclick="openScoreScreen()">Enter Hole 1 Score</button>
+    <div id="lie-modal">
+      <h3 style="margin: 0 0 5px 0; color: var(--gold);">Select Lie</h3>
+      <p style="margin: 0; font-size: 12px; color: var(--muted);">Where is your ball located?</p>
+      <div class="lie-grid">
+        <button class="lie-btn" onclick="confirmLie('Fairway')">Fairway</button>
+        <button class="lie-btn" onclick="confirmLie('Rough')">Rough</button>
+        <button class="lie-btn" onclick="confirmLie('Sand')">Sand</button>
+        <button class="lie-btn" onclick="confirmLie('Fringe')">Fringe</button>
+        <button class="lie-btn" onclick="confirmLie('Recovery/Tree')">Recovery / Tree</button>
+        <button class="lie-btn" onclick="confirmLie('Penalty')">Penalty</button>
+        <button class="lie-btn" onclick="confirmLie('Mogul')" style="grid-column: span 2;">Mogul</button>
+      </div>
+      <button onclick="cancelLie()" style="width: 100%; margin-top: 15px; padding: 10px; background: transparent; color: var(--red); border: none;">Cancel Plot</button>
+    </div>
+
+    <div class="command-center">
+      <div class="shot-selector" id="shot-selector">
+        <button class="shot-btn active" onclick="setShotType('Tee', this)">TEE</button>
+        <button class="shot-btn" onclick="setShotType('Approach', this)">APP.</button>
+        <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button>
+        <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
+      </div>
+      <div class="status-row">
+        <div id="average-display" class="avg-text">Awaiting Shot Plot...</div>
+        <button class="undo-btn" onclick="undoLastShot()">⟲ Undo</button>
+      </div>
+      <button id="save-hole-btn" class="action-btn" onclick="openScoreScreen()">Enter Score</button>
     </div>
   </div>
-
 
   <div id="screen-score">
     <div class="score-header">
       <button class="back-btn" onclick="switchScreen('screen-game')">Cancel</button>
-      <h3 style="margin: 0; font-family: 'Syne', sans-serif;">Hole <span id="score-hole-title">1</span></h3>
+      <h3 style="margin: 0; font-family: 'Syne';">Hole <span id="score-hole-title">1</span></h3>
       <div style="width: 50px;"></div>
     </div>
-
-    <div class="hole-indicator" id="hole-indicator-strip"></div>
-
     <div class="score-card-section">
       <div class="par-info" id="par-yardage-info">Par 4 | 340 Yds</div>
-
       <div class="entry-row">
         <div class="entry-label">Score</div>
         <div class="number-adjuster">
@@ -178,7 +162,6 @@
           <button class="adj-btn" onclick="adjustValue('score-val', 1)">+</button>
         </div>
       </div>
-
       <div class="entry-row">
         <div class="entry-label">Putts</div>
         <div class="number-adjuster">
@@ -187,39 +170,22 @@
           <button class="adj-btn" onclick="adjustValue('putts-val', 1)">+</button>
         </div>
       </div>
-
-      <div class="entry-row" style="flex-direction: column; align-items: flex-start;">
-        <div class="entry-label" style="margin-bottom: 15px;">Drive Accuracy</div>
-        <div class="segment-group" style="width: 100%;">
-          <button class="segment-btn drive-btn" onclick="selectDrive('left', this)">◂ Left</button>
-          <button class="segment-btn drive-btn" onclick="selectDrive('hit', this)">Fairway</button>
-          <button class="segment-btn drive-btn" onclick="selectDrive('right', this)">Right ▸</button>
-        </div>
-      </div>
-
-      <div class="entry-row" style="flex-direction: column; align-items: flex-start; border-bottom: none;">
-        <div class="entry-label" style="margin-bottom: 15px;">Green in Regulation</div>
-        <div class="segment-group" style="width: 100%;">
-          <button id="gir-missed-btn" class="segment-btn gir-btn" onclick="selectGIR(false, this)">Missed</button>
-          <button id="gir-hit-btn" class="segment-btn gir-btn" onclick="selectGIR(true, this)">Hit</button>
-        </div>
-      </div>
     </div>
-
     <div class="bottom-bar">
-      <button class="next-hole-btn" onclick="saveScoreAndNextHole()">SAVE & NEXT HOLE</button>
+      <button class="next-hole-btn" onclick="saveScoreToDB()">SAVE TO DATABASE</button>
     </div>
   </div>
 
   <script>
-    // --- 1. SUPABASE SETUP ---
+    // --- SUPABASE SETUP ---
     const SUPABASE_URL = 'https://nawebecmrjoyuapwhuaq.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hd2ViZWNtcmpveXVhcHdodWFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY2NjEsImV4cCI6MjA5MDEwMjY2MX0.bKOoBYFDTEw0QYvFmoSuOjcqRioN44OkqgpLfX42sG0';
     let sb = null;
     try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch (err) { console.error(err); }
 
-    // --- 2. COURSE DATA (Bey Lea Approximate Lat/Lngs) ---
-    // These coordinates tell Leaflet where to point the camera for each hole.
+    let currentUser = null;
+
+    // --- COURSE DATA ---
     const courseData = {
       1: { par: 4, yards: 340, lat: 39.9961, lng: -74.2120 }, 
       2: { par: 4, yards: 390, lat: 39.9980, lng: -74.2110 }, 
@@ -232,46 +198,29 @@
       9: { par: 4, yards: 400, lat: 39.9955, lng: -74.2080 }
     };
 
-    // --- 3. UI ROUTER ---
+    // --- UI ROUTER ---
     function switchScreen(screenId) {
       ['screen-auth', 'screen-home', 'screen-game', 'screen-score'].forEach(id => {
         document.getElementById(id).style.display = 'none';
       });
       document.getElementById(screenId).style.display = 'flex';
-      
-      // Leaflet needs to know when its container becomes visible to size properly
-      if (screenId === 'screen-game' && map) {
-        setTimeout(() => map.invalidateSize(), 100);
+      if (screenId === 'screen-game' && map) setTimeout(() => map.invalidateSize(), 100);
+    }
+
+    // Check Auth Session on Load
+    window.onload = async () => {
+      if(!sb) return;
+      const { data } = await sb.auth.getSession();
+      if (data.session) {
+        currentUser = data.session.user;
+        document.getElementById('home-user-email').textContent = currentUser.email;
+        switchScreen('screen-home');
+      } else {
+        switchScreen('screen-auth');
       }
-    }
+    };
 
-    // --- 4. LEAFLET MAP SETUP ---
-    let map = null;
-    let markersLayer = null;
-
-    function initMap() {
-      if (map) return; // Prevent double initialization
-      
-      // Initialize map, locked reasonably close so they don't get lost
-      map = L.map('map-container', {
-        zoomControl: false, // We'll rely on pinch-zoom
-        minZoom: 16,
-        maxZoom: 21
-      }).setView([39.9961, -74.2120], 18);
-
-      // Add Esri Satellite Imagery
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-        attribution: 'Tiles &copy; Esri'
-      }).addTo(map);
-
-      // Layer to hold our shot pins
-      markersLayer = L.layerGroup().addTo(map);
-
-      // Listen for map taps to drop pins
-      map.on('click', handleMapTap);
-    }
-
-    // --- 5. AUTHENTICATION ---
+    // --- AUTH ---
     let authMode = 'login'; 
     function switchAuthTab(mode) {
       authMode = mode;
@@ -284,179 +233,177 @@
     async function handleAuth() {
       const email = document.getElementById('field-email').value;
       const pass = document.getElementById('field-pass').value;
-      const btn = document.getElementById('auth-submit');
-      if (!email || !pass) return alert("Please enter email and password.");
-      btn.textContent = 'LOADING…'; btn.disabled = true;
-
+      if (!email || !pass) return alert("Please enter credentials.");
       try {
         if (authMode === 'signup') {
           const { error } = await sb.auth.signUp({ email, password: pass });
-          if (error) throw error;
-          alert("Account Created! Switch to LOGIN.");
-          switchAuthTab('login');
+          if (error) throw error; alert("Account Created! Please Login."); switchAuthTab('login');
         } else {
           const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
           if (error) throw error;
-          
-          document.getElementById('home-user-email').textContent = data.user.email;
+          currentUser = data.user;
+          document.getElementById('home-user-email').textContent = currentUser.email;
           switchScreen('screen-home');
         }
-      } catch (err) { alert("Auth Error: " + err.message); }
-      btn.textContent = authMode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN'; btn.disabled = false;
+      } catch (err) { alert(err.message); }
+    }
+    async function logOut() { await sb.auth.signOut(); currentUser = null; switchScreen('screen-auth'); }
+
+    // --- MAP & GAME LOGIC ---
+    let map = null, markersLayer = null;
+    let currentHole = 1, currentShots = [], activeShotType = 'Tee'; 
+    let pendingPlot = null; // Holds lat/lng while user selects lie
+
+    function startRound() { switchScreen('screen-game'); initMap(); loadHole(1); }
+
+    function initMap() {
+      if (map) return; 
+      map = L.map('map-container', { zoomControl: false, minZoom: 16, maxZoom: 21 }).setView([39.9961, -74.2120], 18);
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }).addTo(map);
+      markersLayer = L.layerGroup().addTo(map);
+      map.on('click', handleMapTap);
     }
 
-    async function logOut() {
-      await sb.auth.signOut();
-      switchScreen('screen-auth');
-    }
-
-    // --- 6. GAME / MAP LOGIC ---
-    let currentHole = 1;
-    const TOTAL_HOLES = 9; 
-    let currentShots = []; 
-    let activeShotType = 'Tee'; 
-
-    function startRound() {
-      switchScreen('screen-game');
-      initMap();
-      loadHole(1);
-    }
-
-    function loadHole(holeNumber) {
-      currentHole = holeNumber;
+    function loadHole(holeNum) {
+      currentHole = holeNum;
       const holeInfo = courseData[currentHole];
+      document.getElementById('hole-title').textContent = `Hole ${currentHole}`;
       
-      document.getElementById('hole-title').textContent = `Hole ${holeNumber}`;
-      document.getElementById('save-hole-btn').textContent = `Enter Hole ${holeNumber} Score`;
-      
-      // Pan camera to the new hole
-      if (map && holeInfo) {
-        map.setView([holeInfo.lat, holeInfo.lng], 18, { animate: true });
+      // Auto-Center using previous data if available
+      const savedBounds = localStorage.getItem(`beylea_hole_${currentHole}_bounds`);
+      if (savedBounds && map) {
+        const bd = JSON.parse(savedBounds);
+        map.fitBounds(L.latLngBounds([bd.tee.lat, bd.tee.lng], [bd.green.lat, bd.green.lng]), { padding: [40, 40] });
+      } else if (map && holeInfo) {
+        map.setView([holeInfo.lat, holeInfo.lng], 18);
       }
       
-      currentShots = [];
+      currentShots = []; markersLayer.clearLayers();
       document.getElementById('average-display').textContent = "Awaiting Shot Plot...";
-      
-      // Clear pins from previous hole
-      if (markersLayer) markersLayer.clearLayers();
-      
-      document.querySelectorAll('.shot-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.shot-btn')[0].classList.add('active');
-      activeShotType = 'Tee';
+      setShotType('Tee', document.querySelectorAll('.shot-btn')[0]);
     }
 
-    function setShotType(type, buttonElement) {
+    function setShotType(type, btn) {
       activeShotType = type;
-      document.querySelectorAll('.shot-btn').forEach(btn => btn.classList.remove('active'));
-      buttonElement.classList.add('active');
+      document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
     }
 
-    async function handleMapTap(event) {
-      // event.latlng contains the exact real-world GPS coordinates of the tap
-      const lat = event.latlng.lat;
-      const lng = event.latlng.lng;
+    function handleMapTap(event) {
+      if (activeShotType === 'Tee' && currentShots.some(s => s.type === 'Tee')) return alert("Tee shot already plotted.");
+      
+      const lat = event.latlng.lat, lng = event.latlng.lng;
 
-      if (activeShotType === 'Tee' && currentShots.some(shot => shot.type === 'Tee')) {
-        return alert("You have already plotted a Tee shot.");
+      // If Approach or Chip, trigger the Lie Modal
+      if (activeShotType === 'Approach' || activeShotType === 'Chip') {
+        pendingPlot = { lat, lng };
+        document.getElementById('lie-modal').style.display = 'block';
+      } else {
+        // Tee or Putt implies its own lie (Tee box / Green)
+        plotPin(lat, lng, activeShotType === 'Tee' ? 'Tee Box' : 'Green');
       }
+    }
 
-      // Create a custom HTML pin
+    function confirmLie(lieType) {
+      if (pendingPlot) {
+        plotPin(pendingPlot.lat, pendingPlot.lng, lieType);
+        pendingPlot = null;
+      }
+      document.getElementById('lie-modal').style.display = 'none';
+    }
+
+    function cancelLie() {
+      pendingPlot = null;
+      document.getElementById('lie-modal').style.display = 'none';
+    }
+
+    function plotPin(lat, lng, lieType) {
       const customIcon = L.divIcon({
         className: 'custom-pin-wrapper',
         html: `<div class="shot-pin pin-${activeShotType}"></div>`,
-        iconSize: [9, 9], // Match the shrunk CSS size
-        iconAnchor: [4.5, 4.5] // Centers the pin exactly on the tap coordinate
+        iconSize: [11, 11], iconAnchor: [5.5, 5.5] 
       });
 
-      L.marker([lat, lng], { icon: customIcon }).addTo(markersLayer);
+      const marker = L.marker([lat, lng], { icon: customIcon, draggable: true }).addTo(markersLayer);
+      
+      const shotData = { type: activeShotType, lie: lieType, lat: lat, lng: lng, marker: marker };
+      currentShots.push(shotData);
 
-      currentShots.push({ type: activeShotType, lat: lat, lng: lng });
+      marker.on('dragend', function(e) {
+        const newPos = marker.getLatLng();
+        shotData.lat = newPos.lat; shotData.lng = newPos.lng;
+      });
+
       document.getElementById('average-display').textContent = `Plot saved! Total Shots: ${currentShots.length}`;
     }
 
-    // --- 7. SMART SCORE ENTRY LOGIC ---
-    let driveState = null; 
-    let girState = null;   
-
-    function renderHoleStrip() {
-      const strip = document.getElementById('hole-indicator-strip');
-      strip.innerHTML = '';
-      for(let i=1; i<=TOTAL_HOLES; i++) {
-        const circle = document.createElement('div');
-        circle.className = `hole-circle ${i === currentHole ? 'active' : ''}`;
-        circle.textContent = i;
-        strip.appendChild(circle);
-      }
+    function undoLastShot() {
+      if (currentShots.length === 0) return;
+      const last = currentShots.pop();
+      markersLayer.removeLayer(last.marker);
+      document.getElementById('average-display').textContent = currentShots.length > 0 ? `Plot saved! Total Shots: ${currentShots.length}` : "Awaiting Shot Plot...";
     }
 
+    // --- SCORE ENTRY & DB SAVE ---
     function openScoreScreen() {
       document.getElementById('score-hole-title').textContent = currentHole;
-      const holeInfo = courseData[currentHole] || { par: 4, yards: 0 };
-      document.getElementById('par-yardage-info').textContent = `Par ${holeInfo.par} | ${holeInfo.yards} Yds`;
-      renderHoleStrip();
-
-      // SMART PRE-FILL
-      const totalScore = currentShots.length > 0 ? currentShots.length : holeInfo.par;
+      const totalScore = currentShots.length > 0 ? currentShots.length : courseData[currentHole].par;
       const totalPutts = currentShots.filter(s => s.type === 'Putt').length;
       document.getElementById('score-val').textContent = totalScore;
       document.getElementById('putts-val').textContent = totalPutts;
-
-      // RESET TOGGLES
-      driveState = null; girState = null;
-      document.querySelectorAll('.drive-btn').forEach(btn => btn.classList.remove('active'));
-      document.querySelectorAll('.gir-btn').forEach(btn => btn.classList.remove('active-green'));
-
-      // AUTO-CALCULATE GIR
-      if (currentShots.length > 0) {
-        const strokesToGreen = totalScore - totalPutts;
-        const girTarget = holeInfo.par - 2;
-        const isGIR = strokesToGreen <= girTarget;
-        
-        if (isGIR) selectGIR(true, document.getElementById('gir-hit-btn'));
-        else selectGIR(false, document.getElementById('gir-missed-btn'));
-      }
-
       switchScreen('screen-score');
     }
 
-    function adjustValue(elementId, change) {
-      const el = document.getElementById(elementId);
-      let val = parseInt(el.textContent) + change;
-      if (val < 0) val = 0;
-      el.textContent = val;
+    function adjustValue(id, change) {
+      const el = document.getElementById(id);
+      el.textContent = Math.max(0, parseInt(el.textContent) + change);
     }
 
-    function selectDrive(state, btnElement) {
-      driveState = state;
-      document.querySelectorAll('.drive-btn').forEach(btn => btn.classList.remove('active'));
-      btnElement.classList.add('active');
-    }
+    async function saveScoreToDB() {
+      if (!currentUser) return alert("Must be logged in.");
+      const btn = document.querySelector('.next-hole-btn');
+      btn.textContent = "SAVING..."; btn.disabled = true;
 
-    function selectGIR(state, btnElement) {
-      girState = state;
-      document.querySelectorAll('.gir-btn').forEach(btn => btn.classList.remove('active-green'));
-      btnElement.classList.add('active-green');
-    }
-
-    async function saveScoreAndNextHole() {
-      const scoreData = {
-        hole: currentHole,
-        score: parseInt(document.getElementById('score-val').textContent),
-        putts: parseInt(document.getElementById('putts-val').textContent),
-        drive: driveState,
-        gir: girState,
-        plots: currentShots // Now saving Lat/Lng instead of X/Y %!
-      };
-      
-      console.log("Saving Hole Data:", scoreData);
-      
-      if (currentHole < TOTAL_HOLES) {
-        switchScreen('screen-game');
-        loadHole(currentHole + 1);
-      } else {
-        alert("Front 9 Complete! Returning to Home Screen.");
-        switchScreen('screen-home');
+      // 1. Learn Bounds for next time
+      const teeShot = currentShots.find(s => s.type === 'Tee');
+      const finalPutt = currentShots.slice().reverse().find(s => s.type === 'Putt');
+      if (teeShot && finalPutt) {
+        localStorage.setItem(`beylea_hole_${currentHole}_bounds`, JSON.stringify({
+          tee: { lat: teeShot.lat, lng: teeShot.lng }, green: { lat: finalPutt.lat, lng: finalPutt.lng }
+        }));
       }
+
+      try {
+        // 2. Insert into `rounds` table
+        const score = parseInt(document.getElementById('score-val').textContent);
+        const putts = parseInt(document.getElementById('putts-val').textContent);
+
+        const { data: roundData, error: roundErr } = await sb.from('rounds').insert([{
+          user_id: currentUser.id, hole_number: currentHole, score: score, putts: putts, played_at: new Date().toISOString()
+        }]).select().single();
+        
+        if (roundErr) throw roundErr;
+
+        // 3. Insert into `shots` table (Crucial for Strokes Gained & Live Watch!)
+        if (currentShots.length > 0) {
+          const dbShots = currentShots.map(s => ({
+            user_id: currentUser.id, round_id: roundData.id, hole_number: currentHole,
+            shot_type: s.type, lie: s.lie, lat: s.lat, lng: s.lng
+          }));
+          const { error: shotErr } = await sb.from('shots').insert(dbShots);
+          if (shotErr) throw shotErr;
+        }
+
+        if (currentHole < 9) {
+          switchScreen('screen-game'); loadHole(currentHole + 1);
+        } else {
+          alert("Round Complete!"); switchScreen('screen-home');
+        }
+      } catch (err) {
+        alert("Error saving: " + err.message);
+      }
+      
+      btn.textContent = "SAVE TO DATABASE"; btn.disabled = false;
     }
   </script>
 </body>
