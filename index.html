@@ -156,4 +156,604 @@
         <button class="lie-btn" onclick="confirmLie('Fringe')">Fringe</button>
         <button class="lie-btn" onclick="confirmLie('Recovery/Tree')">Recovery / Tree</button>
         <button class="lie-btn" onclick="confirmLie('Penalty')">Penalty</button>
-        <button class="lie-btn" onclick="confirmLie('Mogul')" style="grid-
+        <button class="lie-btn" onclick="confirmLie('Mogul')" style="grid-column: span 2;">Mogul</button>
+      </div>
+      <button onclick="cancelLie()" style="width: 100%; margin-top: 15px; padding: 10px; background: transparent; color: var(--red); border: none;">Cancel Plot</button>
+    </div>
+    
+    <div class="command-center">
+      <div class="shot-selector" id="shot-selector">
+        <button class="shot-btn" onclick="setShotType('Tee', this)">TEE</button>
+        <button class="shot-btn" onclick="setShotType('Approach', this)">APP.</button>
+        <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button>
+        <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
+      </div>
+      <div class="status-row">
+        <div id="average-display" class="avg-text">Awaiting Shot Plot...</div>
+        <div>
+          <button id="toggle-overlay-btn" class="util-btn active" onclick="togglePlayOverlay()">👁️ STHO</button>
+          <button class="util-btn" onclick="undoLastShot()">⟲ Undo</button>
+        </div>
+      </div>
+      <button id="save-hole-btn" class="action-btn" onclick="openScoreScreen()">Enter Score</button>
+    </div>
+  </div>
+
+  <div id="screen-data" style="display: none;">
+    <div class="header-bar">
+      <div class="hole-info-container" onclick="openHoleJumper('data')">
+        <h2 id="data-hole-title" style="margin: 0; font-family: 'Syne'; color: var(--gold);">Hole 1 ▾</h2>
+        <div style="font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace;">Historical Data</div>
+      </div>
+      <button class="nav-btn" onclick="switchScreen('screen-home')">HOME</button>
+    </div>
+    <div class="data-toggle-bar">
+      <button class="data-tab active" onclick="setDataView('mine')">MY STHO</button>
+      <button class="data-tab" onclick="setDataView('community')">COMMUNITY STHO</button>
+    </div>
+    <div id="data-map-container"></div>
+    <div style="padding: 15px; background: var(--navy-mid); text-align: center; border-top: 1px solid var(--navy-light);">
+      <p id="data-status-text" style="margin: 0; color: var(--muted); font-family: 'DM Mono', monospace; font-size: 14px;">Loading historical data...</p>
+    </div>
+  </div>
+
+  <div id="hole-jumper-modal">
+    <div class="jumper-content">
+      <h3 style="color: white; margin-top: 0; font-family: 'Syne';">Jump to Hole</h3>
+      <div id="hole-grid" class="jumper-grid"></div>
+      <button onclick="closeHoleJumper()" style="margin-top: 20px; width: 100%; padding: 12px; background: var(--red); color: white; border: none; border-radius: 8px; font-weight: bold;">Cancel</button>
+    </div>
+  </div>
+
+  <div id="screen-score" style="display: none;">
+    <div class="score-header">
+      <button class="back-btn" onclick="switchScreen('screen-game')">Cancel</button>
+      <h3 style="margin: 0; font-family: 'Syne';">Hole <span id="score-hole-title">1</span></h3>
+      <div style="width: 50px;"></div>
+    </div>
+    <div class="score-card-section">
+      <div class="par-info" id="par-yardage-info">Par 4 | 340 Yds</div>
+      <div class="entry-row">
+        <div class="entry-label">Score</div>
+        <div class="number-adjuster">
+          <button class="adj-btn" onclick="adjustValue('score-val', -1)">-</button>
+          <div class="num-display" id="score-val">0</div>
+          <button class="adj-btn" onclick="adjustValue('score-val', 1)">+</button>
+        </div>
+      </div>
+      <div class="entry-row">
+        <div class="entry-label">Putts</div>
+        <div class="number-adjuster">
+          <button class="adj-btn" onclick="adjustValue('putts-val', -1)">-</button>
+          <div class="num-display" id="putts-val">0</div>
+          <button class="adj-btn" onclick="adjustValue('putts-val', 1)">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <button class="next-hole-btn" onclick="saveScoreToDB()">SAVE TO DATABASE</button>
+    </div>
+  </div>
+
+  <script>
+    console.log("JAVASCRIPT IS ALIVE AND RUNNING!");
+
+    // --- SUPABASE SETUP & DEEP DEBUG AUTH ---
+    const SUPABASE_URL = 'https://nawebecmrjoyuapwhuaq.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hd2ViZWNtcmpveXVhcHdodWFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY2NjEsImV4cCI6MjA5MDEwMjY2MX0.bKOoBYFDTEw0QYvFmoSuOjcqRioN44OkqgpLfX42sG0';
+    
+    let sb = null;
+    try { 
+      if (typeof supabase !== 'undefined') {
+        sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); 
+        console.log("Supabase successfully initialized.");
+      } else {
+        console.error("Supabase variable is completely undefined.");
+      }
+    } catch (err) { console.error("Supabase Init Error:", err); }
+
+    let currentUser = null;
+    let authMode = 'login';
+
+    window.onload = async () => {
+      console.log("App loaded. Checking environment...");
+      if(!sb) {
+        alert("CRITICAL ERROR: The Supabase library failed to load. Are you using an adblocker or a strict network/VPN? Disable it and refresh.");
+        return;
+      }
+      
+      try {
+        const { data, error } = await sb.auth.getSession();
+        if (error) throw error;
+        
+        if (data && data.session) {
+          currentUser = data.session.user;
+          document.getElementById('home-user-email').textContent = currentUser.email;
+          switchScreen('screen-home');
+        } else {
+          switchScreen('screen-auth');
+        }
+      } catch (err) { 
+        console.error("Session Check Failed:", err.message);
+        switchScreen('screen-auth'); 
+      }
+    };
+
+    function switchAuthTab(mode) {
+      console.log("Switching tab to:", mode);
+      authMode = mode;
+      const tabs = document.querySelectorAll('.auth-tab');
+      tabs[0].classList.toggle('active', mode === 'login');
+      tabs[1].classList.toggle('active', mode === 'signup');
+      document.getElementById('auth-submit').textContent = mode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN';
+    }
+
+    async function handleAuth() {
+      console.log("Auth button clicked.");
+      if (!sb) return alert("Database connection failed. Please refresh the page.");
+      
+      const email = document.getElementById('field-email').value;
+      const pass = document.getElementById('field-pass').value;
+      const btn = document.getElementById('auth-submit');
+      
+      if (!email || !pass) return alert("Please enter both an email and password.");
+      
+      btn.textContent = "LOADING..."; btn.disabled = true;
+
+      try {
+        if (authMode === 'signup') {
+          console.log("Attempting signup...");
+          const { data, error } = await sb.auth.signUp({ email, password: pass });
+          if (error) throw error; 
+          alert("Account Created! If Supabase requires email confirmation, check your inbox. Otherwise, click LOGIN."); 
+          switchAuthTab('login');
+        } else {
+          console.log("Attempting login...");
+          const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+          if (error) throw error;
+          currentUser = data.user;
+          document.getElementById('home-user-email').textContent = currentUser.email;
+          switchScreen('screen-home');
+        }
+      } catch (err) { 
+        console.error("AUTH ERROR:", err);
+        if (err.message.includes("Email not confirmed")) {
+          alert("ERROR: You must turn OFF 'Confirm Email' in your Supabase Auth Settings!");
+        } else if (err.message.includes("Invalid login credentials")) {
+          alert("ERROR: Wrong password, or the account doesn't exist yet.");
+        } else {
+          alert("ERROR: " + err.message); 
+        }
+      }
+      
+      btn.textContent = authMode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN'; btn.disabled = false;
+    }
+
+    async function logOut() { 
+      if(sb) await sb.auth.signOut(); 
+      currentUser = null; switchScreen('screen-auth'); 
+    }
+
+    // --- FULL 18 HOLE COURSE DATA (BEY LEA) ---
+    const beyleaData = {
+      1: { par: 4, hcp: 13, yards: 370, lat: 39.9961, lng: -74.2120 },
+      2: { par: 5, hcp: 9, yards: 466, lat: 39.9980, lng: -74.2110 },
+      3: { par: 4, hcp: 7, yards: 365, lat: 39.9990, lng: -74.2090 },
+      4: { par: 3, hcp: 15, yards: 160, lat: 39.9985, lng: -74.2070 },
+      5: { par: 4, hcp: 1, yards: 442, lat: 39.9970, lng: -74.2060 },
+      6: { par: 4, hcp: 17, yards: 329, lat: 39.9960, lng: -74.2040 },
+      7: { par: 5, hcp: 3, yards: 547, lat: 39.9950, lng: -74.2030 },
+      8: { par: 3, hcp: 5, yards: 184, lat: 39.9940, lng: -74.2050 },
+      9: { par: 4, hcp: 11, yards: 389, lat: 39.9955, lng: -74.2080 },
+      10: { par: 4, hcp: 10, yards: 392, lat: 39.9930, lng: -74.2120 },
+      11: { par: 4, hcp: 18, yards: 337, lat: 39.9920, lng: -74.2100 },
+      12: { par: 3, hcp: 12, yards: 194, lat: 39.9910, lng: -74.2080 },
+      13: { par: 4, hcp: 16, yards: 354, lat: 39.9900, lng: -74.2060 },
+      14: { par: 4, hcp: 4, yards: 425, lat: 39.9890, lng: -74.2040 },
+      15: { par: 5, hcp: 8, yards: 499, lat: 39.9880, lng: -74.2020 },
+      16: { par: 4, hcp: 2, yards: 386, lat: 39.9895, lng: -74.2000 },
+      17: { par: 3, hcp: 14, yards: 182, lat: 39.9915, lng: -74.2020 },
+      18: { par: 4, hcp: 6, yards: 344, lat: 39.9935, lng: -74.2040 }
+    };
+    const TOTAL_HOLES = 18;
+
+    // --- UI ROUTER ---
+    function switchScreen(screenId) {
+      ['screen-auth', 'screen-home', 'screen-game', 'screen-data', 'screen-score'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      document.getElementById(screenId).style.display = 'flex';
+      
+      if (screenId === 'screen-game' && map) setTimeout(() => map.invalidateSize(), 100);
+      if (screenId === 'screen-data' && dataMap) setTimeout(() => dataMap.invalidateSize(), 100);
+    }
+
+    // Map Bounds logic
+    async function getHoleBounds(holeNum) {
+      const savedBounds = localStorage.getItem(`beylea_hole_${holeNum}_bounds`);
+      if (savedBounds) {
+        const bd = JSON.parse(savedBounds);
+        return L.latLngBounds([bd.tee.lat, bd.tee.lng], [bd.green.lat, bd.green.lng]);
+      } else if (sb) {
+        const { data } = await sb.from('shots').select('lat, lng').eq('hole_number', holeNum);
+        if (data && data.length > 1) { 
+          const lats = data.map(s => s.lat); const lngs = data.map(s => s.lng);
+          return L.latLngBounds([Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)]);
+        }
+      }
+      return null;
+    }
+
+    // Hole Jumper
+    let currentJumperContext = 'play'; 
+    function openHoleJumper(context) {
+      currentJumperContext = context;
+      const grid = document.getElementById('hole-grid'); grid.innerHTML = ''; 
+      for(let i = 1; i <= TOTAL_HOLES; i++) {
+        const btn = document.createElement('button');
+        btn.innerText = i; btn.className = `jumper-btn ${i === currentHole ? 'active' : ''}`;
+        btn.onclick = () => { closeHoleJumper(); context === 'play' ? loadHole(i) : loadDataHole(i); };
+        grid.appendChild(btn);
+      }
+      document.getElementById('hole-jumper-modal').style.display = 'flex';
+    }
+    function closeHoleJumper() { document.getElementById('hole-jumper-modal').style.display = 'none'; }
+
+
+    // ==========================================
+    // 1. PLAY GOLF LOGIC (STRICT PERSONAL OVERLAYS)
+    // ==========================================
+    let map = null, markersLayer = null;
+    let playOverlaysLayer = null;
+    let currentHole = 1, currentShots = [], activeShotType = null; 
+    let pendingPlot = null; 
+    let playClusters = []; 
+    let isPlayOverlayActive = true; 
+
+    function startRound() { switchScreen('screen-game'); initMap(); loadHole(1); }
+    function confirmQuit() { if(confirm("Are you sure you want to quit? Unsaved data for this hole will be lost.")) switchScreen('screen-home'); }
+
+    function initMap() {
+      if (map) return; 
+      map = L.map('map-container', { zoomControl: false, minZoom: 16, maxZoom: 21 }).setView([39.9961, -74.2120], 18);
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }).addTo(map);
+      
+      playOverlaysLayer = L.layerGroup().addTo(map); 
+      markersLayer = L.layerGroup().addTo(map); 
+      map.on('click', handleMapTap);
+    }
+
+    async function loadHole(holeNum) {
+      currentHole = holeNum;
+      const holeInfo = beyleaData[currentHole];
+      
+      document.getElementById('hole-title').textContent = `Hole ${currentHole} ▾`;
+      document.getElementById('hole-details').textContent = `Par ${holeInfo.par} • HCP ${holeInfo.hcp} • ${holeInfo.yards} yds`;
+      document.getElementById('save-hole-btn').textContent = `Enter Hole ${currentHole} Score`;
+      
+      const bounds = await getHoleBounds(currentHole);
+      if(bounds) map.fitBounds(bounds, { padding: [40, 40], animate: true });
+      else map.setView([holeInfo.lat, holeInfo.lng], 18, { animate: true });
+      
+      currentShots = []; markersLayer.clearLayers();
+      document.getElementById('average-display').textContent = "Select a shot type below to begin.";
+      activeShotType = null; document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
+      
+      fetchPlayData(currentHole);
+    }
+
+    async function fetchPlayData(holeNum) {
+      playClusters = [];
+      if(playOverlaysLayer) playOverlaysLayer.clearLayers();
+      if(!sb || !currentUser) return;
+
+      const { data: globalRounds, error } = await sb.from('rounds')
+        .select(`id, user_id, score, shots(id, lat, lng, created_at)`).eq('hole_number', holeNum);
+
+      if (error || !globalRounds || globalRounds.length === 0) return;
+
+      let allShots = [];
+      globalRounds.forEach(round => {
+        if (!round.shots || round.shots.length === 0) return;
+        const sortedShots = round.shots.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        sortedShots.forEach((shot, index) => {
+          allShots.push({ lat: shot.lat, lng: shot.lng, stho: round.score - index, isMine: round.user_id === currentUser.id });
+        });
+      });
+
+      const DISTANCE_THRESHOLD = 15;
+      allShots.forEach(shot => {
+        let added = false;
+        for (let c of playClusters) {
+          if (map.distance([shot.lat, shot.lng], [c.latSum / c.totalCount, c.lngSum / c.totalCount]) <= DISTANCE_THRESHOLD) {
+            c.latSum += shot.lat; c.lngSum += shot.lng; c.globalSthoSum += shot.stho; c.totalCount++;
+            if (shot.isMine) { c.mySthoSum += shot.stho; c.myCount++; }
+            added = true; break;
+          }
+        }
+        if (!added) playClusters.push({
+          latSum: shot.lat, lngSum: shot.lng, globalSthoSum: shot.stho, totalCount: 1,
+          mySthoSum: shot.isMine ? shot.stho : 0, myCount: shot.isMine ? 1 : 0
+        });
+      });
+
+      renderPlayOverlays();
+    }
+
+    function renderPlayOverlays() {
+      if (!playOverlaysLayer) return;
+      playOverlaysLayer.clearLayers();
+      if (!isPlayOverlayActive) return;
+
+      playClusters.forEach(cluster => {
+        if (cluster.myCount === 0) return;
+
+        const centerLat = cluster.latSum / cluster.totalCount;
+        const centerLng = cluster.lngSum / cluster.totalCount;
+        const communityAvg = cluster.globalSthoSum / cluster.totalCount;
+        
+        const myAvg = cluster.mySthoSum / cluster.myCount;
+        const displayVal = myAvg.toFixed(1);
+        const diff = myAvg - communityAvg;
+        
+        let colorClass = 'stho-average';
+        if (diff < -0.3) colorClass = 'stho-better';
+        else if (diff > 0.3) colorClass = 'stho-worse';
+
+        const textIcon = L.divIcon({
+          className: 'stho-overlay-wrapper',
+          html: `<div class="stho-number stho-play-mode ${colorClass}">${displayVal}</div>`,
+          iconSize: [30, 20], iconAnchor: [15, 10]
+        });
+        
+        L.marker([centerLat, centerLng], { icon: textIcon, interactive: false }).addTo(playOverlaysLayer);
+      });
+    }
+
+    function togglePlayOverlay() {
+      isPlayOverlayActive = !isPlayOverlayActive;
+      const btn = document.getElementById('toggle-overlay-btn');
+      btn.classList.toggle('active', isPlayOverlayActive);
+      renderPlayOverlays();
+    }
+
+    function getExpectedSthoForSpot(lat, lng) {
+      let closestCluster = null; let minAvgDist = 15;
+      for (let c of playClusters) {
+        const dist = map.distance([lat, lng], [c.latSum / c.totalCount, c.lngSum / c.totalCount]);
+        if (dist < minAvgDist) { minAvgDist = dist; closestCluster = c; }
+      }
+      if (closestCluster && closestCluster.myCount > 0) {
+        return `Personal Avg: ${(closestCluster.mySthoSum/closestCluster.myCount).toFixed(1)}`;
+      }
+      return "Plot saved!";
+    }
+
+    function setShotType(type, btn) {
+      activeShotType = type;
+      document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active');
+    }
+
+    function handleMapTap(event) {
+      if (!activeShotType) return alert("Please select a shot type (Tee, App, etc.) first!");
+      const hasTee = currentShots.some(s => s.type === 'Tee');
+      if (activeShotType !== 'Tee' && !hasTee) return alert("You must plot your Tee shot first!");
+      if (activeShotType === 'Tee' && hasTee) return alert("Tee shot already locked in.");
+      
+      const lat = event.latlng.lat, lng = event.latlng.lng;
+      if (activeShotType === 'Approach' || activeShotType === 'Chip') {
+        pendingPlot = { lat, lng }; document.getElementById('lie-modal').style.display = 'block';
+      } else {
+        plotShot(lat, lng, activeShotType === 'Tee' ? 'Tee Box' : 'Green');
+      }
+    }
+
+    function confirmLie(lieType) {
+      if (pendingPlot) { plotShot(pendingPlot.lat, pendingPlot.lng, lieType); pendingPlot = null; }
+      document.getElementById('lie-modal').style.display = 'none';
+    }
+    function cancelLie() { pendingPlot = null; document.getElementById('lie-modal').style.display = 'none'; }
+
+    function plotShot(lat, lng, lieType) {
+      const customIcon = L.divIcon({ className: 'custom-pin-wrapper', html: `<div class="shot-pin pin-${activeShotType}"></div>`, iconSize: [11, 11], iconAnchor: [5.5, 5.5] });
+      const marker = L.marker([lat, lng], { icon: customIcon, draggable: true }).addTo(markersLayer);
+      const shotData = { type: activeShotType, lie: lieType, lat: lat, lng: lng, marker: marker };
+      currentShots.push(shotData);
+
+      marker.on('dragend', function(e) {
+        const newPos = marker.getLatLng(); shotData.lat = newPos.lat; shotData.lng = newPos.lng;
+        updateStatusText(shotData.lat, shotData.lng);
+      });
+
+      updateStatusText(lat, lng);
+      activeShotType = null; document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
+    }
+    
+    function updateStatusText(lat, lng) {
+      const sthoText = getExpectedSthoForSpot(lat, lng);
+      document.getElementById('average-display').textContent = `Shot ${currentShots.length} | ${sthoText}`;
+    }
+
+    function undoLastShot() {
+      if (currentShots.length === 0) return;
+      const last = currentShots.pop(); markersLayer.removeLayer(last.marker);
+      document.getElementById('average-display').textContent = currentShots.length > 0 ? `Plot removed. Total: ${currentShots.length}` : "Select a shot type below to begin.";
+    }
+
+    // ==========================================
+    // 2. SCORE ENTRY LOGIC
+    // ==========================================
+    function openScoreScreen() {
+      document.getElementById('score-hole-title').textContent = currentHole;
+      const holeInfo = beyleaData[currentHole];
+      document.getElementById('par-yardage-info').textContent = `Par ${holeInfo.par} | ${holeInfo.yards} Yds`;
+      
+      const totalScore = currentShots.length > 0 ? currentShots.length : holeInfo.par;
+      const totalPutts = currentShots.filter(s => s.type === 'Putt').length;
+      document.getElementById('score-val').textContent = totalScore;
+      document.getElementById('putts-val').textContent = totalPutts;
+      
+      switchScreen('screen-score');
+    }
+
+    function adjustValue(id, change) {
+      const el = document.getElementById(id);
+      el.textContent = Math.max(0, parseInt(el.textContent) + change);
+    }
+
+    async function saveScoreToDB() {
+      if (!currentUser || !sb) return alert("Must be logged in to a valid database.");
+      const btn = document.querySelector('.next-hole-btn'); btn.textContent = "SAVING..."; btn.disabled = true;
+
+      const teeShot = currentShots.find(s => s.type === 'Tee');
+      const finalPutt = currentShots.slice().reverse().find(s => s.type === 'Putt');
+      if (teeShot && finalPutt) {
+        localStorage.setItem(`beylea_hole_${currentHole}_bounds`, JSON.stringify({
+          tee: { lat: teeShot.lat, lng: teeShot.lng }, green: { lat: finalPutt.lat, lng: finalPutt.lng }
+        }));
+      }
+
+      try {
+        const score = parseInt(document.getElementById('score-val').textContent);
+        const putts = parseInt(document.getElementById('putts-val').textContent);
+
+        const { data: roundData, error: roundErr } = await sb.from('rounds').insert([{
+          user_id: currentUser.id, hole_number: currentHole, score: score, putts: putts, played_at: new Date().toISOString()
+        }]).select().single();
+        if (roundErr) throw roundErr;
+
+        if (currentShots.length > 0) {
+          const dbShots = currentShots.map(s => ({
+            user_id: currentUser.id, round_id: roundData.id, hole_number: currentHole,
+            shot_type: s.type, lie: s.lie, lat: s.lat, lng: s.lng
+          }));
+          const { error: shotErr } = await sb.from('shots').insert(dbShots);
+          if (shotErr) throw shotErr;
+        }
+
+        if (currentHole < TOTAL_HOLES) { switchScreen('screen-game'); loadHole(currentHole + 1); } 
+        else { alert("Round Complete!"); switchScreen('screen-home'); }
+      } catch (err) { alert("Error saving: " + err.message); }
+      
+      btn.textContent = "SAVE TO DATABASE"; btn.disabled = false;
+    }
+
+    // ==========================================
+    // 3. DATA DASHBOARD LOGIC
+    // ==========================================
+    let dataMap = null, dataOverlaysLayer = null;
+    let currentDataView = 'mine', cachedClusters = []; 
+
+    function setDataView(view) {
+      currentDataView = view;
+      const tabs = document.querySelectorAll('.data-tab');
+      tabs[0].classList.toggle('active', view === 'mine');
+      tabs[1].classList.toggle('active', view === 'community');
+      renderDataScreenOverlays(); 
+    }
+
+    function openDataDashboard() {
+      switchScreen('screen-data');
+      if (!dataMap) {
+        dataMap = L.map('data-map-container', { zoomControl: false, minZoom: 16, maxZoom: 21 }).setView([39.9961, -74.2120], 18);
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }).addTo(dataMap);
+        dataOverlaysLayer = L.layerGroup().addTo(dataMap);
+      }
+      loadDataHole(1);
+    }
+
+    async function loadDataHole(holeNum) {
+      currentHole = holeNum;
+      document.getElementById('data-hole-title').textContent = `Hole ${currentHole} ▾`;
+      document.getElementById('data-status-text').textContent = "Crunching community data...";
+      dataOverlaysLayer.clearLayers(); cachedClusters = []; 
+
+      const bounds = await getHoleBounds(currentHole);
+      if(bounds) dataMap.fitBounds(bounds, { padding: [40, 40], animate: true });
+      else dataMap.setView([beyleaData[currentHole].lat, beyleaData[currentHole].lng], 18, { animate: true });
+
+      if(!sb) return document.getElementById('data-status-text').textContent = "Database offline.";
+
+      const { data: globalRounds, error } = await sb.from('rounds')
+        .select(`id, user_id, score, shots(id, lat, lng, created_at)`).eq('hole_number', currentHole);
+
+      if (error || !globalRounds || globalRounds.length === 0) {
+        document.getElementById('data-status-text').textContent = "No community data to display for this hole yet."; return;
+      }
+
+      let allShots = [];
+      globalRounds.forEach(round => {
+        if (!round.shots || round.shots.length === 0) return;
+        const sortedShots = round.shots.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+        sortedShots.forEach((shot, index) => {
+          allShots.push({ lat: shot.lat, lng: shot.lng, stho: round.score - index, isMine: round.user_id === currentUser.id });
+        });
+      });
+
+      const DISTANCE_THRESHOLD = 15; 
+      allShots.forEach(shot => {
+        let addedToCluster = false;
+        for (let cluster of cachedClusters) {
+          if (dataMap.distance([shot.lat, shot.lng], [cluster.latSum / cluster.totalCount, cluster.lngSum / cluster.totalCount]) <= DISTANCE_THRESHOLD) {
+            cluster.latSum += shot.lat; cluster.lngSum += shot.lng; cluster.globalSthoSum += shot.stho; cluster.totalCount++;
+            if (shot.isMine) { cluster.mySthoSum += shot.stho; cluster.myCount++; }
+            addedToCluster = true; break;
+          }
+        }
+        if (!addedToCluster) cachedClusters.push({ 
+          latSum: shot.lat, lngSum: shot.lng, globalSthoSum: shot.stho, totalCount: 1,
+          mySthoSum: shot.isMine ? shot.stho : 0, myCount: shot.isMine ? 1 : 0
+        });
+      });
+
+      renderDataScreenOverlays();
+    }
+
+    function renderDataScreenOverlays() {
+      dataOverlaysLayer.clearLayers();
+      let displayedZones = 0;
+
+      cachedClusters.forEach(cluster => {
+        const centerLat = cluster.latSum / cluster.totalCount;
+        const centerLng = cluster.lngSum / cluster.totalCount;
+        const communityAvg = cluster.globalSthoSum / cluster.totalCount;
+
+        if (currentDataView === 'mine') {
+          if (cluster.myCount === 0) return; 
+          displayedZones++;
+          const myAvg = cluster.mySthoSum / cluster.myCount;
+          const diff = myAvg - communityAvg;
+          let colorClass = 'stho-average'; 
+          if (diff < -0.3) colorClass = 'stho-better'; 
+          else if (diff > 0.3) colorClass = 'stho-worse'; 
+
+          const textIcon = L.divIcon({
+            className: 'stho-overlay-wrapper',
+            html: `<div class="stho-number ${colorClass}">${myAvg.toFixed(2)}</div>`,
+            iconSize: [40, 24], iconAnchor: [20, 12]
+          });
+          L.marker([centerLat, centerLng], { icon: textIcon }).addTo(dataOverlaysLayer);
+        
+        } else if (currentDataView === 'community') {
+          displayedZones++;
+          const textIcon = L.divIcon({
+            className: 'stho-overlay-wrapper',
+            html: `<div class="stho-number stho-community">${communityAvg.toFixed(2)}</div>`,
+            iconSize: [40, 24], iconAnchor: [20, 12]
+          });
+          L.marker([centerLat, centerLng], { icon: textIcon }).addTo(dataOverlaysLayer);
+        }
+      });
+
+      if (displayedZones === 0 && currentDataView === 'mine') {
+        document.getElementById('data-status-text').textContent = "You haven't logged any shots on this hole yet.";
+      } else if (currentDataView === 'mine') {
+        document.getElementById('data-status-text').textContent = `Showing ${displayedZones} personal zones compared to community averages.`;
+      } else {
+        document.getElementById('data-status-text').textContent = `Showing ${displayedZones} community zones across all players.`;
+      }
+    }
+
+  </script>
+</body>
+</html>
