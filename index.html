@@ -22,43 +22,44 @@
   }
   
   body {
-    margin: 0; padding: 0;
-    font-family: 'DM Sans', sans-serif;
+    margin: 0; padding: 0; font-family: 'DM Sans', sans-serif;
     background-color: var(--navy); color: var(--white);
-    display: flex; flex-direction: column;
-    height: 100vh; overflow: hidden; 
+    display: flex; flex-direction: column; height: 100vh; overflow: hidden; 
   }
 
   button { cursor: pointer; }
+
+  /* --- SHARED UI --- */
+  .auth-input { width: 100%; max-width: 300px; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--navy-light); background: var(--navy-mid); color: var(--white); font-size: 16px; }
+  .action-btn { width: 100%; max-width: 300px; padding: 15px; border-radius: 8px; border: none; background: var(--gold); color: var(--navy); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; }
+  .header-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: var(--navy-mid); border-bottom: 1px solid var(--navy-light); }
 
   /* --- AUTH SCREEN --- */
   #screen-auth { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; }
   .auth-tabs { display: flex; margin-bottom: 20px; background: var(--navy-mid); border-radius: 8px; overflow: hidden; }
   .auth-tab { background: transparent; color: var(--muted); border: none; padding: 10px 20px; font-family: 'Syne', sans-serif; font-weight: 700; transition: 0.3s; }
   .auth-tab.active { background: var(--green); color: var(--navy); }
-  .auth-input { width: 100%; max-width: 300px; padding: 15px; margin-bottom: 15px; border-radius: 8px; border: 1px solid var(--navy-light); background: var(--navy-mid); color: var(--white); font-size: 16px; }
-  .auth-btn { width: 100%; max-width: 300px; padding: 15px; border-radius: 8px; border: none; background: var(--gold); color: var(--navy); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; }
+
+  /* --- HOME SCREEN (NEW) --- */
+  #screen-home { display: none; flex-direction: column; height: 100%; }
+  .home-menu { flex-grow: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 20px; }
+  .menu-btn { width: 100%; max-width: 300px; padding: 20px; border-radius: 12px; border: 2px solid var(--navy-light); background: var(--navy-mid); color: var(--white); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 18px; transition: 0.2s; }
+  .menu-btn.primary { background: var(--green); color: var(--navy); border-color: var(--green); }
 
   /* --- GAME SCREEN (MAP) --- */
   #screen-game { display: none; flex-direction: column; height: 100%; }
-  
-  .header-bar { padding: 15px; display: flex; justify-content: space-between; align-items: center; background: var(--navy-mid); border-bottom: 1px solid var(--navy-light); }
   .nav-btn { background: transparent; color: var(--gold); border: 1px solid var(--gold); border-radius: 4px; padding: 5px 15px; font-weight: bold; }
   
   .shot-selector { display: flex; justify-content: space-between; padding: 10px; background: var(--navy); }
   .shot-btn { flex: 1; margin: 0 2px; padding: 10px 0; background: var(--navy-mid); color: var(--muted); border: 1px solid var(--navy-light); border-radius: 4px; font-size: 12px; font-weight: bold; }
   .shot-btn.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
   
+  /* Zoom/Pan Mechanics (Fixed for infinite panning) */
   #map-container { flex-grow: 1; display: flex; justify-content: center; align-items: center; background: #000; overflow: hidden; }
-  #zoom-wrapper { position: relative; display: inline-block; }
+  #zoom-wrapper { position: relative; display: inline-block; transform-origin: center center; }
   #hole-image { display: block; max-width: 100vw; max-height: 60vh; object-fit: contain; pointer-events: none; }
   
-  .shot-pin {
-    position: absolute; width: 16px; height: 16px;
-    border: 2px solid white; border-radius: 50%;
-    transform: translate(-50%, -50%); pointer-events: none;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.8); z-index: 10;
-  }
+  .shot-pin { position: absolute; width: 16px; height: 16px; border: 2px solid white; border-radius: 50%; transform: translate(-50%, -50%); pointer-events: none; box-shadow: 0 2px 5px rgba(0,0,0,0.8); z-index: 10; }
   .pin-Tee { background-color: var(--red); }
   .pin-Approach { background-color: var(--blue); }
   .pin-Chip { background-color: var(--gold); }
@@ -66,11 +67,9 @@
 
   .data-panel { padding: 15px; text-align: center; background: var(--navy-mid); border-top: 1px solid var(--navy-light); z-index: 20; }
   .avg-text { font-family: 'DM Mono', monospace; color: var(--green); font-size: 18px; margin-bottom: 10px; }
-  .save-btn { width: 100%; padding: 15px; border-radius: 8px; border: none; background: var(--gold); color: var(--navy); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; }
 
-  /* --- SCORE ENTRY SCREEN (GHIN STYLE) --- */
+  /* --- SCORE ENTRY SCREEN --- */
   #screen-score { display: none; flex-direction: column; height: 100%; background: var(--navy); overflow-y: auto; }
-  
   .score-header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: var(--navy-mid); border-bottom: 1px solid var(--navy-light); }
   .back-btn { background: none; border: none; color: var(--blue); font-size: 16px; font-weight: bold; padding: 0; }
   
@@ -80,16 +79,13 @@
 
   .score-card-section { padding: 20px; flex-grow: 1; }
   .par-info { text-align: center; font-family: 'DM Mono', monospace; color: var(--muted); margin-bottom: 25px; font-size: 14px; }
-
   .entry-row { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--navy-light); }
   .entry-label { font-size: 18px; font-weight: 600; }
   
-  /* Number adjusters for Score & Putts */
   .number-adjuster { display: flex; align-items: center; gap: 15px; }
   .adj-btn { width: 40px; height: 40px; border-radius: 50%; border: 1px solid var(--blue); background: transparent; color: var(--blue); font-size: 24px; display: flex; justify-content: center; align-items: center; }
   .num-display { font-size: 28px; font-weight: 800; width: 40px; text-align: center; font-family: 'DM Mono', monospace; }
 
-  /* Segmented Controls for Drive/GIR */
   .segment-group { display: flex; gap: 5px; background: var(--navy-mid); padding: 5px; border-radius: 8px; }
   .segment-btn { flex: 1; padding: 10px 15px; background: transparent; border: none; color: var(--muted); font-weight: bold; border-radius: 4px; transition: 0.2s; }
   .segment-btn.active { background: var(--blue); color: white; }
@@ -113,14 +109,31 @@
 
     <input type="email" id="field-email" class="auth-input" placeholder="Email Address">
     <input type="password" id="field-pass" class="auth-input" placeholder="Password">
-    <button id="auth-submit" class="auth-btn" onclick="handleAuth()">LOGIN</button>
+    <button id="auth-submit" class="action-btn" onclick="handleAuth()">LOGIN</button>
+  </div>
+
+
+  <div id="screen-home">
+    <div class="header-bar">
+      <div>
+        <span style="color: var(--muted); font-size: 12px;">Logged in as</span><br>
+        <strong id="home-user-email" style="font-family: 'DM Mono', monospace; color: var(--gold);">user@email.com</strong>
+      </div>
+      <button onclick="logOut()" style="background: transparent; border: none; color: var(--red); font-weight: bold;">LOG OUT</button>
+    </div>
+    
+    <div class="home-menu">
+      <button class="menu-btn primary" onclick="startRound()">🏌️‍♂️ PLAY GOLF</button>
+      <button class="menu-btn" onclick="alert('Data Analysis module coming soon!')">📊 DATA ANALYSIS</button>
+      <button class="menu-btn" onclick="alert('Friends List coming soon!')">👥 FRIENDS LIST</button>
+    </div>
   </div>
 
 
   <div id="screen-game">
     <div class="header-bar">
       <h2 id="hole-title" style="margin: 0; font-family: 'Syne', sans-serif; font-size: 22px;">Hole 1</h2>
-      <button class="nav-btn" onclick="openScoreScreen()">ENTER SCORE</button>
+      <button class="nav-btn" onclick="switchScreen('screen-home')">QUIT</button>
     </div>
 
     <div class="shot-selector" id="shot-selector">
@@ -138,20 +151,19 @@
 
     <div class="data-panel">
       <div id="average-display" class="avg-text">Awaiting Shot Plot...</div>
-      <button id="save-hole-btn" class="save-btn" onclick="openScoreScreen()">Enter Hole 1 Score</button>
+      <button id="save-hole-btn" class="action-btn" onclick="openScoreScreen()">Enter Hole 1 Score</button>
     </div>
   </div>
 
 
   <div id="screen-score">
-    
     <div class="score-header">
-      <button class="back-btn" onclick="closeScoreScreen()">Cancel</button>
+      <button class="back-btn" onclick="switchScreen('screen-game')">Cancel</button>
       <h3 style="margin: 0; font-family: 'Syne', sans-serif;">Hole <span id="score-hole-title">1</span></h3>
-      <div style="width: 50px;"></div> </div>
+      <div style="width: 50px;"></div>
+    </div>
 
-    <div class="hole-indicator" id="hole-indicator-strip">
-      </div>
+    <div class="hole-indicator" id="hole-indicator-strip"></div>
 
     <div class="score-card-section">
       <div class="par-info" id="par-yardage-info">Par 4 | 340 Yds</div>
@@ -186,17 +198,15 @@
       <div class="entry-row" style="flex-direction: column; align-items: flex-start; border-bottom: none;">
         <div class="entry-label" style="margin-bottom: 15px;">Green in Regulation</div>
         <div class="segment-group" style="width: 100%;">
-          <button class="segment-btn gir-btn" onclick="selectGIR(false, this)">Missed</button>
-          <button class="segment-btn gir-btn" onclick="selectGIR(true, this)">Hit</button>
+          <button id="gir-missed-btn" class="segment-btn gir-btn" onclick="selectGIR(false, this)">Missed</button>
+          <button id="gir-hit-btn" class="segment-btn gir-btn" onclick="selectGIR(true, this)">Hit</button>
         </div>
       </div>
-
     </div>
 
     <div class="bottom-bar">
-      <button class="next-hole-btn" onclick="saveScoreAndNextHole()">NEXT HOLE</button>
+      <button class="next-hole-btn" onclick="saveScoreAndNextHole()">SAVE & NEXT HOLE</button>
     </div>
-
   </div>
 
   <script>
@@ -206,21 +216,34 @@
     let sb = null;
     try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch (err) { console.error(err); }
 
-    // --- 2. COURSE DATA (MOCK PARS FOR FRONT 9) ---
+    // --- 2. COURSE DATA (Front 9 Mocked) ---
     const courseData = {
       1: { par: 4, yards: 340 }, 2: { par: 4, yards: 390 }, 3: { par: 5, yards: 500 },
       4: { par: 3, yards: 160 }, 5: { par: 4, yards: 380 }, 6: { par: 4, yards: 410 },
       7: { par: 3, yards: 180 }, 8: { par: 5, yards: 520 }, 9: { par: 4, yards: 400 }
     };
 
-    // --- 3. PANZOOM SETUP ---
+    // --- 3. UI ROUTER ---
+    function switchScreen(screenId) {
+      ['screen-auth', 'screen-home', 'screen-game', 'screen-score'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      document.getElementById(screenId).style.display = 'flex';
+    }
+
+    // --- 4. PANZOOM SETUP ---
     let panzoomInstance = null;
     function initPanzoom() {
       const zoomWrapper = document.getElementById('zoom-wrapper');
-      panzoomInstance = Panzoom(zoomWrapper, { maxScale: 5, minScale: 1, contain: 'outside', step: 0.3 });
+      // Removed 'contain' to allow infinite panning and zooming out
+      panzoomInstance = Panzoom(zoomWrapper, { 
+        maxScale: 6, 
+        minScale: 0.4, 
+        step: 0.3 
+      });
     }
 
-    // --- 4. AUTHENTICATION ---
+    // --- 5. AUTHENTICATION ---
     let authMode = 'login'; 
     function switchAuthTab(mode) {
       authMode = mode;
@@ -244,21 +267,33 @@
           alert("Account Created! Switch to LOGIN.");
           switchAuthTab('login');
         } else {
-          const { error } = await sb.auth.signInWithPassword({ email, password: pass });
+          const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
           if (error) throw error;
-          document.getElementById('screen-auth').style.display = 'none';
-          document.getElementById('screen-game').style.display = 'flex';
-          initPanzoom(); loadHole(1);
+          
+          // Successful Login: Setup Home Screen
+          document.getElementById('home-user-email').textContent = data.user.email;
+          switchScreen('screen-home');
         }
       } catch (err) { alert("Auth Error: " + err.message); }
       btn.textContent = authMode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN'; btn.disabled = false;
     }
 
-    // --- 5. GAME / MAP STATE ---
+    async function logOut() {
+      await sb.auth.signOut();
+      switchScreen('screen-auth');
+    }
+
+    // --- 6. GAME / MAP LOGIC ---
     let currentHole = 1;
     const TOTAL_HOLES = 9; 
     let currentShots = []; 
     let activeShotType = 'Tee'; 
+
+    function startRound() {
+      switchScreen('screen-game');
+      if (!panzoomInstance) initPanzoom();
+      loadHole(1);
+    }
 
     function loadHole(holeNumber) {
       currentHole = holeNumber;
@@ -269,7 +304,12 @@
       currentShots = [];
       document.getElementById('average-display').textContent = "Awaiting Shot Plot...";
       document.querySelectorAll('.shot-pin').forEach(pin => pin.remove());
-      if (panzoomInstance) panzoomInstance.reset();
+      
+      if (panzoomInstance) {
+        panzoomInstance.reset();
+        // Slightly zoom out by default so it fits nicely
+        panzoomInstance.zoom(0.8);
+      }
       
       document.querySelectorAll('.shot-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.shot-btn')[0].classList.add('active');
@@ -284,7 +324,7 @@
 
     async function handleMapTap(event) {
       if (activeShotType === 'Tee' && currentShots.some(shot => shot.type === 'Tee')) {
-        return alert("You have already plotted a Tee shot. Switch to Approach, Chip, or Putt.");
+        return alert("You have already plotted a Tee shot.");
       }
       const wrapper = document.getElementById('zoom-wrapper');
       const rect = wrapper.getBoundingClientRect();
@@ -296,16 +336,13 @@
       pin.style.left = `${pctX}%`; pin.style.top = `${pctY}%`;
       wrapper.appendChild(pin);
 
-      currentShots.push({ type: activeShotType, x: pctX, y: pctY, timestamp: new Date().toISOString() });
-      document.getElementById('average-display').textContent = "Calculating...";
-      
-      // Calculate Average (Mocked DB Call for brevity in logic view)
+      currentShots.push({ type: activeShotType, x: pctX, y: pctY });
       document.getElementById('average-display').textContent = `Plot saved! Total Shots: ${currentShots.length}`;
     }
 
-    // --- 6. GHIN-STYLE SCORE ENTRY LOGIC ---
-    let driveState = null; // 'left', 'hit', 'right'
-    let girState = null;   // true, false
+    // --- 7. SMART SCORE ENTRY LOGIC ---
+    let driveState = null; 
+    let girState = null;   
 
     function renderHoleStrip() {
       const strip = document.getElementById('hole-indicator-strip');
@@ -319,37 +356,35 @@
     }
 
     function openScoreScreen() {
-      // 1. Setup UI Text
       document.getElementById('score-hole-title').textContent = currentHole;
       const holeInfo = courseData[currentHole] || { par: 4, yards: 0 };
       document.getElementById('par-yardage-info').textContent = `Par ${holeInfo.par} | ${holeInfo.yards} Yds`;
       renderHoleStrip();
 
-      // 2. SMART PRE-FILL LOGIC
-      // Score = Total physical plots placed on the map
+      // SMART PRE-FILL
       const totalScore = currentShots.length > 0 ? currentShots.length : holeInfo.par;
-      // Putts = Total plots marked specifically as 'Putt'
       const totalPutts = currentShots.filter(s => s.type === 'Putt').length;
-
       document.getElementById('score-val').textContent = totalScore;
       document.getElementById('putts-val').textContent = totalPutts;
 
-      // 3. Reset manual toggles
+      // RESET TOGGLES
       driveState = null; girState = null;
       document.querySelectorAll('.drive-btn').forEach(btn => btn.classList.remove('active'));
       document.querySelectorAll('.gir-btn').forEach(btn => btn.classList.remove('active-green'));
 
-      // 4. Swap Screens
-      document.getElementById('screen-game').style.display = 'none';
-      document.getElementById('screen-score').style.display = 'flex';
+      // AUTO-CALCULATE GIR: (Total Strokes - Putts) <= (Par - 2)
+      if (currentShots.length > 0) {
+        const strokesToGreen = totalScore - totalPutts;
+        const girTarget = holeInfo.par - 2;
+        const isGIR = strokesToGreen <= girTarget;
+        
+        if (isGIR) selectGIR(true, document.getElementById('gir-hit-btn'));
+        else selectGIR(false, document.getElementById('gir-missed-btn'));
+      }
+
+      switchScreen('screen-score');
     }
 
-    function closeScoreScreen() {
-      document.getElementById('screen-score').style.display = 'none';
-      document.getElementById('screen-game').style.display = 'flex';
-    }
-
-    // Math functions for the +/- buttons
     function adjustValue(elementId, change) {
       const el = document.getElementById(elementId);
       let val = parseInt(el.textContent) + change;
@@ -357,12 +392,12 @@
       el.textContent = val;
     }
 
-    // Toggle logic for Drive and GIR
     function selectDrive(state, btnElement) {
       driveState = state;
       document.querySelectorAll('.drive-btn').forEach(btn => btn.classList.remove('active'));
       btnElement.classList.add('active');
     }
+
     function selectGIR(state, btnElement) {
       girState = state;
       document.querySelectorAll('.gir-btn').forEach(btn => btn.classList.remove('active-green'));
@@ -370,22 +405,26 @@
     }
 
     async function saveScoreAndNextHole() {
-      const score = parseInt(document.getElementById('score-val').textContent);
-      const putts = parseInt(document.getElementById('putts-val').textContent);
-
-      // (Optional: Add actual Supabase DB saving here using sb.from('rounds').insert(...))
-
-      // Move to Next Hole!
-      closeScoreScreen();
+      // Data ready to push to DB
+      const scoreData = {
+        hole: currentHole,
+        score: parseInt(document.getElementById('score-val').textContent),
+        putts: parseInt(document.getElementById('putts-val').textContent),
+        drive: driveState,
+        gir: girState,
+        plots: currentShots
+      };
+      
+      console.log("Saving Hole Data:", scoreData);
       
       if (currentHole < TOTAL_HOLES) {
+        switchScreen('screen-game');
         loadHole(currentHole + 1);
       } else {
-        alert("Front 9 Complete! Great round.");
-        loadHole(1); // loop back or redirect to a summary page later
+        alert("Front 9 Complete! Returning to Home Screen.");
+        switchScreen('screen-home');
       }
     }
-
   </script>
 </body>
 </html>
