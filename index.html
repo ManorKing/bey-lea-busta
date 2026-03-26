@@ -8,10 +8,12 @@
 <meta name="theme-color" content="#0a1628">
 <title>Bey Lea Busta</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@panzoom/panzoom@4.5.1/dist/panzoom.min.js"></script>
 
 <style>
-  /* DESIGN TOKENS: Midnight Navy with Neon Turf Green & Gold */
+  /* DESIGN TOKENS */
   :root {
     --navy: #0a1628; --navy-mid: #0f2040; --navy-light: #162d55;
     --green: #00d68f; --green-dim: #00a872;
@@ -22,19 +24,13 @@
   body {
     margin: 0; padding: 0;
     font-family: 'DM Sans', sans-serif;
-    background-color: var(--navy);
-    color: var(--white);
+    background-color: var(--navy); color: var(--white);
     display: flex; flex-direction: column;
-    height: 100vh;
-    overflow: hidden; /* Prevent bouncing on mobile */
+    height: 100vh; overflow: hidden; 
   }
 
   /* --- AUTH SCREEN --- */
-  #screen-auth {
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    height: 100%; padding: 20px;
-  }
+  #screen-auth { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; padding: 20px; }
   .auth-tabs { display: flex; margin-bottom: 20px; background: var(--navy-mid); border-radius: 8px; overflow: hidden; }
   .auth-tab { background: transparent; color: var(--muted); border: none; padding: 10px 20px; font-family: 'Syne', sans-serif; font-weight: 700; cursor: pointer; transition: 0.3s; }
   .auth-tab.active { background: var(--green); color: var(--navy); }
@@ -47,36 +43,56 @@
   .header-bar { padding: 10px; display: flex; justify-content: space-between; align-items: center; background: var(--navy-mid); border-bottom: 1px solid var(--navy-light); }
   .nav-btn { background: transparent; color: var(--gold); border: 1px solid var(--gold); border-radius: 4px; padding: 5px 15px; font-weight: bold; }
   
-  /* Shot Type Selector Panel */
   .shot-selector { display: flex; justify-content: space-between; padding: 10px; background: var(--navy); }
   .shot-btn { flex: 1; margin: 0 2px; padding: 8px 0; background: var(--navy-mid); color: var(--muted); border: 1px solid var(--navy-light); border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; }
   .shot-btn.active { background: var(--blue); color: var(--white); border-color: var(--blue); }
   
-  /* Map Area */
+  /* Map Area & Zoom Mechanics */
   #map-container { 
     flex-grow: 1; 
-    position: relative; /* Crucial for placing pins accurately */
     display: flex; justify-content: center; align-items: center; 
     background: #000; overflow: hidden; 
   }
-  #hole-image { max-width: 100%; max-height: 100%; object-fit: contain; }
   
-  /* The visual pin dropped on the map */
+  /* The wrapper tight-fits the image. This ensures our percentage-based 
+    pin placements stay perfectly locked to the turf even when zoomed! 
+  */
+  #zoom-wrapper { position: relative; display: inline-block; }
+  #hole-image { display: block; max-width: 100vw; max-height: 65vh; object-fit: contain; pointer-events: none; }
+  
+  /* Visual Pins (Color Coded!) */
   .shot-pin {
     position: absolute;
-    width: 12px; height: 12px;
-    background-color: var(--red);
-    border: 2px solid white;
-    border-radius: 50%;
-    transform: translate(-50%, -50%); /* Centers pin on tap */
+    width: 14px; height: 14px;
+    border: 2px solid white; border-radius: 50%;
+    transform: translate(-50%, -50%); /* Center on exact tap coordinate */
     pointer-events: none;
-    box-shadow: 0 0 5px rgba(0,0,0,0.5);
+    box-shadow: 0 2px 5px rgba(0,0,0,0.8);
+    z-index: 10;
   }
+  .pin-Tee { background-color: var(--red); }
+  .pin-Approach { background-color: var(--blue); }
+  .pin-Chip { background-color: var(--gold); }
+  .pin-Putt { background-color: var(--green); }
 
-  /* Data Display Panel */
-  .data-panel { padding: 15px; text-align: center; background: var(--navy-mid); border-top: 1px solid var(--navy-light); }
+  /* Data & Actions */
+  .data-panel { padding: 15px; text-align: center; background: var(--navy-mid); border-top: 1px solid var(--navy-light); z-index: 20; }
   .avg-text { font-family: 'DM Mono', monospace; color: var(--green); font-size: 18px; margin-bottom: 10px; }
-  .save-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--gold); color: var(--navy); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; }
+  .save-btn { width: 100%; padding: 12px; border-radius: 8px; border: none; background: var(--gold); color: var(--navy); font-family: 'Syne', sans-serif; font-weight: 800; font-size: 16px; cursor: pointer;}
+
+  /* --- SCORE MODAL (GHIN DATA PREFILL) --- */
+  #score-modal {
+    display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0,0,0,0.8); z-index: 100;
+    align-items: center; justify-content: center;
+  }
+  .modal-content {
+    background: var(--navy-mid); padding: 25px; border-radius: 12px; width: 85%; max-width: 400px;
+    border: 1px solid var(--navy-light);
+  }
+  .modal-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+  .modal-input { width: 60px; padding: 10px; text-align: center; border-radius: 6px; border: none; background: var(--navy-light); color: white; font-weight: bold; font-size: 16px; }
+  .modal-check { transform: scale(1.5); accent-color: var(--green); }
 </style>
 </head>
 <body>
@@ -92,12 +108,10 @@
 
     <input type="email" id="field-email" class="auth-input" placeholder="Email Address">
     <input type="password" id="field-pass" class="auth-input" placeholder="Password">
-    
     <button id="auth-submit" class="auth-btn" onclick="handleAuth()">LOGIN</button>
   </div>
 
   <div id="screen-game">
-    
     <div class="header-bar">
       <button class="nav-btn" onclick="changeHole(-1)">◀ PREV</button>
       <h2 id="hole-title" style="margin: 0; font-family: 'Syne', sans-serif;">Hole 1</h2>
@@ -111,30 +125,74 @@
       <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
     </div>
 
-    <div id="map-container" onclick="handleMapTap(event)">
-      <img id="hole-image" src="./images/Hole1.png" alt="Hole Map" draggable="false">
+    <div id="map-container">
+      <div id="zoom-wrapper" onclick="handleMapTap(event)">
+        <img id="hole-image" src="./images/Hole1.png" alt="Hole Map">
+        </div>
     </div>
 
     <div class="data-panel">
       <div id="average-display" class="avg-text">Awaiting Shot Plot...</div>
-      <button class="save-btn" onclick="saveHoleData()">FINISH & SAVE HOLE</button>
+      <button id="save-hole-btn" class="save-btn" onclick="openScoreModal()">Enter Hole 1 Score</button>
+    </div>
+  </div>
+
+  <div id="score-modal">
+    <div class="modal-content">
+      <h2 style="margin-top: 0; color: var(--gold); border-bottom: 1px solid var(--navy-light); padding-bottom: 10px;">Hole <span id="modal-hole-num">1</span> Stats</h2>
+      
+      <div class="modal-row">
+        <label style="font-weight: bold;">Total Strokes</label>
+        <input type="number" id="modal-score" class="modal-input" min="1">
+      </div>
+      
+      <div class="modal-row">
+        <label style="font-weight: bold;">Putts</label>
+        <input type="number" id="modal-putts" class="modal-input" min="0">
+      </div>
+      
+      <div class="modal-row">
+        <label>Fairway in Reg. (FIR)</label>
+        <input type="checkbox" id="modal-fir" class="modal-check">
+      </div>
+      
+      <div class="modal-row">
+        <label>Green in Reg. (GIR)</label>
+        <input type="checkbox" id="modal-gir" class="modal-check">
+      </div>
+
+      <div style="display: flex; gap: 10px; margin-top: 25px;">
+        <button class="auth-btn" style="background: var(--navy-light); color: white;" onclick="closeScoreModal()">Cancel</button>
+        <button class="auth-btn" onclick="submitScoreToDB()">SAVE DATA</button>
+      </div>
     </div>
   </div>
 
   <script>
     // --- 1. SUPABASE INITIALIZATION ---
-    // User's specific Bey Lea Busta credentials
     const SUPABASE_URL = 'https://nawebecmrjoyuapwhuaq.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hd2ViZWNtcmpveXVhcHdodWFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY2NjEsImV4cCI6MjA5MDEwMjY2MX0.bKOoBYFDTEw0QYvFmoSuOjcqRioN44OkqgpLfX42sG0';
     
     let sb = null;
-    try {
-      sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-    } catch (err) {
-      console.error("Supabase failed to initialize:", err);
+    try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } 
+    catch (err) { console.error("Supabase fail:", err); }
+
+    // --- 2. PANZOOM SETUP (MOBILE PINCH ZOOM) ---
+    let panzoomInstance = null;
+    
+    function initPanzoom() {
+      const zoomWrapper = document.getElementById('zoom-wrapper');
+      panzoomInstance = Panzoom(zoomWrapper, {
+        maxScale: 5,
+        minScale: 1,
+        contain: 'outside', // Keeps image from getting lost off-screen
+        step: 0.3
+      });
+      // Allow mousewheel zooming for desktop testing
+      zoomWrapper.parentElement.addEventListener('wheel', panzoomInstance.zoomWithWheel);
     }
 
-    // --- 2. AUTHENTICATION LOGIC ---
+    // --- 3. AUTHENTICATION ---
     let authMode = 'login'; 
 
     function switchAuthTab(mode) {
@@ -151,57 +209,51 @@
       const btn = document.getElementById('auth-submit');
       
       if (!email || !pass) return alert("Please enter email and password.");
-
-      btn.textContent = 'LOADING…';
-      btn.disabled = true;
-
-      if (!sb) {
-        alert("Database disconnected. Cannot authenticate.");
-        btn.disabled = false; return;
-      }
+      btn.textContent = 'LOADING…'; btn.disabled = true;
 
       try {
         if (authMode === 'signup') {
           const { error } = await sb.auth.signUp({ email, password: pass });
           if (error) throw error;
-          alert("Account Created! You can now log in.");
+          alert("Account Created! Switch to LOGIN.");
           switchAuthTab('login');
         } else {
           const { error } = await sb.auth.signInWithPassword({ email, password: pass });
           if (error) throw error;
           
-          // Success! Show app and load front 9
           document.getElementById('screen-auth').style.display = 'none';
           document.getElementById('screen-game').style.display = 'flex';
+          
+          // Initialize map interactions
+          initPanzoom();
           loadHole(1);
         }
       } catch (err) {
         alert("Auth Error: " + err.message);
       }
-      
-      btn.textContent = authMode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN';
-      btn.disabled = false;
+      btn.textContent = authMode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN'; btn.disabled = false;
     }
 
-    // --- 3. COURSE STATE & NAVIGATION ---
+    // --- 4. COURSE STATE & NAVIGATION ---
     let currentHole = 1;
-    const TOTAL_HOLES = 9; // Currently beta testing front 9
-    
-    // State to hold the shots plotted during the *current* play of this hole
+    const TOTAL_HOLES = 9; 
     let currentShots = []; 
-    let activeShotType = 'Tee'; // Default shot type
+    let activeShotType = 'Tee'; 
 
     function loadHole(holeNumber) {
       currentHole = holeNumber;
       document.getElementById('hole-title').textContent = `Hole ${holeNumber}`;
       document.getElementById('hole-image').src = `./images/Hole${holeNumber}.png`;
       
-      // Reset hole state
+      // Update dynamic save button text
+      document.getElementById('save-hole-btn').textContent = `Enter Hole ${holeNumber} Score`;
+      
+      // Reset hole state and zoom
       currentShots = [];
       document.getElementById('average-display').textContent = "Awaiting Shot Plot...";
-      
-      // Remove visual pins from the map
       document.querySelectorAll('.shot-pin').forEach(pin => pin.remove());
+      
+      if (panzoomInstance) panzoomInstance.reset();
       
       // Reset shot type to Tee
       document.querySelectorAll('.shot-btn').forEach(btn => btn.classList.remove('active'));
@@ -218,62 +270,52 @@
 
     function setShotType(type, buttonElement) {
       activeShotType = type;
-      // Update UI
       document.querySelectorAll('.shot-btn').forEach(btn => btn.classList.remove('active'));
       buttonElement.classList.add('active');
     }
 
-    // --- 4. MAP TAPPING & AVERAGES (THE HEART OF THE APP) ---
+    // --- 5. MAP TAPPING & AVERAGES ---
     async function handleMapTap(event) {
-      const img = document.getElementById('hole-image');
-      if (event.target !== img) return; // Ensure they tapped the image itself
+      // Prevent dropping a pin if the user was just dragging/panning the map
+      // (Panzoom stops click events automatically if panning occurred, so this is clean)
+      
+      // RULE: Only 1 Tee plot allowed per hole
+      if (activeShotType === 'Tee' && currentShots.some(shot => shot.type === 'Tee')) {
+        alert("You have already plotted a Tee shot. Please switch to Approach, Chip, or Putt.");
+        return; 
+      }
 
-      // CALCULATE PERCENTAGES: 
-      // We calculate where the user tapped as a % of the image's total width/height.
-      // This is critical because an iPhone Mini and an iPad render the image at different sizes.
-      const rect = img.getBoundingClientRect();
+      const wrapper = document.getElementById('zoom-wrapper');
+      const rect = wrapper.getBoundingClientRect();
+      
+      // Calculate tap position relative to the scaled wrapper
       const tapX = event.clientX - rect.left;
       const tapY = event.clientY - rect.top;
       
+      // Convert to strict percentages so pins scale perfectly with the zoom
       const pctX = (tapX / rect.width) * 100;
       const pctY = (tapY / rect.height) * 100;
 
-      // Draw a pin on the screen
-      dropPin(tapX, tapY);
+      dropPin(pctX, pctY, activeShotType);
 
-      // Save to current session state
-      currentShots.push({
-        type: activeShotType,
-        x: pctX,
-        y: pctY,
-        timestamp: new Date().toISOString()
-      });
+      currentShots.push({ type: activeShotType, x: pctX, y: pctY, timestamp: new Date().toISOString() });
 
-      // Fetch the DECADE-style "Strokes to Hole Out" average
       document.getElementById('average-display').textContent = "Calculating...";
       const averageText = await calculateAverageFromDatabase(currentHole, pctX, pctY);
       document.getElementById('average-display').textContent = averageText;
     }
 
-    function dropPin(x, y) {
-      const mapContainer = document.getElementById('map-container');
-      const img = document.getElementById('hole-image');
-      
-      // Calculate offset based on image position inside container
-      const imgRect = img.getBoundingClientRect();
-      const containerRect = mapContainer.getBoundingClientRect();
-      
+    function dropPin(pctX, pctY, type) {
+      const wrapper = document.getElementById('zoom-wrapper');
       const pin = document.createElement('div');
-      pin.className = 'shot-pin';
-      pin.style.left = `${(imgRect.left - containerRect.left) + x}px`;
-      pin.style.top = `${(imgRect.top - containerRect.top) + y}px`;
-      mapContainer.appendChild(pin);
+      pin.className = `shot-pin pin-${type}`;
+      pin.style.left = `${pctX}%`;
+      pin.style.top = `${pctY}%`;
+      wrapper.appendChild(pin);
     }
 
     async function calculateAverageFromDatabase(holeNum, pctX, pctY) {
       if (!sb) return "DB Offline - Avg: N/A";
-      
-      // Tolerance: Look for past shots within a 4% radius of this tap
       const TOLERANCE = 4.0; 
 
       const { data: pastRounds, error } = await sb
@@ -282,70 +324,77 @@
         .eq('hole_number', holeNum)
         .not('plotted', 'is', null);
 
-      if (error || !pastRounds || pastRounds.length === 0) {
-        return "No prior data. You're pioneering!";
-      }
+      if (error || !pastRounds || pastRounds.length === 0) return "New spot! No historical data here.";
 
-      let totalStrokesRemaining = 0;
-      let matchingShotsCount = 0;
+      let totalStrokesRemaining = 0; let matchingShotsCount = 0;
 
       pastRounds.forEach(round => {
-        if (!round.plotted || !Array.isArray(round.plotted)) return;
-        
+        if (!round.plotted) return;
         round.plotted.forEach((shot, index) => {
-           // Check if historical shot is within our tolerance radius
            if (Math.abs(shot.x - pctX) <= TOLERANCE && Math.abs(shot.y - pctY) <= TOLERANCE) {
-               // Strokes to hole out = Total Score minus the strokes taken to REACH this spot.
-               // (e.g., if you scored a 5, and this was your 2nd shot plot, it took you 3 more to hole out)
-               const strokesRemaining = round.score - index; 
-               totalStrokesRemaining += strokesRemaining;
+               totalStrokesRemaining += (round.score - index); 
                matchingShotsCount++;
            }
         });
       });
 
-      if (matchingShotsCount > 0) {
-        const avg = totalStrokesRemaining / matchingShotsCount;
-        return `Avg to Hole Out: ${avg.toFixed(1)} (${matchingShotsCount} prior shots)`;
-      } else {
-        return "New spot! No historical data here.";
-      }
+      return matchingShotsCount > 0 
+        ? `Avg to Hole Out: ${(totalStrokesRemaining / matchingShotsCount).toFixed(1)} (${matchingShotsCount} prior shots)`
+        : "New spot! No historical data here.";
     }
 
-    // --- 5. SAVING THE ROUND ---
-    async function saveHoleData() {
-      if (currentShots.length === 0) {
-        return alert("You haven't plotted any shots for this hole yet!");
-      }
+    // --- 6. SMART SCORE MODAL ---
+    function openScoreModal() {
+      if (currentShots.length === 0) return alert("You haven't plotted any shots for this hole yet!");
+      
+      document.getElementById('modal-hole-num').textContent = currentHole;
+      
+      // Smart Pre-fill logic based on plots
+      const puttsPlotted = currentShots.filter(s => s.type === 'Putt').length;
+      const totalPlotted = currentShots.length;
+      
+      // Defaults: Total score assumes 1 shot per plot. 
+      // FIR assumes yes unless specifically marked missed (left to user for now).
+      document.getElementById('modal-score').value = totalPlotted;
+      document.getElementById('modal-putts').value = puttsPlotted;
+      document.getElementById('modal-fir').checked = false; // User toggles
+      document.getElementById('modal-gir').checked = false; // User toggles
 
-      // In a full app, this might be a custom modal. For beta, prompt works perfectly.
-      const scoreInput = prompt(`What was your total score for Hole ${currentHole}?`);
-      if (!scoreInput || isNaN(scoreInput)) return;
+      document.getElementById('score-modal').style.display = 'flex';
+    }
 
-      const score = parseInt(scoreInput);
+    function closeScoreModal() {
+      document.getElementById('score-modal').style.display = 'none';
+    }
 
-      // Get current authenticated user
+    async function submitScoreToDB() {
+      const score = parseInt(document.getElementById('modal-score').value);
+      const putts = parseInt(document.getElementById('modal-putts').value);
+      const fir = document.getElementById('modal-fir').checked;
+      const gir = document.getElementById('modal-gir').checked;
+
       const { data: { user } } = await sb.auth.getUser();
-      if (!user) return alert("You must be logged in to save.");
+      if (!user) return alert("Session expired. Please log in again.");
 
-      // Push to Supabase 'rounds' table
       const { error } = await sb.from('rounds').insert({
         user_id: user.id,
         hole_number: currentHole,
         score: score,
+        putts: putts,
+        fir: fir,
+        gir: gir,
         plotted: currentShots // Saves the JSON array of coordinates and shot types
       });
 
       if (error) {
         alert("Error saving: " + error.message);
       } else {
-        alert("Hole saved! Database updated.");
-        // Auto-advance to next hole
-        changeHole(1);
+        closeScoreModal();
+        changeHole(1); // Auto-advance
       }
     }
 
-    // --- 6. PWA SERVICE WORKER ---
+    // --- 7. PWA SERVICE WORKER ---
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW failed', err));
