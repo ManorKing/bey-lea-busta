@@ -62,7 +62,7 @@
     border-radius: 6px; border-width: 2px; border-style: solid;
     background: rgba(10, 22, 40, 0.85); box-shadow: 0 4px 6px rgba(0,0,0,0.5);
   }
-  .stho-play-mode { font-size: 12px; padding: 1px 4px; opacity: 0.85; } /* Slightly smaller for Play Screen */
+  .stho-play-mode { font-size: 12px; padding: 1px 4px; opacity: 0.85; }
   
   .stho-better { border-color: var(--green); color: var(--green); }
   .stho-average { border-color: var(--gold); color: var(--gold); }
@@ -394,11 +394,9 @@
       document.getElementById('average-display').textContent = "Select a shot type below to begin.";
       activeShotType = null; document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
       
-      // Fetch the background data for the overlay
       fetchPlayData(currentHole);
     }
 
-    // Background logic to pull community data for the active Play Map
     async function fetchPlayData(holeNum) {
       playClusters = [];
       if(playOverlaysLayer) playOverlaysLayer.clearLayers();
@@ -442,24 +440,20 @@
       if (!isPlayOverlayActive) return;
 
       playClusters.forEach(cluster => {
+        // STRICTLY ONLY RENDER IF THERE IS PERSONAL DATA
+        if (cluster.myCount === 0) return;
+
         const centerLat = cluster.latSum / cluster.totalCount;
         const centerLng = cluster.lngSum / cluster.totalCount;
         const communityAvg = cluster.globalSthoSum / cluster.totalCount;
-
-        let displayVal = ""; let colorClass = "";
         
-        // Show Personal STHO if you have data here, otherwise fallback to Community STHO
-        if (cluster.myCount > 0) {
-          const myAvg = cluster.mySthoSum / cluster.myCount;
-          displayVal = myAvg.toFixed(1);
-          const diff = myAvg - communityAvg;
-          colorClass = 'stho-average';
-          if (diff < -0.3) colorClass = 'stho-better';
-          else if (diff > 0.3) colorClass = 'stho-worse';
-        } else {
-          displayVal = communityAvg.toFixed(1);
-          colorClass = 'stho-community'; 
-        }
+        const myAvg = cluster.mySthoSum / cluster.myCount;
+        const displayVal = myAvg.toFixed(1);
+        const diff = myAvg - communityAvg;
+        
+        let colorClass = 'stho-average';
+        if (diff < -0.3) colorClass = 'stho-better';
+        else if (diff > 0.3) colorClass = 'stho-worse';
 
         const textIcon = L.divIcon({
           className: 'stho-overlay-wrapper',
@@ -467,7 +461,6 @@
           iconSize: [30, 20], iconAnchor: [15, 10]
         });
         
-        // interactive: false ensures you can click THRU the badge to plot a shot
         L.marker([centerLat, centerLng], { icon: textIcon, interactive: false }).addTo(playOverlaysLayer);
       });
     }
@@ -485,9 +478,9 @@
         const dist = map.distance([lat, lng], [c.latSum / c.totalCount, c.lngSum / c.totalCount]);
         if (dist < minAvgDist) { minAvgDist = dist; closestCluster = c; }
       }
-      if (closestCluster) {
-        if (closestCluster.myCount > 0) return `Avg from here: ${(closestCluster.mySthoSum/closestCluster.myCount).toFixed(1)}`;
-        return `Comm Avg from here: ${(closestCluster.globalSthoSum/closestCluster.totalCount).toFixed(1)}`;
+      // ONLY RETURN PERSONAL DATA
+      if (closestCluster && closestCluster.myCount > 0) {
+        return `Personal Avg: ${(closestCluster.mySthoSum/closestCluster.myCount).toFixed(1)}`;
       }
       return "Plot saved!";
     }
@@ -610,112 +603,4 @@
 
     function setDataView(view) {
       currentDataView = view;
-      const tabs = document.querySelectorAll('.data-tab');
-      tabs[0].classList.toggle('active', view === 'mine');
-      tabs[1].classList.toggle('active', view === 'community');
-      renderDataScreenOverlays(); 
-    }
-
-    function openDataDashboard() {
-      switchScreen('screen-data');
-      if (!dataMap) {
-        dataMap = L.map('data-map-container', { zoomControl: false, minZoom: 16, maxZoom: 21 }).setView([39.9961, -74.2120], 18);
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }).addTo(dataMap);
-        dataOverlaysLayer = L.layerGroup().addTo(dataMap);
-      }
-      loadDataHole(1);
-    }
-
-    async function loadDataHole(holeNum) {
-      currentHole = holeNum;
-      document.getElementById('data-hole-title').textContent = `Hole ${currentHole} ▾`;
-      document.getElementById('data-status-text').textContent = "Crunching community data...";
-      dataOverlaysLayer.clearLayers(); cachedClusters = []; 
-
-      const bounds = await getHoleBounds(currentHole);
-      if(bounds) dataMap.fitBounds(bounds, { padding: [40, 40], animate: true });
-      else dataMap.setView([beyleaData[currentHole].lat, beyleaData[currentHole].lng], 18, { animate: true });
-
-      const { data: globalRounds, error } = await sb.from('rounds')
-        .select(`id, user_id, score, shots(id, lat, lng, created_at)`).eq('hole_number', currentHole);
-
-      if (error || !globalRounds || globalRounds.length === 0) {
-        document.getElementById('data-status-text').textContent = "No community data to display for this hole yet."; return;
-      }
-
-      let allShots = [];
-      globalRounds.forEach(round => {
-        if (!round.shots || round.shots.length === 0) return;
-        const sortedShots = round.shots.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
-        sortedShots.forEach((shot, index) => {
-          allShots.push({ lat: shot.lat, lng: shot.lng, stho: round.score - index, isMine: round.user_id === currentUser.id });
-        });
-      });
-
-      const DISTANCE_THRESHOLD = 15; 
-      allShots.forEach(shot => {
-        let addedToCluster = false;
-        for (let cluster of cachedClusters) {
-          if (dataMap.distance([shot.lat, shot.lng], [cluster.latSum / cluster.totalCount, cluster.lngSum / cluster.totalCount]) <= DISTANCE_THRESHOLD) {
-            cluster.latSum += shot.lat; cluster.lngSum += shot.lng; cluster.globalSthoSum += shot.stho; cluster.totalCount++;
-            if (shot.isMine) { cluster.mySthoSum += shot.stho; cluster.myCount++; }
-            addedToCluster = true; break;
-          }
-        }
-        if (!addedToCluster) cachedClusters.push({ 
-          latSum: shot.lat, lngSum: shot.lng, globalSthoSum: shot.stho, totalCount: 1,
-          mySthoSum: shot.isMine ? shot.stho : 0, myCount: shot.isMine ? 1 : 0
-        });
-      });
-
-      renderDataScreenOverlays();
-    }
-
-    function renderDataScreenOverlays() {
-      dataOverlaysLayer.clearLayers();
-      let displayedZones = 0;
-
-      cachedClusters.forEach(cluster => {
-        const centerLat = cluster.latSum / cluster.totalCount;
-        const centerLng = cluster.lngSum / cluster.totalCount;
-        const communityAvg = cluster.globalSthoSum / cluster.totalCount;
-
-        if (currentDataView === 'mine') {
-          if (cluster.myCount === 0) return; 
-          displayedZones++;
-          const myAvg = cluster.mySthoSum / cluster.myCount;
-          const diff = myAvg - communityAvg;
-          let colorClass = 'stho-average'; 
-          if (diff < -0.3) colorClass = 'stho-better'; 
-          else if (diff > 0.3) colorClass = 'stho-worse'; 
-
-          const textIcon = L.divIcon({
-            className: 'stho-overlay-wrapper',
-            html: `<div class="stho-number ${colorClass}">${myAvg.toFixed(2)}</div>`,
-            iconSize: [40, 24], iconAnchor: [20, 12]
-          });
-          L.marker([centerLat, centerLng], { icon: textIcon }).addTo(dataOverlaysLayer);
-        
-        } else if (currentDataView === 'community') {
-          displayedZones++;
-          const textIcon = L.divIcon({
-            className: 'stho-overlay-wrapper',
-            html: `<div class="stho-number stho-community">${communityAvg.toFixed(2)}</div>`,
-            iconSize: [40, 24], iconAnchor: [20, 12]
-          });
-          L.marker([centerLat, centerLng], { icon: textIcon }).addTo(dataOverlaysLayer);
-        }
-      });
-
-      if (displayedZones === 0 && currentDataView === 'mine') {
-        document.getElementById('data-status-text').textContent = "You haven't logged any shots on this hole yet.";
-      } else if (currentDataView === 'mine') {
-        document.getElementById('data-status-text').textContent = `Showing ${displayedZones} personal zones compared to community averages.`;
-      } else {
-        document.getElementById('data-status-text').textContent = `Showing ${displayedZones} community zones across all players.`;
-      }
-    }
-
-  </script>
-</body>
-</html>
+      const tabs
