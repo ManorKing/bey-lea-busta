@@ -44,6 +44,10 @@
   #map-container { flex-grow: 1; background: #000; width: 100%; z-index: 1; }
   .nav-btn { background: transparent; color: var(--gold); border: 1px solid var(--gold); border-radius: 4px; padding: 5px 15px; font-weight: bold; }
   
+  /* Clickable Hole Info */
+  .hole-info-container { cursor: pointer; padding: 5px; border-radius: 6px; transition: background 0.2s; }
+  .hole-info-container:active { background: var(--navy-light); }
+  
   /* Pins */
   .leaflet-div-icon { background: transparent; border: none; }
   .shot-pin { width: 11px; height: 11px; border: 1.5px solid white; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.9); }
@@ -61,11 +65,17 @@
   .avg-text { font-family: 'DM Mono', monospace; color: var(--green); font-size: 14px; }
   .undo-btn { background: transparent; border: 1px solid var(--muted); color: var(--white); border-radius: 4px; padding: 5px 12px; font-size: 12px; font-weight: bold; }
 
-  /* Lie Selector Modal (NEW) */
-  #lie-modal { display: none; position: absolute; bottom: 0; left: 0; right: 0; background: var(--navy-mid); padding: 20px; border-top-left-radius: 16px; border-top-right-radius: 16px; z-index: 2000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
+  /* Modals (Lie Selector & Jump to Hole) */
+  .bottom-modal { display: none; position: absolute; bottom: 0; left: 0; right: 0; background: var(--navy-mid); padding: 20px; border-top-left-radius: 16px; border-top-right-radius: 16px; z-index: 2000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
   .lie-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
   .lie-btn { padding: 12px; background: var(--navy); border: 1px solid var(--navy-light); color: var(--white); border-radius: 8px; font-weight: bold; }
   .lie-btn:active { background: var(--blue); }
+
+  #hole-jumper-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center; }
+  .jumper-content { background: var(--navy-mid); padding: 20px; border-radius: 12px; width: 90%; max-width: 400px; text-align: center; border: 1px solid var(--navy-light); }
+  .jumper-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 15px; }
+  .jumper-btn { padding: 15px 0; background: var(--navy-light); color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 16px; }
+  .jumper-btn.active { background: var(--green); color: var(--navy); }
 
   /* Score Screen */
   #screen-score { display: none; flex-direction: column; height: 100%; background: var(--navy); overflow-y: auto; }
@@ -110,301 +120,17 @@
 
   <div id="screen-game" style="display: flex;">
     <div class="header-bar">
-      <h2 id="hole-title" style="margin: 0; font-family: 'Syne';">Hole 1</h2>
+      <div class="hole-info-container" onclick="openHoleJumper()">
+        <h2 id="hole-title" style="margin: 0; font-family: 'Syne';">Hole 1 ▾</h2>
+        <div id="hole-details" style="font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace;">Par 4 • HCP 13 • 370 yds</div>
+      </div>
       <button class="nav-btn" onclick="switchScreen('screen-home')">QUIT</button>
     </div>
 
     <div id="map-container"></div>
 
-    <div id="lie-modal">
+    <div id="lie-modal" class="bottom-modal">
       <h3 style="margin: 0 0 5px 0; color: var(--gold);">Select Lie</h3>
       <p style="margin: 0; font-size: 12px; color: var(--muted);">Where is your ball located?</p>
       <div class="lie-grid">
         <button class="lie-btn" onclick="confirmLie('Fairway')">Fairway</button>
-        <button class="lie-btn" onclick="confirmLie('Rough')">Rough</button>
-        <button class="lie-btn" onclick="confirmLie('Sand')">Sand</button>
-        <button class="lie-btn" onclick="confirmLie('Fringe')">Fringe</button>
-        <button class="lie-btn" onclick="confirmLie('Recovery/Tree')">Recovery / Tree</button>
-        <button class="lie-btn" onclick="confirmLie('Penalty')">Penalty</button>
-        <button class="lie-btn" onclick="confirmLie('Mogul')" style="grid-column: span 2;">Mogul</button>
-      </div>
-      <button onclick="cancelLie()" style="width: 100%; margin-top: 15px; padding: 10px; background: transparent; color: var(--red); border: none;">Cancel Plot</button>
-    </div>
-
-    <div class="command-center">
-      <div class="shot-selector" id="shot-selector">
-        <button class="shot-btn active" onclick="setShotType('Tee', this)">TEE</button>
-        <button class="shot-btn" onclick="setShotType('Approach', this)">APP.</button>
-        <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button>
-        <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
-      </div>
-      <div class="status-row">
-        <div id="average-display" class="avg-text">Awaiting Shot Plot...</div>
-        <button class="undo-btn" onclick="undoLastShot()">⟲ Undo</button>
-      </div>
-      <button id="save-hole-btn" class="action-btn" onclick="openScoreScreen()">Enter Score</button>
-    </div>
-  </div>
-
-  <div id="screen-score">
-    <div class="score-header">
-      <button class="back-btn" onclick="switchScreen('screen-game')">Cancel</button>
-      <h3 style="margin: 0; font-family: 'Syne';">Hole <span id="score-hole-title">1</span></h3>
-      <div style="width: 50px;"></div>
-    </div>
-    <div class="score-card-section">
-      <div class="par-info" id="par-yardage-info">Par 4 | 340 Yds</div>
-      <div class="entry-row">
-        <div class="entry-label">Score</div>
-        <div class="number-adjuster">
-          <button class="adj-btn" onclick="adjustValue('score-val', -1)">-</button>
-          <div class="num-display" id="score-val">0</div>
-          <button class="adj-btn" onclick="adjustValue('score-val', 1)">+</button>
-        </div>
-      </div>
-      <div class="entry-row">
-        <div class="entry-label">Putts</div>
-        <div class="number-adjuster">
-          <button class="adj-btn" onclick="adjustValue('putts-val', -1)">-</button>
-          <div class="num-display" id="putts-val">0</div>
-          <button class="adj-btn" onclick="adjustValue('putts-val', 1)">+</button>
-        </div>
-      </div>
-    </div>
-    <div class="bottom-bar">
-      <button class="next-hole-btn" onclick="saveScoreToDB()">SAVE TO DATABASE</button>
-    </div>
-  </div>
-
-  <script>
-    // --- SUPABASE SETUP ---
-    const SUPABASE_URL = 'https://nawebecmrjoyuapwhuaq.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hd2ViZWNtcmpveXVhcHdodWFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY2NjEsImV4cCI6MjA5MDEwMjY2MX0.bKOoBYFDTEw0QYvFmoSuOjcqRioN44OkqgpLfX42sG0';
-    let sb = null;
-    try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch (err) { console.error(err); }
-
-    let currentUser = null;
-
-    // --- COURSE DATA ---
-    const courseData = {
-      1: { par: 4, yards: 340, lat: 39.9961, lng: -74.2120 }, 
-      2: { par: 4, yards: 390, lat: 39.9980, lng: -74.2110 }, 
-      3: { par: 5, yards: 500, lat: 39.9990, lng: -74.2090 },
-      4: { par: 3, yards: 160, lat: 39.9985, lng: -74.2070 }, 
-      5: { par: 4, yards: 380, lat: 39.9970, lng: -74.2060 }, 
-      6: { par: 4, yards: 410, lat: 39.9960, lng: -74.2040 },
-      7: { par: 3, yards: 180, lat: 39.9950, lng: -74.2030 }, 
-      8: { par: 5, yards: 520, lat: 39.9940, lng: -74.2050 }, 
-      9: { par: 4, yards: 400, lat: 39.9955, lng: -74.2080 }
-    };
-
-    // --- UI ROUTER ---
-    function switchScreen(screenId) {
-      ['screen-auth', 'screen-home', 'screen-game', 'screen-score'].forEach(id => {
-        document.getElementById(id).style.display = 'none';
-      });
-      document.getElementById(screenId).style.display = 'flex';
-      if (screenId === 'screen-game' && map) setTimeout(() => map.invalidateSize(), 100);
-    }
-
-    // Check Auth Session on Load
-    window.onload = async () => {
-      if(!sb) return;
-      const { data } = await sb.auth.getSession();
-      if (data.session) {
-        currentUser = data.session.user;
-        document.getElementById('home-user-email').textContent = currentUser.email;
-        switchScreen('screen-home');
-      } else {
-        switchScreen('screen-auth');
-      }
-    };
-
-    // --- AUTH ---
-    let authMode = 'login'; 
-    function switchAuthTab(mode) {
-      authMode = mode;
-      const tabs = document.querySelectorAll('.auth-tab');
-      tabs[0].classList.toggle('active', mode === 'login');
-      tabs[1].classList.toggle('active', mode === 'signup');
-      document.getElementById('auth-submit').textContent = mode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN';
-    }
-
-    async function handleAuth() {
-      const email = document.getElementById('field-email').value;
-      const pass = document.getElementById('field-pass').value;
-      if (!email || !pass) return alert("Please enter credentials.");
-      try {
-        if (authMode === 'signup') {
-          const { error } = await sb.auth.signUp({ email, password: pass });
-          if (error) throw error; alert("Account Created! Please Login."); switchAuthTab('login');
-        } else {
-          const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
-          if (error) throw error;
-          currentUser = data.user;
-          document.getElementById('home-user-email').textContent = currentUser.email;
-          switchScreen('screen-home');
-        }
-      } catch (err) { alert(err.message); }
-    }
-    async function logOut() { await sb.auth.signOut(); currentUser = null; switchScreen('screen-auth'); }
-
-    // --- MAP & GAME LOGIC ---
-    let map = null, markersLayer = null;
-    let currentHole = 1, currentShots = [], activeShotType = 'Tee'; 
-    let pendingPlot = null; // Holds lat/lng while user selects lie
-
-    function startRound() { switchScreen('screen-game'); initMap(); loadHole(1); }
-
-    function initMap() {
-      if (map) return; 
-      map = L.map('map-container', { zoomControl: false, minZoom: 16, maxZoom: 21 }).setView([39.9961, -74.2120], 18);
-      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }).addTo(map);
-      markersLayer = L.layerGroup().addTo(map);
-      map.on('click', handleMapTap);
-    }
-
-    function loadHole(holeNum) {
-      currentHole = holeNum;
-      const holeInfo = courseData[currentHole];
-      document.getElementById('hole-title').textContent = `Hole ${currentHole}`;
-      
-      // Auto-Center using previous data if available
-      const savedBounds = localStorage.getItem(`beylea_hole_${currentHole}_bounds`);
-      if (savedBounds && map) {
-        const bd = JSON.parse(savedBounds);
-        map.fitBounds(L.latLngBounds([bd.tee.lat, bd.tee.lng], [bd.green.lat, bd.green.lng]), { padding: [40, 40] });
-      } else if (map && holeInfo) {
-        map.setView([holeInfo.lat, holeInfo.lng], 18);
-      }
-      
-      currentShots = []; markersLayer.clearLayers();
-      document.getElementById('average-display').textContent = "Awaiting Shot Plot...";
-      setShotType('Tee', document.querySelectorAll('.shot-btn')[0]);
-    }
-
-    function setShotType(type, btn) {
-      activeShotType = type;
-      document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-    }
-
-    function handleMapTap(event) {
-      if (activeShotType === 'Tee' && currentShots.some(s => s.type === 'Tee')) return alert("Tee shot already plotted.");
-      
-      const lat = event.latlng.lat, lng = event.latlng.lng;
-
-      // If Approach or Chip, trigger the Lie Modal
-      if (activeShotType === 'Approach' || activeShotType === 'Chip') {
-        pendingPlot = { lat, lng };
-        document.getElementById('lie-modal').style.display = 'block';
-      } else {
-        // Tee or Putt implies its own lie (Tee box / Green)
-        plotPin(lat, lng, activeShotType === 'Tee' ? 'Tee Box' : 'Green');
-      }
-    }
-
-    function confirmLie(lieType) {
-      if (pendingPlot) {
-        plotPin(pendingPlot.lat, pendingPlot.lng, lieType);
-        pendingPlot = null;
-      }
-      document.getElementById('lie-modal').style.display = 'none';
-    }
-
-    function cancelLie() {
-      pendingPlot = null;
-      document.getElementById('lie-modal').style.display = 'none';
-    }
-
-    function plotPin(lat, lng, lieType) {
-      const customIcon = L.divIcon({
-        className: 'custom-pin-wrapper',
-        html: `<div class="shot-pin pin-${activeShotType}"></div>`,
-        iconSize: [11, 11], iconAnchor: [5.5, 5.5] 
-      });
-
-      const marker = L.marker([lat, lng], { icon: customIcon, draggable: true }).addTo(markersLayer);
-      
-      const shotData = { type: activeShotType, lie: lieType, lat: lat, lng: lng, marker: marker };
-      currentShots.push(shotData);
-
-      marker.on('dragend', function(e) {
-        const newPos = marker.getLatLng();
-        shotData.lat = newPos.lat; shotData.lng = newPos.lng;
-      });
-
-      document.getElementById('average-display').textContent = `Plot saved! Total Shots: ${currentShots.length}`;
-    }
-
-    function undoLastShot() {
-      if (currentShots.length === 0) return;
-      const last = currentShots.pop();
-      markersLayer.removeLayer(last.marker);
-      document.getElementById('average-display').textContent = currentShots.length > 0 ? `Plot saved! Total Shots: ${currentShots.length}` : "Awaiting Shot Plot...";
-    }
-
-    // --- SCORE ENTRY & DB SAVE ---
-    function openScoreScreen() {
-      document.getElementById('score-hole-title').textContent = currentHole;
-      const totalScore = currentShots.length > 0 ? currentShots.length : courseData[currentHole].par;
-      const totalPutts = currentShots.filter(s => s.type === 'Putt').length;
-      document.getElementById('score-val').textContent = totalScore;
-      document.getElementById('putts-val').textContent = totalPutts;
-      switchScreen('screen-score');
-    }
-
-    function adjustValue(id, change) {
-      const el = document.getElementById(id);
-      el.textContent = Math.max(0, parseInt(el.textContent) + change);
-    }
-
-    async function saveScoreToDB() {
-      if (!currentUser) return alert("Must be logged in.");
-      const btn = document.querySelector('.next-hole-btn');
-      btn.textContent = "SAVING..."; btn.disabled = true;
-
-      // 1. Learn Bounds for next time
-      const teeShot = currentShots.find(s => s.type === 'Tee');
-      const finalPutt = currentShots.slice().reverse().find(s => s.type === 'Putt');
-      if (teeShot && finalPutt) {
-        localStorage.setItem(`beylea_hole_${currentHole}_bounds`, JSON.stringify({
-          tee: { lat: teeShot.lat, lng: teeShot.lng }, green: { lat: finalPutt.lat, lng: finalPutt.lng }
-        }));
-      }
-
-      try {
-        // 2. Insert into `rounds` table
-        const score = parseInt(document.getElementById('score-val').textContent);
-        const putts = parseInt(document.getElementById('putts-val').textContent);
-
-        const { data: roundData, error: roundErr } = await sb.from('rounds').insert([{
-          user_id: currentUser.id, hole_number: currentHole, score: score, putts: putts, played_at: new Date().toISOString()
-        }]).select().single();
-        
-        if (roundErr) throw roundErr;
-
-        // 3. Insert into `shots` table (Crucial for Strokes Gained & Live Watch!)
-        if (currentShots.length > 0) {
-          const dbShots = currentShots.map(s => ({
-            user_id: currentUser.id, round_id: roundData.id, hole_number: currentHole,
-            shot_type: s.type, lie: s.lie, lat: s.lat, lng: s.lng
-          }));
-          const { error: shotErr } = await sb.from('shots').insert(dbShots);
-          if (shotErr) throw shotErr;
-        }
-
-        if (currentHole < 9) {
-          switchScreen('screen-game'); loadHole(currentHole + 1);
-        } else {
-          alert("Round Complete!"); switchScreen('screen-home');
-        }
-      } catch (err) {
-        alert("Error saving: " + err.message);
-      }
-      
-      btn.textContent = "SAVE TO DATABASE"; btn.disabled = false;
-    }
-  </script>
-</body>
-</html>
