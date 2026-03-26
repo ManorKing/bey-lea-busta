@@ -55,6 +55,7 @@
   .pin-Approach { background-color: var(--blue); }
   .pin-Chip { background-color: var(--gold); }
   .pin-Putt { background-color: var(--green); }
+  .staged-glow { box-shadow: 0 0 10px 3px var(--white); } /* Highlights unconfirmed pins */
 
   /* Command Center */
   .command-center { background: var(--navy-mid); border-top: 1px solid var(--navy-light); z-index: 1000; display: flex; flex-direction: column; padding: 10px 15px 20px 15px; gap: 10px; }
@@ -65,7 +66,7 @@
   .avg-text { font-family: 'DM Mono', monospace; color: var(--green); font-size: 14px; }
   .undo-btn { background: transparent; border: 1px solid var(--muted); color: var(--white); border-radius: 4px; padding: 5px 12px; font-size: 12px; font-weight: bold; }
 
-  /* Modals (Lie Selector & Jump to Hole) */
+  /* Modals */
   .bottom-modal { display: none; position: absolute; bottom: 0; left: 0; right: 0; background: var(--navy-mid); padding: 20px; border-top-left-radius: 16px; border-top-right-radius: 16px; z-index: 2000; box-shadow: 0 -5px 20px rgba(0,0,0,0.5); }
   .lie-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
   .lie-btn { padding: 12px; background: var(--navy); border: 1px solid var(--navy-light); color: var(--white); border-radius: 8px; font-weight: bold; }
@@ -94,9 +95,9 @@
 </head>
 <body>
 
-  <div id="screen-auth" style="display: none;">
+  <div id="screen-auth" style="display: flex;">
     <h1 style="font-family: 'Syne'; color: var(--green); font-size: 36px; text-align: center; margin-bottom: 5px;">BEY LEA<br>BUSTA</h1>
-    <p style="color: var(--muted); margin-bottom: 30px;">Cause the BUSTA kept me outta handcuffs</p>
+    <p style="color: var(--muted); margin-bottom: 30px;">cause the BUSTA kept me outta handcuffs</p>
     <div class="auth-tabs">
       <button class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</button>
       <button class="auth-tab" onclick="switchAuthTab('signup')">SIGN UP</button>
@@ -118,13 +119,13 @@
     </div>
   </div>
 
-  <div id="screen-game" style="display: flex;">
+  <div id="screen-game" style="display: none;">
     <div class="header-bar">
       <div class="hole-info-container" onclick="openHoleJumper()">
         <h2 id="hole-title" style="margin: 0; font-family: 'Syne';">Hole 1 ▾</h2>
         <div id="hole-details" style="font-size: 12px; color: var(--muted); font-family: 'DM Mono', monospace;">Par 4 • HCP 13 • 370 yds</div>
       </div>
-      <button class="nav-btn" onclick="switchScreen('screen-home')">QUIT</button>
+      <button class="nav-btn" onclick="confirmQuit()">QUIT</button>
     </div>
 
     <div id="map-container"></div>
@@ -134,3 +135,404 @@
       <p style="margin: 0; font-size: 12px; color: var(--muted);">Where is your ball located?</p>
       <div class="lie-grid">
         <button class="lie-btn" onclick="confirmLie('Fairway')">Fairway</button>
+        <button class="lie-btn" onclick="confirmLie('Rough')">Rough</button>
+        <button class="lie-btn" onclick="confirmLie('Sand')">Sand</button>
+        <button class="lie-btn" onclick="confirmLie('Fringe')">Fringe</button>
+        <button class="lie-btn" onclick="confirmLie('Recovery/Tree')">Recovery / Tree</button>
+        <button class="lie-btn" onclick="confirmLie('Penalty')">Penalty</button>
+        <button class="lie-btn" onclick="confirmLie('Mogul')" style="grid-column: span 2;">Mogul</button>
+      </div>
+      <button onclick="cancelLie()" style="width: 100%; margin-top: 15px; padding: 10px; background: transparent; color: var(--red); border: none;">Cancel Plot</button>
+    </div>
+
+    <div id="hole-jumper-modal">
+      <div class="jumper-content">
+        <h3 style="color: white; margin-top: 0; font-family: 'Syne';">Jump to Hole</h3>
+        <div id="hole-grid" class="jumper-grid"></div>
+        <button onclick="closeHoleJumper()" style="margin-top: 20px; width: 100%; padding: 12px; background: var(--red); color: white; border: none; border-radius: 8px; font-weight: bold;">Cancel</button>
+      </div>
+    </div>
+
+    <div class="command-center">
+      <div class="shot-selector" id="shot-selector">
+        <button class="shot-btn" onclick="setShotType('Tee', this)">TEE</button>
+        <button class="shot-btn" onclick="setShotType('Approach', this)">APP.</button>
+        <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button>
+        <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
+      </div>
+      <button id="confirm-shot-btn" class="action-btn" style="display: none; background: var(--green); padding: 10px;" onclick="commitStagedShot()">CONFIRM SHOT</button>
+      <div class="status-row">
+        <div id="average-display" class="avg-text">Awaiting Shot Plot...</div>
+        <button class="undo-btn" onclick="undoLastShot()">⟲ Undo</button>
+      </div>
+      <button id="save-hole-btn" class="action-btn" onclick="openScoreScreen()">Enter Score</button>
+    </div>
+  </div>
+
+  <div id="screen-score" style="display: none;">
+    <div class="score-header">
+      <button class="back-btn" onclick="switchScreen('screen-game')">Cancel</button>
+      <h3 style="margin: 0; font-family: 'Syne';">Hole <span id="score-hole-title">1</span></h3>
+      <div style="width: 50px;"></div>
+    </div>
+    <div class="score-card-section">
+      <div class="par-info" id="par-yardage-info">Par 4 | 340 Yds</div>
+      <div class="entry-row">
+        <div class="entry-label">Score</div>
+        <div class="number-adjuster">
+          <button class="adj-btn" onclick="adjustValue('score-val', -1)">-</button>
+          <div class="num-display" id="score-val">0</div>
+          <button class="adj-btn" onclick="adjustValue('score-val', 1)">+</button>
+        </div>
+      </div>
+      <div class="entry-row">
+        <div class="entry-label">Putts</div>
+        <div class="number-adjuster">
+          <button class="adj-btn" onclick="adjustValue('putts-val', -1)">-</button>
+          <div class="num-display" id="putts-val">0</div>
+          <button class="adj-btn" onclick="adjustValue('putts-val', 1)">+</button>
+        </div>
+      </div>
+    </div>
+    <div class="bottom-bar">
+      <button class="next-hole-btn" onclick="saveScoreToDB()">SAVE TO DATABASE</button>
+    </div>
+  </div>
+
+  <script>
+    // --- SUPABASE SETUP ---
+    const SUPABASE_URL = 'https://nawebecmrjoyuapwhuaq.supabase.co';
+    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hd2ViZWNtcmpveXVhcHdodWFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY2NjEsImV4cCI6MjA5MDEwMjY2MX0.bKOoBYFDTEw0QYvFmoSuOjcqRioN44OkqgpLfX42sG0';
+    let sb = null;
+    try { sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch (err) { console.error(err); }
+
+    let currentUser = null;
+
+    // --- FULL 18 HOLE COURSE DATA (BEY LEA) ---
+    const beyleaData = {
+      1: { par: 4, hcp: 13, yards: 370, lat: 39.9961, lng: -74.2120 },
+      2: { par: 5, hcp: 9, yards: 466, lat: 39.9980, lng: -74.2110 },
+      3: { par: 4, hcp: 7, yards: 365, lat: 39.9990, lng: -74.2090 },
+      4: { par: 3, hcp: 15, yards: 160, lat: 39.9985, lng: -74.2070 },
+      5: { par: 4, hcp: 1, yards: 442, lat: 39.9970, lng: -74.2060 },
+      6: { par: 4, hcp: 17, yards: 329, lat: 39.9960, lng: -74.2040 },
+      7: { par: 5, hcp: 3, yards: 547, lat: 39.9950, lng: -74.2030 },
+      8: { par: 3, hcp: 5, yards: 184, lat: 39.9940, lng: -74.2050 },
+      9: { par: 4, hcp: 11, yards: 389, lat: 39.9955, lng: -74.2080 },
+      10: { par: 4, hcp: 10, yards: 392, lat: 39.9930, lng: -74.2120 },
+      11: { par: 4, hcp: 18, yards: 337, lat: 39.9920, lng: -74.2100 },
+      12: { par: 3, hcp: 12, yards: 194, lat: 39.9910, lng: -74.2080 },
+      13: { par: 4, hcp: 16, yards: 354, lat: 39.9900, lng: -74.2060 },
+      14: { par: 4, hcp: 4, yards: 425, lat: 39.9890, lng: -74.2040 },
+      15: { par: 5, hcp: 8, yards: 499, lat: 39.9880, lng: -74.2020 },
+      16: { par: 4, hcp: 2, yards: 386, lat: 39.9895, lng: -74.2000 },
+      17: { par: 3, hcp: 14, yards: 182, lat: 39.9915, lng: -74.2020 },
+      18: { par: 4, hcp: 6, yards: 344, lat: 39.9935, lng: -74.2040 }
+    };
+    const TOTAL_HOLES = 18;
+
+    // --- UI ROUTER ---
+    function switchScreen(screenId) {
+      ['screen-auth', 'screen-home', 'screen-game', 'screen-score'].forEach(id => {
+        document.getElementById(id).style.display = 'none';
+      });
+      document.getElementById(screenId).style.display = 'flex';
+      if (screenId === 'screen-game' && map) setTimeout(() => map.invalidateSize(), 100);
+    }
+
+    // Check Auth
+    window.onload = async () => {
+      if(!sb) return;
+      try {
+        const { data, error } = await sb.auth.getSession();
+        if (error) throw error;
+        
+        if (data && data.session) {
+          currentUser = data.session.user;
+          document.getElementById('home-user-email').textContent = currentUser.email;
+          switchScreen('screen-home');
+        } else {
+          switchScreen('screen-auth');
+        }
+      } catch (err) {
+        switchScreen('screen-auth');
+      }
+    };
+
+    // --- AUTH ---
+    let authMode = 'login'; 
+    function switchAuthTab(mode) {
+      authMode = mode;
+      const tabs = document.querySelectorAll('.auth-tab');
+      tabs[0].classList.toggle('active', mode === 'login');
+      tabs[1].classList.toggle('active', mode === 'signup');
+      document.getElementById('auth-submit').textContent = mode === 'signup' ? 'CREATE ACCOUNT' : 'LOGIN';
+    }
+
+    async function handleAuth() {
+      const email = document.getElementById('field-email').value;
+      const pass = document.getElementById('field-pass').value;
+      if (!email || !pass) return alert("Please enter credentials.");
+      try {
+        if (authMode === 'signup') {
+          const { error } = await sb.auth.signUp({ email, password: pass });
+          if (error) throw error; alert("Account Created! Please Login."); switchAuthTab('login');
+        } else {
+          const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+          if (error) throw error;
+          currentUser = data.user;
+          document.getElementById('home-user-email').textContent = currentUser.email;
+          switchScreen('screen-home');
+        }
+      } catch (err) { alert(err.message); }
+    }
+    async function logOut() { await sb.auth.signOut(); currentUser = null; switchScreen('screen-auth'); }
+
+    // --- MAP & GAME LOGIC ---
+    let map = null, markersLayer = null;
+    let currentHole = 1, currentShots = [], activeShotType = null; 
+    let pendingPlot = null; // Used for lie selection routing
+    let stagedMarker = null; // The temporary visual pin
+    let stagedShotData = null; // The temporary data waiting for confirm
+
+    function startRound() { switchScreen('screen-game'); initMap(); loadHole(1); }
+
+    function confirmQuit() {
+      if(confirm("Are you sure you want to quit? Unsaved data for this hole will be lost.")) {
+        switchScreen('screen-home');
+      }
+    }
+
+    function initMap() {
+      if (map) return; 
+      map = L.map('map-container', { zoomControl: false, minZoom: 16, maxZoom: 21 }).setView([39.9961, -74.2120], 18);
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '&copy; Esri' }).addTo(map);
+      markersLayer = L.layerGroup().addTo(map);
+      map.on('click', handleMapTap);
+    }
+
+    function openHoleJumper() {
+      const grid = document.getElementById('hole-grid');
+      grid.innerHTML = ''; 
+      for(let i = 1; i <= TOTAL_HOLES; i++) {
+        const btn = document.createElement('button');
+        btn.innerText = i;
+        btn.className = `jumper-btn ${i === currentHole ? 'active' : ''}`;
+        btn.onclick = () => { closeHoleJumper(); loadHole(i); };
+        grid.appendChild(btn);
+      }
+      document.getElementById('hole-jumper-modal').style.display = 'flex';
+    }
+    function closeHoleJumper() { document.getElementById('hole-jumper-modal').style.display = 'none'; }
+
+    async function centerMap(holeNum) {
+      const holeInfo = beyleaData[holeNum];
+      const savedBounds = localStorage.getItem(`beylea_hole_${holeNum}_bounds`);
+      
+      if (savedBounds && map) {
+        const bd = JSON.parse(savedBounds);
+        map.fitBounds(L.latLngBounds([bd.tee.lat, bd.tee.lng], [bd.green.lat, bd.green.lng]), { padding: [40, 40], animate: true });
+      } else if (map && sb) {
+        const { data, error } = await sb.from('shots').select('lat, lng').eq('hole_number', holeNum);
+        if (data && data.length > 1) { 
+          const lats = data.map(s => s.lat);
+          const lngs = data.map(s => s.lng);
+          const bounds = L.latLngBounds( [Math.min(...lats), Math.min(...lngs)], [Math.max(...lats), Math.max(...lngs)] );
+          map.fitBounds(bounds, { padding: [40, 40], animate: true });
+        } else if (data && data.length === 1) {
+          map.setView([data[0].lat, data[0].lng], 19, { animate: true });
+        } else if (holeInfo && holeInfo.lat) {
+          map.setView([holeInfo.lat, holeInfo.lng], 18, { animate: true });
+        }
+      }
+    }
+
+    function loadHole(holeNum) {
+      currentHole = holeNum;
+      const holeInfo = beyleaData[currentHole];
+      
+      document.getElementById('hole-title').textContent = `Hole ${currentHole} ▾`;
+      document.getElementById('hole-details').textContent = `Par ${holeInfo.par} • HCP ${holeInfo.hcp} • ${holeInfo.yards} yds`;
+      document.getElementById('save-hole-btn').textContent = `Enter Hole ${currentHole} Score`;
+      
+      centerMap(currentHole);
+      
+      // Reset Arrays and UI states
+      currentShots = []; 
+      markersLayer.clearLayers();
+      if (stagedMarker) { stagedMarker = null; stagedShotData = null; }
+      document.getElementById('confirm-shot-btn').style.display = 'none';
+      document.getElementById('average-display').textContent = "Select a shot type below to begin.";
+      
+      // Deselect all buttons initially
+      activeShotType = null;
+      document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function setShotType(type, btn) {
+      activeShotType = type;
+      document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    }
+
+    function handleMapTap(event) {
+      if (!activeShotType) return alert("Please select a shot type (Tee, App, etc.) first!");
+      
+      // The Golden Rule: Must plot Tee first
+      const hasTee = currentShots.some(s => s.type === 'Tee');
+      if (activeShotType !== 'Tee' && !hasTee && (!stagedShotData || stagedShotData.type !== 'Tee')) {
+        return alert("You must plot your Tee shot first for this hole!");
+      }
+
+      if (activeShotType === 'Tee' && hasTee) return alert("Tee shot already locked in.");
+      
+      const lat = event.latlng.lat, lng = event.latlng.lng;
+
+      if (activeShotType === 'Approach' || activeShotType === 'Chip') {
+        pendingPlot = { lat, lng };
+        document.getElementById('lie-modal').style.display = 'block';
+      } else {
+        stagePin(lat, lng, activeShotType === 'Tee' ? 'Tee Box' : 'Green');
+      }
+    }
+
+    function confirmLie(lieType) {
+      if (pendingPlot) { stagePin(pendingPlot.lat, pendingPlot.lng, lieType); pendingPlot = null; }
+      document.getElementById('lie-modal').style.display = 'none';
+    }
+
+    function cancelLie() { pendingPlot = null; document.getElementById('lie-modal').style.display = 'none'; }
+
+    // Renders the pin but waits for confirmation
+    function stagePin(lat, lng, lieType) {
+      if (stagedMarker) markersLayer.removeLayer(stagedMarker); 
+
+      const customIcon = L.divIcon({
+        className: 'custom-pin-wrapper',
+        html: `<div class="shot-pin pin-${activeShotType} staged-glow"></div>`, // Notice the glow class
+        iconSize: [11, 11], iconAnchor: [5.5, 5.5] 
+      });
+
+      stagedMarker = L.marker([lat, lng], { icon: customIcon, draggable: true }).addTo(markersLayer);
+      stagedShotData = { type: activeShotType, lie: lieType, lat: lat, lng: lng, marker: stagedMarker };
+
+      stagedMarker.on('dragend', function(e) {
+        const newPos = stagedMarker.getLatLng();
+        stagedShotData.lat = newPos.lat; stagedShotData.lng = newPos.lng;
+      });
+
+      document.getElementById('confirm-shot-btn').style.display = 'block';
+      document.getElementById('average-display').textContent = "Drag pin to adjust, then click Confirm.";
+    }
+
+    // Locks the staged pin into the array
+    function commitStagedShot() {
+      if (!stagedShotData) return;
+      
+      // Remove the glow
+      const finalIcon = L.divIcon({
+        className: 'custom-pin-wrapper',
+        html: `<div class="shot-pin pin-${stagedShotData.type}"></div>`,
+        iconSize: [11, 11], iconAnchor: [5.5, 5.5] 
+      });
+      stagedMarker.setIcon(finalIcon);
+      stagedMarker.dragging.disable(); // Optional: stop them from moving it after lock
+      
+      // Save to array
+      currentShots.push(stagedShotData);
+      stagedMarker = null;
+      stagedShotData = null;
+      
+      // Reset UI
+      document.getElementById('confirm-shot-btn').style.display = 'none';
+      document.getElementById('average-display').textContent = `Plot saved! Total Shots: ${currentShots.length}`;
+      
+      activeShotType = null;
+      document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
+    }
+
+    function undoLastShot() {
+      // First, check if there is a staged shot waiting to be cleared
+      if (stagedMarker) {
+        markersLayer.removeLayer(stagedMarker);
+        stagedMarker = null; stagedShotData = null;
+        document.getElementById('confirm-shot-btn').style.display = 'none';
+        document.getElementById('average-display').textContent = currentShots.length > 0 ? `Plot saved! Total Shots: ${currentShots.length}` : "Select a shot type below to begin.";
+        return;
+      }
+      
+      // Otherwise, pop the last locked shot
+      if (currentShots.length === 0) return;
+      const last = currentShots.pop();
+      markersLayer.removeLayer(last.marker);
+      document.getElementById('average-display').textContent = currentShots.length > 0 ? `Plot saved! Total Shots: ${currentShots.length}` : "Select a shot type below to begin.";
+    }
+
+    // --- SCORE ENTRY & DB SAVE ---
+    function openScoreScreen() {
+      // Clean up any un-confirmed pins if they jump straight to scoring
+      if (stagedMarker) { markersLayer.removeLayer(stagedMarker); stagedMarker = null; stagedShotData = null; document.getElementById('confirm-shot-btn').style.display = 'none'; }
+
+      document.getElementById('score-hole-title').textContent = currentHole;
+      const holeInfo = beyleaData[currentHole];
+      document.getElementById('par-yardage-info').textContent = `Par ${holeInfo.par} | ${holeInfo.yards} Yds`;
+      
+      const totalScore = currentShots.length > 0 ? currentShots.length : holeInfo.par;
+      const totalPutts = currentShots.filter(s => s.type === 'Putt').length;
+      document.getElementById('score-val').textContent = totalScore;
+      document.getElementById('putts-val').textContent = totalPutts;
+      
+      switchScreen('screen-score');
+    }
+
+    function adjustValue(id, change) {
+      const el = document.getElementById(id);
+      el.textContent = Math.max(0, parseInt(el.textContent) + change);
+    }
+
+    async function saveScoreToDB() {
+      if (!currentUser) return alert("Must be logged in.");
+      const btn = document.querySelector('.next-hole-btn');
+      btn.textContent = "SAVING..."; btn.disabled = true;
+
+      const teeShot = currentShots.find(s => s.type === 'Tee');
+      const finalPutt = currentShots.slice().reverse().find(s => s.type === 'Putt');
+      if (teeShot && finalPutt) {
+        localStorage.setItem(`beylea_hole_${currentHole}_bounds`, JSON.stringify({
+          tee: { lat: teeShot.lat, lng: teeShot.lng }, green: { lat: finalPutt.lat, lng: finalPutt.lng }
+        }));
+      }
+
+      try {
+        const score = parseInt(document.getElementById('score-val').textContent);
+        const putts = parseInt(document.getElementById('putts-val').textContent);
+
+        const { data: roundData, error: roundErr } = await sb.from('rounds').insert([{
+          user_id: currentUser.id, hole_number: currentHole, score: score, putts: putts, played_at: new Date().toISOString()
+        }]).select().single();
+        
+        if (roundErr) throw roundErr;
+
+        if (currentShots.length > 0) {
+          const dbShots = currentShots.map(s => ({
+            user_id: currentUser.id, round_id: roundData.id, hole_number: currentHole,
+            shot_type: s.type, lie: s.lie, lat: s.lat, lng: s.lng
+          }));
+          const { error: shotErr } = await sb.from('shots').insert(dbShots);
+          if (shotErr) throw shotErr;
+        }
+
+        if (currentHole < TOTAL_HOLES) {
+          switchScreen('screen-game'); loadHole(currentHole + 1);
+        } else {
+          alert("Round Complete!"); switchScreen('screen-home');
+        }
+      } catch (err) {
+        alert("Error saving: " + err.message);
+      }
+      
+      btn.textContent = "SAVE TO DATABASE"; btn.disabled = false;
+    }
+  </script>
+</body>
+</html>
