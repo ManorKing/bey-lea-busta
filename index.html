@@ -11,114 +11,96 @@
 <meta name="apple-mobile-web-app-title" content="AutoCaddy">
 <link rel="apple-touch-icon" href="icon-192.png">
 
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;800&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
   :root { 
-    /* The Fortune 500 AutoCaddy Theme */
-    --bg-main: #FFFFFF; 
-    --bg-sub: #F3F4F6;
-    --text-main: #111827; 
-    --text-muted: #6B7280; 
-    --champ-blue: #003876; 
-    --champ-blue-light: #0055A4;
-    --trophy-gold: #D4AF37; 
-    --accent-red: #EF4444; 
-    --accent-green: #10B981; 
-    --border-light: #E5E7EB;
+    var(--bg-main): #FFFFFF; var(--bg-sub): #F3F4F6; var(--text-main): #111827; var(--text-muted): #6B7280; 
+    var(--champ-blue): #003876; var(--champ-blue-light): #0055A4; var(--trophy-gold): #D4AF37; 
+    var(--accent-red): #EF4444; var(--accent-green): #10B981; var(--border-light): #E5E7EB;
   }
-  
-  body { margin:0; padding:0; font-family:'DM Sans',sans-serif; background:var(--bg-sub); color:var(--text-main); display:flex; flex-direction:column; height:100vh; overflow:hidden; }
+  body { margin:0; padding:0; font-family:'DM Sans',sans-serif; background:#F3F4F6; color:#111827; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
   button { cursor:pointer; }
   
-  /* Inputs & Buttons */
   .auth-input, .action-btn, .menu-btn { width:100%; max-width:300px; padding:15px; border-radius:8px; border:none; font-size:16px; box-sizing:border-box; }
-  .auth-input { background:var(--bg-main); color:var(--text-main); border:1px solid var(--border-light); margin-bottom:15px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
-  .auth-input::placeholder { color: var(--text-muted); }
+  .auth-input { background:#FFFFFF; color:#111827; border:1px solid #E5E7EB; margin-bottom:15px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
+  .action-btn { background:#003876; color:#FFFFFF; font-family:'Syne'; font-weight:800; letter-spacing: 0.5px; box-shadow: 0 4px 6px -1px rgba(0,56,118,0.2); transition: all 0.2s; }
   
-  .action-btn { background:var(--champ-blue); color:var(--bg-main); font-family:'Syne'; font-weight:800; letter-spacing: 0.5px; box-shadow: 0 4px 6px -1px rgba(0,56,118,0.2); transition: all 0.2s; }
-  .action-btn:active { transform: translateY(2px); box-shadow: 0 2px 4px -1px rgba(0,56,118,0.2); }
+  .header-bar { padding:15px; display:flex; justify-content:space-between; align-items:center; background:#003876; color:#FFFFFF; z-index:1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .nav-btn { background:transparent; color:#D4AF37; border:1px solid #D4AF37; border-radius:4px; padding:5px 15px; font-weight:bold; }
   
-  /* Layout & Navigation */
-  .header-bar { padding:15px; display:flex; justify-content:space-between; align-items:center; background:var(--champ-blue); color:var(--bg-main); z-index:1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-  .nav-btn { background:transparent; color:var(--trophy-gold); border:1px solid var(--trophy-gold); border-radius:4px; padding:5px 15px; font-weight:bold; }
+  .auth-tabs { display:flex; margin-bottom:20px; background:#FFFFFF; border-radius:8px; border: 1px solid #E5E7EB; overflow: hidden;}
+  .auth-tab { background:transparent; color:#6B7280; border:none; padding:12px 20px; font-family:'Syne'; font-weight:700; flex:1; }
+  .auth-tab.active { background:#003876; color:#FFFFFF; }
   
-  /* Tabs */
-  .auth-tabs { display:flex; margin-bottom:20px; background:var(--bg-main); border-radius:8px; border: 1px solid var(--border-light); overflow: hidden;}
-  .auth-tab { background:transparent; color:var(--text-muted); border:none; padding:12px 20px; font-family:'Syne'; font-weight:700; flex:1; }
-  .auth-tab.active { background:var(--champ-blue); color:var(--bg-main); }
+  .home-menu { flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:20px; background:#FFFFFF; }
+  .menu-btn { padding:20px; border-radius:12px; background:#FFFFFF; color:#003876; font-family:'Syne'; font-weight:800; font-size:18px; border:1px solid #E5E7EB; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+  .menu-btn.primary { background:#003876; color:#FFFFFF; border:none; }
   
-  /* Menus & Cards */
-  .home-menu { flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:20px; background:var(--bg-main); }
-  .menu-btn { padding:20px; border-radius:12px; background:var(--bg-main); color:var(--champ-blue); font-family:'Syne'; font-weight:800; font-size:18px; border:1px solid var(--border-light); box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
-  .menu-btn.primary { background:var(--champ-blue); color:var(--bg-main); border:none; }
+  .recap-card, .friend-card { background:#FFFFFF; border:1px solid #E5E7EB; border-radius:12px; padding:15px; margin-bottom:12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
   
-  .recap-card, .friend-card { background:var(--bg-main); border:1px solid var(--border-light); border-radius:12px; padding:15px; margin-bottom:12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
-  
-  /* Screens */
   #screen-auth, #screen-home, #screen-game, #screen-data, #screen-score, #screen-recap-list, #screen-recap-map, #screen-social { display:none; flex-direction:column; height:100%; position:relative; }
-  #screen-auth { align-items:center; justify-content:center; padding:20px; background: var(--bg-main); }
+  #screen-auth { align-items:center; justify-content:center; padding:20px; background: #FFFFFF; }
   #map-container, #recap-map-container { flex-grow:1; background:#E5E3DF; width:100%; z-index:1; box-shadow: inset 0px 5px 15px rgba(0,0,0,0.1); }
   
-  /* Map Pins */
+  /* Map Pins & Decimal Analytics */
   .leaflet-div-icon { background:transparent; border:none; }
   .shot-pin { width:12px; height:12px; border:2px solid white; border-radius:50%; box-shadow:0 2px 4px rgba(0,0,0,0.6); }
-  .pin-Tee { background-color:var(--champ-blue-light); } .pin-Approach { background-color:var(--text-main); } .pin-Chip { background-color:var(--trophy-gold); } .pin-Putt { background-color:var(--accent-green); }
-  .pin-Penalty { background-color:var(--accent-red); border-color:var(--bg-main); } 
+  .pin-Tee { background-color:#0055A4; } .pin-Approach { background-color:#111827; } .pin-Chip { background-color:#D4AF37; } .pin-Putt { background-color:#10B981; }
+  .pin-Penalty { background-color:#EF4444; border-color:#FFFFFF; } 
+  .stho-decimal-icon { background:transparent; border:none; pointer-events: none; }
   
-  /* Game Controls & Modals */
-  .command-center { background:var(--bg-main); border-top:1px solid var(--border-light); z-index:1000; display:flex; flex-direction:column; padding:15px; gap:12px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
+  /* Overlays Menu */
+  .overlay-panel { position:absolute; top:70px; right:15px; z-index:1000; background:rgba(255,255,255,0.95); border-radius:12px; padding:8px; box-shadow:0 4px 15px rgba(0,0,0,0.15); border:1px solid #E5E7EB; display:flex; flex-direction:column; gap:6px; backdrop-filter: blur(4px); }
+  .layer-btn { background:transparent; border:1px solid transparent; color:#6B7280; font-size:10px; font-weight:bold; font-family:'DM Mono'; padding:6px 10px; border-radius:6px; text-align:left; transition:0.2s; }
+  .layer-btn.active { background:#003876; color:#FFFFFF; }
+
+  .command-center { background:#FFFFFF; border-top:1px solid #E5E7EB; z-index:1000; display:flex; flex-direction:column; padding:15px; gap:12px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
   .shot-selector { display:flex; gap:5px; } 
-  .shot-btn { flex:1; padding:12px 0; background:var(--bg-sub); color:var(--text-muted); border:1px solid var(--border-light); border-radius:6px; font-weight:bold; font-size: 13px; transition: 0.2s; }
-  .shot-btn.active { background:var(--champ-blue); color:var(--bg-main); border-color:var(--champ-blue); box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
+  .shot-btn { flex:1; padding:12px 0; background:#F3F4F6; color:#6B7280; border:1px solid #E5E7EB; border-radius:6px; font-weight:bold; font-size: 13px; transition: 0.2s; }
+  .shot-btn.active { background:#003876; color:#FFFFFF; border-color:#003876; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
   
-  .bottom-modal { display:none; position:absolute; bottom:0; left:0; right:0; background:var(--bg-main); padding:20px; border-top-left-radius:24px; border-top-right-radius:24px; z-index:2000; box-shadow:0 -10px 25px rgba(0,0,0,0.15); animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform; }
+  .bottom-modal { display:none; position:absolute; bottom:0; left:0; right:0; background:#FFFFFF; padding:20px; border-top-left-radius:24px; border-top-right-radius:24px; z-index:2000; box-shadow:0 -10px 25px rgba(0,0,0,0.15); animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform; }
   .lie-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px; } 
-  .lie-btn { padding:14px; background:var(--bg-sub); border:1px solid var(--border-light); color:var(--text-main); border-radius:8px; font-weight:bold; }
+  .lie-btn { padding:14px; background:#F3F4F6; border:1px solid #E5E7EB; color:#111827; border-radius:8px; font-weight:bold; }
   
-  /* Score Adjuster */
-  #screen-score { overflow-y:auto; background:var(--bg-sub); }
+  #screen-score { overflow-y:auto; background:#F3F4F6; }
   .number-adjuster { display:flex; align-items:center; gap:15px; } 
-  .adj-btn { width:44px; height:44px; border-radius:50%; border:2px solid var(--border-light); background:var(--bg-main); color:var(--champ-blue); font-size:24px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-  .num-display { font-size:32px; font-weight:800; width:40px; text-align:center; font-family:'DM Mono'; color:var(--text-main); }
+  .adj-btn { width:44px; height:44px; border-radius:50%; border:2px solid #E5E7EB; background:#FFFFFF; color:#003876; font-size:24px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+  .num-display { font-size:32px; font-weight:800; width:40px; text-align:center; font-family:'DM Mono'; color:#111827; }
   
-  /* Stats & Badges */
-  .wind-badge { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:var(--bg-main); padding:3px 10px; border-radius:12px; font-size:11px; font-family:'DM Mono'; font-weight:bold; margin-top:4px; display:inline-block; }
-  .live-badge { background:var(--accent-red); color:white; font-size:10px; font-family:'DM Mono'; font-weight:bold; padding:4px 8px; border-radius:4px; animation: pulse 1.5s infinite; }
+  .wind-badge { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:#FFFFFF; padding:3px 10px; border-radius:12px; font-size:11px; font-family:'DM Mono'; font-weight:bold; margin-top:4px; display:inline-block; }
+  .live-badge { background:#EF4444; color:white; font-size:10px; font-family:'DM Mono'; font-weight:bold; padding:4px 8px; border-radius:4px; animation: pulse 1.5s infinite; }
   
   .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px; }
-  .stat-box { background:var(--bg-main); padding:20px 15px; border-radius:12px; text-align:center; border:1px solid var(--border-light); box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
-  .stat-value { font-family:'Syne'; font-size:28px; color:var(--trophy-gold); margin-top:5px; }
-  .stat-label { font-size:11px; color:var(--text-muted); font-weight:bold; letter-spacing:0.5px; }
+  .stat-box { background:#FFFFFF; padding:20px 15px; border-radius:12px; text-align:center; border:1px solid #E5E7EB; box-shadow: 0 2px 6px rgba(0,0,0,0.03); }
+  .stat-value { font-family:'Syne'; font-size:28px; color:#D4AF37; margin-top:5px; }
+  .stat-label { font-size:11px; color:#6B7280; font-weight:bold; letter-spacing:0.5px; }
   .search-row { display:flex; gap:10px; margin-bottom:20px; }
 
-  /* Recap Tools */
-  .recap-stats-bar { display:flex; justify-content:space-between; background:var(--bg-main); padding:12px 20px; border-bottom:1px solid var(--border-light); font-family:'DM Mono'; font-size:14px; color:var(--champ-blue); font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index:100; position:relative; }
+  .recap-stats-bar { display:flex; justify-content:space-between; background:#FFFFFF; padding:12px 20px; border-bottom:1px solid #E5E7EB; font-family:'DM Mono'; font-size:14px; color:#003876; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index:100; position:relative; }
   .recap-stat-item { text-align:center; }
-  .recap-stat-item span { display:block; color:var(--text-muted); font-size:10px; text-transform:uppercase; font-family:'DM Sans'; margin-bottom:2px; }
+  .recap-stat-item span { display:block; color:#6B7280; font-size:10px; text-transform:uppercase; font-family:'DM Sans'; margin-bottom:2px; }
   
-  .recap-tools { display:flex; gap:10px; justify-content:center; padding:12px 15px; background:var(--bg-main); border-bottom:1px solid var(--border-light); z-index:100; }
-  .tool-btn { background:var(--bg-sub); color:var(--text-main); border:1px solid var(--border-light); padding:10px 15px; border-radius:8px; font-weight:bold; font-size:12px; flex:1; display:flex; justify-content:center; align-items:center; gap:5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-  .tool-btn.active-heat { background:var(--trophy-gold); color:var(--bg-main); border-color:var(--trophy-gold); }
+  .recap-tools { display:flex; gap:10px; justify-content:center; padding:12px 15px; background:#FFFFFF; border-bottom:1px solid #E5E7EB; z-index:100; }
+  .tool-btn { background:#F3F4F6; color:#111827; border:1px solid #E5E7EB; padding:10px 15px; border-radius:8px; font-weight:bold; font-size:12px; flex:1; display:flex; justify-content:center; align-items:center; gap:5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
 
-  /* --- FORTUNE 500 POLISH --- */
   .leaflet-layer { filter: saturate(1.3) contrast(1.1) brightness(1.05); }
   @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: var(--border-light); border-radius: 10px; }
-  ::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+  ::-webkit-scrollbar-thumb { background: #E5E7EB; border-radius: 10px; }
 </style>
 </head>
 <body>
 
   <div id="screen-auth" style="display:flex;">
-    <h1 style="font-family:'Syne'; color:var(--champ-blue); font-size:38px; text-align:center; margin-bottom:5px;">AutoCaddy</h1>
-    <p style="color:var(--text-muted); margin-bottom:30px; font-weight:500;">Precision Golf Mapping & Tracking</p>
+    <h1 style="font-family:'Syne'; color:#003876; font-size:38px; text-align:center; margin-bottom:5px;">AutoCaddy</h1>
+    <p style="color:#6B7280; margin-bottom:30px; font-weight:500;">Precision Golf Mapping & Tracking</p>
     <div class="auth-tabs"><button class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</button><button class="auth-tab" onclick="switchAuthTab('signup')">SIGN UP</button></div>
     <input type="text" id="field-username" class="auth-input" placeholder="Username" style="display:none;">
     <input type="email" id="field-email" class="auth-input" placeholder="Email Address">
@@ -128,8 +110,8 @@
 
   <div id="screen-home">
     <div class="header-bar">
-      <div><span style="color:var(--bg-main); font-size:12px; opacity:0.8;">Logged in as</span><br><strong id="home-user-email" style="color:var(--trophy-gold);"></strong></div>
-      <button onclick="logOut()" style="background:transparent; border:none; color:var(--bg-main); font-weight:bold; opacity:0.8;">LOG OUT</button>
+      <div><span style="color:#FFFFFF; font-size:12px; opacity:0.8;">Logged in as</span><br><strong id="home-user-email" style="color:#D4AF37;"></strong></div>
+      <button onclick="logOut()" style="background:transparent; border:none; color:#FFFFFF; font-weight:bold; opacity:0.8;">LOG OUT</button>
     </div>
     <div class="home-menu">
       <button class="menu-btn primary" onclick="startRound()">🏌️‍♂️ PLAY GOLF</button>
@@ -144,46 +126,60 @@
     <div style="padding:20px; overflow-y:auto; flex-grow:1;">
       <div class="search-row"><input type="text" id="friend-search" class="auth-input" style="margin:0; flex-grow:1;" placeholder="Search usernames..."><button class="action-btn" style="width:auto; padding:0 20px;" onclick="searchFriends()">Find</button></div>
       <div id="friend-search-results" style="margin-bottom:20px;"></div>
-      <h3 style="color:var(--champ-blue); font-family:'Syne'; border-bottom:1px solid var(--border-light); padding-bottom:5px;">Live & Recent</h3>
+      <h3 style="color:#003876; font-family:'Syne'; border-bottom:1px solid #E5E7EB; padding-bottom:5px;">Live & Recent</h3>
       <div id="friends-list-container">Loading feed...</div>
     </div>
   </div>
 
   <div id="profile-modal" class="bottom-modal" style="height:75vh; overflow-y:auto; flex-direction:column;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <h2 id="prof-username" style="margin:0; font-family:'Syne'; color:var(--champ-blue);">Username</h2>
-      <button onclick="document.getElementById('profile-modal').style.display='none'" style="background:transparent; color:var(--text-muted); border:none; font-size:24px;">✕</button>
+      <h2 id="prof-username" style="margin:0; font-family:'Syne'; color:#003876;">Username</h2>
+      <button onclick="document.getElementById('profile-modal').style.display='none'" style="background:transparent; color:#6B7280; border:none; font-size:24px;">✕</button>
     </div>
-    <button id="prof-live-btn" class="action-btn" style="background:var(--accent-red); color:white; margin-bottom:20px; display:none;" onclick="jumpToLiveMap()">🔴 WATCH LIVE ROUND</button>
+    <button id="prof-live-btn" class="action-btn" style="background:#EF4444; color:white; margin-bottom:20px; display:none;" onclick="jumpToLiveMap()">🔴 WATCH LIVE ROUND</button>
     <div class="stats-grid">
-      <div class="stat-box"><div class="stat-label">AUTOCADDY INDEX</div><div class="stat-value" id="prof-busta-cap">--</div><div style="font-size:10px; color:var(--text-muted); margin-top:5px;">Gold Tees • Best 8 of 20</div></div>
-      <div class="stat-box"><div class="stat-label">COURSE AVERAGE</div><div class="stat-value" id="prof-avg-score" style="color:var(--champ-blue);">--</div><div style="font-size:10px; color:var(--text-muted); margin-top:5px;">Total strokes</div></div>
+      <div class="stat-box"><div class="stat-label">AUTOCADDY INDEX</div><div class="stat-value" id="prof-busta-cap">--</div><div style="font-size:10px; color:#6B7280; margin-top:5px;">Gold Tees • Best 8 of 20</div></div>
+      <div class="stat-box"><div class="stat-label">COURSE AVERAGE</div><div class="stat-value" id="prof-avg-score" style="color:#003876;">--</div><div style="font-size:10px; color:#6B7280; margin-top:5px;">Total strokes</div></div>
     </div>
-    <h3 style="color:var(--champ-blue); border-bottom:1px solid var(--border-light); padding-bottom:5px; margin-top:10px;">Recent Rounds</h3>
+    <h3 style="color:#003876; border-bottom:1px solid #E5E7EB; padding-bottom:5px; margin-top:10px;">Recent Rounds</h3>
     <button class="menu-btn" style="width:100%; font-size:14px; padding:15px;" onclick="openRecapFromProfile()">View Shot Maps 🎞️</button>
   </div>
 
   <div id="screen-game">
     <div class="header-bar">
       <div><h2 id="hole-title" style="margin:0; font-family:'Syne';">Hole 1</h2><div id="hole-details" style="font-size:12px; opacity:0.8; font-family:'DM Mono';">Par 4</div><div id="wind-display" class="wind-badge">💨 -- mph</div></div>
-      <button class="nav-btn" onclick="confirmQuit()">QUIT</button>
+      <button class="nav-btn" style="border-color:#EF4444; color:#FFFFFF; background:#EF4444;" onclick="confirmQuit()">QUIT</button>
     </div>
-    <div id="map-container"></div>
+    
+    <div id="map-container">
+      <div class="overlay-panel">
+        <div style="font-size:9px; color:#003876; font-weight:bold; text-align:center; margin-bottom:4px; font-family:'Syne';">DATA LAYERS</div>
+        <button class="layer-btn active" onclick="setOverlay('stho_personal', this)">1. My STHO Avg</button>
+        <button class="layer-btn" onclick="setOverlay('history_personal', this)">2. My Past Shots</button>
+        <button class="layer-btn" onclick="setOverlay('stho_community', this)">3. Global STHO</button>
+        <button class="layer-btn" id="layer-compare-btn" style="display:none; background:#D4AF37; color:#FFFFFF;" onclick="setOverlay('compare', this)">4. Compare STHO</button>
+      </div>
+    </div>
+
     <div id="lie-modal" class="bottom-modal">
-      <h3 style="margin:0 0 5px 0; color:var(--champ-blue);">Select Lie</h3>
+      <h3 style="margin:0 0 5px 0; color:#003876;">Select Lie</h3>
       <div class="lie-grid">
-        <button class="lie-btn" onclick="confirmLie('Fairway')" style="border-color:var(--accent-green); background:#f0fdf4;">Fairway</button> 
-        <button class="lie-btn" onclick="confirmLie('Rough')" style="border-color:var(--trophy-gold); background:#fefce8;">Rough</button>
+        <button class="lie-btn" onclick="confirmLie('Fairway')" style="border-color:#10B981; background:#f0fdf4;">Fairway</button> 
+        <button class="lie-btn" onclick="confirmLie('Rough')" style="border-color:#D4AF37; background:#fefce8;">Rough</button>
         <button class="lie-btn" onclick="confirmLie('Sand')">Sand</button> <button class="lie-btn" onclick="confirmLie('Fringe')">Fringe</button>
         <button class="lie-btn" onclick="confirmLie('Recovery/Tree')">Recovery/Tree</button> <button class="lie-btn" onclick="confirmLie('Mogul')">Mogul</button>
       </div>
-      <button onclick="cancelLie()" style="width:100%; margin-top:15px; padding:10px; background:transparent; color:var(--accent-red); border:none; font-weight:bold;">Cancel Plot</button>
+      <button onclick="cancelLie()" style="width:100%; margin-top:15px; padding:10px; background:transparent; color:#EF4444; border:none; font-weight:bold;">Cancel Plot</button>
     </div>
+    
     <div class="command-center">
       <div class="shot-selector" id="shot-selector">
-        <button class="shot-btn" onclick="setShotType('Tee', this)">TEE</button><button class="shot-btn" onclick="setShotType('Approach', this)">APP.</button>
-        <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button><button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
-        <button class="shot-btn" onclick="setShotType('Penalty', this)" style="border-color:var(--accent-red); color:var(--accent-red);">DROP</button>
+        <button class="shot-btn" onclick="setShotType('Tee', this)">TEE</button>
+        <button class="shot-btn" onclick="setShotType('Approach', this)">APP.</button>
+        <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button>
+        <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
+        <button class="shot-btn" onclick="setShotType('Penalty', this)" style="border-color:#EF4444; color:#EF4444;">DROP</button>
+        <button class="shot-btn" onclick="undoLastPlot()" style="border-color:#6B7280; color:#6B7280;">UNDO</button>
       </div>
       <button id="save-hole-btn" class="action-btn" onclick="openScoreScreen()">Enter Score</button>
     </div>
@@ -192,7 +188,7 @@
   <div id="screen-score">
     <div class="header-bar"><button class="nav-btn" onclick="switchScreen('screen-game')">Cancel</button><h3 style="margin:0;">Score</h3><div style="width:50px;"></div></div>
     <div style="padding:20px; flex-grow:1;">
-      <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 0; border-bottom:1px solid var(--border-light);">
+      <div style="display:flex; justify-content:space-between; align-items:center; padding:20px 0; border-bottom:1px solid #E5E7EB;">
         <div style="font-size:18px; font-weight:bold;">Score</div>
         <div class="number-adjuster"><button class="adj-btn" onclick="adjustValue('score-val',-1)">-</button><div class="num-display" id="score-val">0</div><button class="adj-btn" onclick="adjustValue('score-val',1)">+</button></div>
       </div>
@@ -201,11 +197,11 @@
         <div class="number-adjuster"><button class="adj-btn" onclick="adjustValue('putts-val',-1)">-</button><div class="num-display" id="putts-val">0</div><button class="adj-btn" onclick="adjustValue('putts-val',1)">+</button></div>
       </div>
     </div>
-    <div style="padding:20px; background:var(--bg-main); border-top:1px solid var(--border-light);"><button class="action-btn" onclick="saveScoreToDB()">SAVE HOLE</button></div>
+    <div style="padding:20px; background:#FFFFFF; border-top:1px solid #E5E7EB;"><button class="action-btn" onclick="saveScoreToDB()">SAVE HOLE</button></div>
   </div>
 
   <div id="screen-recap-list">
-    <div class="header-bar"><h2 id="recap-list-title" style="margin:0; font-family:'Syne'; color:var(--bg-main);">Rounds</h2><button class="nav-btn" onclick="switchScreen('screen-home')">BACK</button></div>
+    <div class="header-bar"><h2 id="recap-list-title" style="margin:0; font-family:'Syne'; color:#FFFFFF;">Rounds</h2><button class="nav-btn" onclick="switchScreen('screen-home')">BACK</button></div>
     <div id="recap-list-container" style="padding:20px; overflow-y:auto;"></div>
   </div>
 
@@ -222,17 +218,24 @@
       <div class="recap-stat-item"><span>GIR</span><strong id="recap-stat-gir">--</strong></div>
     </div>
 
-    <div id="recap-map-container"></div>
+    <div id="recap-map-container">
+      <div class="overlay-panel">
+        <div style="font-size:9px; color:#003876; font-weight:bold; text-align:center; margin-bottom:4px; font-family:'Syne';">DATA LAYERS</div>
+        <button class="layer-btn active" onclick="setOverlay('stho_personal', this)">1. My STHO Avg</button>
+        <button class="layer-btn" onclick="setOverlay('history_personal', this)">2. My Past Shots</button>
+        <button class="layer-btn" onclick="setOverlay('stho_community', this)">3. Global STHO</button>
+        <button class="layer-btn" id="recap-layer-compare-btn" style="display:none; background:#D4AF37; color:#FFFFFF;" onclick="setOverlay('compare', this)">4. Compare STHO</button>
+      </div>
+    </div>
     
     <div class="recap-tools">
       <button class="tool-btn" onclick="playMovieMode()">▶ PLAY MOVIE</button>
-      <button class="tool-btn" id="heatmap-toggle-btn" onclick="toggleHeatmap()">🔥 HEATMAP</button>
     </div>
 
     <div class="command-center" style="flex-direction:row; justify-content:space-between; align-items:center; padding-top:15px; border-top:none;">
-      <button class="nav-btn" style="border-color:var(--champ-blue); color:var(--champ-blue);" onclick="changeRecapHole(-1)">Prev</button>
-      <div id="recap-hole-indicator" style="font-family:'DM Mono'; font-weight:bold; color:var(--champ-blue);">Hole 1</div>
-      <button class="nav-btn" style="border-color:var(--champ-blue); color:var(--champ-blue);" onclick="changeRecapHole(1)">Next</button>
+      <button class="nav-btn" style="border-color:#003876; color:#003876;" onclick="changeRecapHole(-1)">Prev</button>
+      <div id="recap-hole-indicator" style="font-family:'DM Mono'; font-weight:bold; color:#003876;">Hole 1</div>
+      <button class="nav-btn" style="border-color:#003876; color:#003876;" onclick="changeRecapHole(1)">Next</button>
     </div>
   </div>
 
@@ -245,6 +248,9 @@
     let map = null, markersLayer = null;
     let currentHole = 1, currentShots = [], activeShotType = null, pendingPlot = null;
     let currentWindString = "-- mph"; 
+    let currentSessionHoleIds = []; // For the Quit Purge
+    let activeOverlayType = 'stho_personal';
+    let overlayLayer = null;
 
     const beyleaData = {
       1: { par: 4, hcp: 13, yards: 370, lat: 39.9961, lng: -74.2120 },
@@ -315,10 +321,13 @@
       if(id === 'screen-recap-map' && recapMap) setTimeout(()=>recapMap.invalidateSize(), 100);
     }
 
+    // --- PLAY ROUND & GPS ---
     function startRound() { 
+      currentSessionHoleIds = []; // Start fresh
       switchScreen('screen-game'); 
       if(!map) {
-        map = L.map('map-container',{zoomControl:false}).setView([39.9961, -74.2120], 18);
+        // GPS Default Fixed to Bey Lea Center
+        map = L.map('map-container',{zoomControl:false}).setView([39.988222, -74.186083], 18);
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 }).addTo(map);
         markersLayer = L.layerGroup().addTo(map);
         map.on('click', handleMapTap);
@@ -332,8 +341,12 @@
       document.getElementById('hole-title').textContent = `Hole ${h}`;
       document.getElementById('hole-details').textContent = `Par ${hd.par} • HCP ${hd.hcp} • ${hd.yards} yds`;
       map.setView([hd.lat, hd.lng], 18);
+      
+      // Auto-load STHO Data overlay
+      renderSTHO(h, activeProfileUserId || currentUser.id);
     }
 
+    // --- PLOTTING & DRAG/UNDO ---
     function setShotType(type, btn) { activeShotType = type; document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
     function handleMapTap(e) {
       if(!activeShotType) return alert("Select a shot type");
@@ -343,11 +356,34 @@
       else document.getElementById('lie-modal').style.display = 'block';
     }
     function cancelLie() { document.getElementById('lie-modal').style.display = 'none'; pendingPlot = null; }
+    
     function confirmLie(lie) {
-      pendingPlot.lie = lie; currentShots.push(pendingPlot);
-      const icon = L.divIcon({className: `shot-pin pin-${pendingPlot.type}`});
-      L.marker([pendingPlot.lat, pendingPlot.lng], {icon}).addTo(markersLayer);
-      document.getElementById('lie-modal').style.display = 'none'; pendingPlot = null;
+      pendingPlot.lie = lie; 
+      currentShots.push(pendingPlot);
+      renderLiveShots();
+      document.getElementById('lie-modal').style.display = 'none'; 
+      pendingPlot = null;
+    }
+
+    function renderLiveShots() {
+      markersLayer.clearLayers();
+      currentShots.forEach((s, index) => {
+        const icon = L.divIcon({className: `shot-pin pin-${s.type}`});
+        // DRAGGABLE PINS ENABLED
+        const marker = L.marker([s.lat, s.lng], {icon, draggable: true}).addTo(markersLayer);
+        
+        marker.on('dragend', function(event) {
+          const position = marker.getLatLng();
+          currentShots[index].lat = position.lat;
+          currentShots[index].lng = position.lng;
+        });
+      });
+    }
+
+    function undoLastPlot() {
+      if(currentShots.length === 0) return;
+      currentShots.pop(); 
+      renderLiveShots();  
     }
 
     function openScoreScreen() {
@@ -363,6 +399,9 @@
       try {
         const { data: round, error: rErr } = await sb.from('rounds').insert([{ user_id: currentUser.id, course_id: 1, hole_number: currentHole, score: score, putts: putts, wind: currentWindString }]).select().single();
         if(rErr) throw rErr;
+        
+        currentSessionHoleIds.push(round.id); // Save for potential Quit purge
+        
         if(currentShots.length > 0) {
           const shotInserts = currentShots.map(s => ({ user_id: currentUser.id, round_id: round.id, hole_number: currentHole, shot_type: s.type, lie: s.lie, lat: s.lat, lng: s.lng }));
           await sb.from('shots').insert(shotInserts);
@@ -371,13 +410,124 @@
       } catch(e) { alert("Error: " + e.message); }
     }
 
+    // --- PURGE DATA ON QUIT ---
+    async function confirmQuit() {
+      const confirmMsg = "Are you sure you want to quit? This will purge all saved data for this incomplete round.";
+      if(!confirm(confirmMsg)) return;
+      
+      if(currentSessionHoleIds.length > 0) {
+        await sb.from('shots').delete().in('round_id', currentSessionHoleIds);
+        await sb.from('rounds').delete().in('id', currentSessionHoleIds);
+      }
+      
+      currentSessionHoleIds = []; currentHole = 1; currentShots = [];
+      if(map) { markersLayer.clearLayers(); if(overlayLayer) overlayLayer.clearLayers(); }
+      switchScreen('screen-home');
+    }
+
+    // --- STROKES TO HOLE OUT (STHO) SPATIAL ENGINE ---
+    function setOverlay(type, btnElement) {
+      activeOverlayType = type;
+      const panel = btnElement.closest('.overlay-panel');
+      panel.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+      
+      const targetHole = (document.getElementById('screen-recap-map').style.display === 'flex') ? currentRecapHole : currentHole;
+      const targetUser = activeProfileUserId || currentUser.id;
+      renderSTHO(targetHole, targetUser);
+    }
+
+    async function renderSTHO(holeNum, targetUserId) {
+      const targetMap = (document.getElementById('screen-recap-map').style.display === 'flex') ? recapMap : map;
+      if(!targetMap) return;
+      
+      if(!overlayLayer) overlayLayer = L.layerGroup().addTo(targetMap);
+      overlayLayer.clearLayers();
+
+      try {
+        if (activeOverlayType === 'history_personal') {
+          // Just plot raw dots for history
+          const { data } = await sb.from('shots').select('lat, lng').eq('hole_number', holeNum).eq('user_id', targetUserId);
+          if(data) data.forEach(s => {
+             L.circle([s.lat, s.lng], { radius: 3, color: '#003876', fillColor: '#003876', fillOpacity: 0.5, weight: 0 }).addTo(overlayLayer);
+          });
+        } 
+        else if (activeOverlayType === 'stho_personal') {
+          const { data: rounds } = await sb.from('rounds').select('id, score').eq('hole_number', holeNum).eq('user_id', targetUserId);
+          await processAndDrawSTHOGrid(rounds, '#003876'); // Blue
+        } 
+        else if (activeOverlayType === 'stho_community') {
+          const { data: rounds } = await sb.from('rounds').select('id, score').eq('hole_number', holeNum);
+          await processAndDrawSTHOGrid(rounds, '#111827'); // Black/Dark
+        }
+        else if (activeOverlayType === 'compare') {
+          const { data: friendRounds } = await sb.from('rounds').select('id, score').eq('hole_number', holeNum).eq('user_id', targetUserId);
+          const { data: myRounds } = await sb.from('rounds').select('id, score').eq('hole_number', holeNum).eq('user_id', currentUser.id);
+          
+          await processAndDrawSTHOGrid(myRounds, '#003876'); // Me = Blue
+          await processAndDrawSTHOGrid(friendRounds, '#D4AF37'); // Friend = Gold
+        }
+      } catch(e) { console.log("Overlay error", e); }
+    }
+
+    async function processAndDrawSTHOGrid(roundsArray, colorCode) {
+        if(!roundsArray || roundsArray.length === 0) return;
+        
+        const roundScores = {};
+        roundsArray.forEach(r => roundScores[r.id] = r.score);
+        const roundIds = Object.keys(roundScores);
+        
+        // Fetch shots ordered by creation time to determine sequence index
+        const { data: shots } = await sb.from('shots').select('lat, lng, round_id, created_at').in('round_id', roundIds).order('created_at', {ascending: true});
+        if(!shots) return;
+
+        const shotsByRound = {};
+        shots.forEach(s => {
+            if(!shotsByRound[s.round_id]) shotsByRound[s.round_id] = [];
+            shotsByRound[s.round_id].push(s);
+        });
+
+        const grid = {};
+        Object.keys(shotsByRound).forEach(roundId => {
+            const roundShots = shotsByRound[roundId];
+            const totalScore = roundScores[roundId];
+
+            roundShots.forEach((shot, index) => {
+                // STHO Math: If I shot a 5, and this is my 2nd shot (index 1), I have 4 strokes left to hole out.
+                const stho = totalScore - index;
+                
+                // Group into an approx 11m x 11m grid
+                const gridLat = (Math.round(shot.lat * 10000) / 10000).toFixed(4);
+                const gridLng = (Math.round(shot.lng * 10000) / 10000).toFixed(4);
+                const key = `${gridLat},${gridLng}`;
+
+                if(!grid[key]) grid[key] = { sum: 0, count: 0, lat: parseFloat(gridLat), lng: parseFloat(gridLng) };
+                grid[key].sum += stho;
+                grid[key].count += 1;
+            });
+        });
+
+        // Draw the Decimal Icons
+        Object.values(grid).forEach(cell => {
+            const avgSTHO = (cell.sum / cell.count).toFixed(2);
+            const icon = L.divIcon({
+                className: 'stho-decimal-icon',
+                html: `<div style="color:${colorCode}; font-family:'DM Mono', monospace; font-weight:800; font-size:13px; text-shadow: 1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff, 0px 2px 4px rgba(0,0,0,0.3); text-align:center; transform: translate(-50%, -50%);">${avgSTHO}</div>`
+            });
+            // If compare mode is on, slight jitter so gold and blue don't perfectly stack
+            const jitterLat = cell.lat + (colorCode === '#D4AF37' ? 0.00003 : 0);
+            L.marker([jitterLat, cell.lng], {icon, interactive: false}).addTo(overlayLayer);
+        });
+    }
+
+    // --- SOCIAL & PROFILE ---
     let activeProfileUserId = null; let activeProfileLiveRoundData = null;
 
     async function openSocialFeed() {
       switchScreen('screen-social'); document.getElementById('friends-list-container').innerHTML = "Loading feed...";
       const {data: follows} = await sb.from('friends').select('followed_id').eq('follower_id', currentUser.id);
       
-      if(!follows || !follows.length) return document.getElementById('friends-list-container').innerHTML = "<div style='text-align:center; padding: 40px 20px;'><div style='font-size:40px; margin-bottom:10px;'>🏌️‍♂️</div><h3 style='margin:0 0 5px 0; color:var(--champ-blue);'>No playing partners yet</h3><p style='color:var(--text-muted); font-size:14px;'>Use the search bar above to find your crew and watch their rounds live.</p></div>";
+      if(!follows || !follows.length) return document.getElementById('friends-list-container').innerHTML = "<div style='text-align:center; padding: 40px 20px;'><div style='font-size:40px; margin-bottom:10px;'>🏌️‍♂️</div><h3 style='margin:0 0 5px 0; color:#003876;'>No playing partners yet</h3><p style='color:#6B7280; font-size:14px;'>Use the search bar above to find your crew and watch their rounds live.</p></div>";
 
       const friendIds = follows.map(f => f.followed_id);
       const {data: profiles} = await sb.from('profiles').select('*').in('id', friendIds);
@@ -397,8 +547,8 @@
       const q = document.getElementById('friend-search').value; if(!q) return;
       const {data} = await sb.from('profiles').select('*').ilike('username', `%${q}%`).neq('id', currentUser.id);
       const res = document.getElementById('friend-search-results');
-      if(!data || !data.length) return res.innerHTML = "<div style='color:var(--text-muted);'>No users found.</div>";
-      res.innerHTML = data.map(p => `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:var(--bg-sub); border:1px solid var(--border-light); margin-bottom:5px; border-radius:8px;"><span>${p.username}</span><button class="nav-btn" onclick="followUser('${p.id}')">Follow</button></div>`).join('');
+      if(!data || !data.length) return res.innerHTML = "<div style='color:#6B7280;'>No users found.</div>";
+      res.innerHTML = data.map(p => `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#F3F4F6; border:1px solid #E5E7EB; margin-bottom:5px; border-radius:8px;"><span>${p.username}</span><button class="nav-btn" onclick="followUser('${p.id}')">Follow</button></div>`).join('');
     }
 
     async function followUser(id) { await sb.from('friends').insert({follower_id: currentUser.id, followed_id: id}); alert("Followed!"); openSocialFeed(); }
@@ -410,6 +560,10 @@
       document.getElementById('prof-busta-cap').innerText = "Calc..."; document.getElementById('prof-avg-score').innerText = "Calc...";
       document.getElementById('prof-live-btn').style.display = 'none'; document.getElementById('profile-modal').style.display = 'flex';
       
+      // Enable Compare Button if viewing a friend
+      document.getElementById('layer-compare-btn').style.display = (userId !== currentUser.id) ? 'block' : 'none';
+      document.getElementById('recap-layer-compare-btn').style.display = (userId !== currentUser.id) ? 'block' : 'none';
+
       const { data: allHoles } = await sb.from('rounds').select('*').eq('user_id', userId).order('created_at', {ascending: false});
       if(!allHoles || allHoles.length === 0) { document.getElementById('prof-busta-cap').innerText = "N/A"; document.getElementById('prof-avg-score').innerText = "N/A"; return; }
 
@@ -448,22 +602,23 @@
     function jumpToLiveMap() { document.getElementById('profile-modal').style.display = 'none'; loadRecapMap(activeProfileLiveRoundData); }
     function openRecapFromProfile() { document.getElementById('profile-modal').style.display = 'none'; openRecapList(activeProfileUserId, `${document.getElementById('prof-username').innerText}'s Rounds`); }
 
-    let recapMap = null, recapLinesLayer = null, recapMarkersLayer = null, heatmapLayer = null;
+    // --- RECAP MAP LOGIC ---
+    let recapMap = null, recapLinesLayer = null, recapMarkersLayer = null;
     let recapHoleData = {}, currentRecapHole = 1;
-    let movieTimeout = null; let isHeatmapActive = false;
+    let movieTimeout = null; 
 
     async function openRecapList(userId, title) {
       switchScreen('screen-recap-list'); document.getElementById('recap-list-title').innerText = title;
       const container = document.getElementById('recap-list-container'); container.innerHTML = "Loading...";
       const { data, error } = await sb.from('rounds').select('*').eq('user_id', userId).order('created_at', {ascending:false});
-      if(error || !data || !data.length) return container.innerHTML = "<p style='color:var(--text-muted)'>No rounds found.</p>";
+      if(error || !data || !data.length) return container.innerHTML = "<p style='color:#6B7280;'>No rounds found.</p>";
       const grouped = {};
       data.forEach(r => {
         const dStr = new Date(r.created_at).toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
         if(!grouped[dStr]) grouped[dStr] = { display: dStr, score: 0, rounds: [] };
         grouped[dStr].score += r.score; grouped[dStr].rounds.push(r);
       });
-      container.innerHTML = Object.values(grouped).map(g => `<div class="recap-card" onclick='loadRecapMap(${JSON.stringify(g).replace(/'/g, "&#39;")})'><div><h3 style="margin:0; color:var(--champ-blue);">${g.display}</h3><p style="margin:5px 0 0 0; color:var(--text-muted); font-family:'DM Mono';">Score: ${g.score} | Holes: ${g.rounds.length}</p></div><span style="font-size:20px; color:var(--champ-blue);">▶</span></div>`).join('');
+      container.innerHTML = Object.values(grouped).map(g => `<div class="recap-card" onclick='loadRecapMap(${JSON.stringify(g).replace(/'/g, "&#39;")})'><div><h3 style="margin:0; color:#003876;">${g.display}</h3><p style="margin:5px 0 0 0; color:#6B7280; font-family:'DM Mono';">Score: ${g.score} | Holes: ${g.rounds.length}</p></div><span style="font-size:20px; color:#003876;">▶</span></div>`).join('');
     }
 
     async function loadRecapMap(groupData) {
@@ -471,10 +626,9 @@
       document.getElementById('recap-map-title').innerText = groupData.display;
       
       if(!recapMap) {
-        recapMap = L.map('recap-map-container',{zoomControl:false}).setView([39.9961, -74.2120], 18);
+        recapMap = L.map('recap-map-container',{zoomControl:false}).setView([39.988222, -74.186083], 18);
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 }).addTo(recapMap);
         recapLinesLayer = L.layerGroup().addTo(recapMap); recapMarkersLayer = L.layerGroup().addTo(recapMap);
-        heatmapLayer = L.layerGroup().addTo(recapMap);
       }
       
       clearRecapMap();
@@ -501,15 +655,15 @@
       document.getElementById('recap-stat-score').innerText = data.details.score;
       document.getElementById('recap-stat-putts').innerText = data.details.putts;
       document.getElementById('recap-stat-fir').innerText = fir;
-      document.getElementById('recap-stat-fir').style.color = fir === 'Hit' ? 'var(--accent-green)' : (fir === 'Miss' ? 'var(--accent-red)' : 'var(--champ-blue)');
+      document.getElementById('recap-stat-fir').style.color = fir === 'Hit' ? '#10B981' : (fir === 'Miss' ? '#EF4444' : '#003876');
       document.getElementById('recap-stat-gir').innerText = gir;
-      document.getElementById('recap-stat-gir').style.color = gir === 'Yes' ? 'var(--accent-green)' : 'var(--champ-blue)';
+      document.getElementById('recap-stat-gir').style.color = gir === 'Yes' ? '#10B981' : '#003876';
       
       const windText = data.details.wind && data.details.wind !== '-- mph' ? ` | Wind: ${data.details.wind}` : '';
       document.getElementById('recap-map-sub').innerText = `Par ${par}${windText}`;
     }
 
-    function clearRecapMap() { if(movieTimeout) clearTimeout(movieTimeout); recapLinesLayer.clearLayers(); recapMarkersLayer.clearLayers(); heatmapLayer.clearLayers(); }
+    function clearRecapMap() { if(movieTimeout) clearTimeout(movieTimeout); recapLinesLayer.clearLayers(); recapMarkersLayer.clearLayers(); }
 
     function drawRecapHole(holeNum) {
       if(!recapHoleData[holeNum]) return;
@@ -518,13 +672,15 @@
       const data = recapHoleData[holeNum];
       
       calculateStats(holeNum, data);
-      if(isHeatmapActive) drawHeatmap(holeNum);
+      
+      // Load the active STHO Data overlay for recap map
+      renderSTHO(holeNum, activeProfileUserId || currentUser.id);
 
       if(data.shots.length > 0) {
         const latlngs = data.shots.map(s => [s.lat, s.lng]);
-        L.polyline(latlngs, {color: 'var(--champ-blue-light)', weight: 4, dashArray: '5, 10'}).addTo(recapLinesLayer);
+        L.polyline(latlngs, {color: '#0055A4', weight: 4, dashArray: '5, 10'}).addTo(recapLinesLayer);
         data.shots.forEach((s, i) => {
-          const icon = L.divIcon({className: `shot-pin pin-${s.shot_type}`, html: `<div style="color:var(--text-main); font-family:'DM Mono'; font-size:10px; position:absolute; top:-16px; left:-5px; font-weight:bold; background:rgba(255,255,255,0.8); border-radius:4px; padding:1px 4px; box-shadow:0 1px 2px rgba(0,0,0,0.3);">${i+1}</div>`});
+          const icon = L.divIcon({className: `shot-pin pin-${s.shot_type}`, html: `<div style="color:#111827; font-family:'DM Mono'; font-size:10px; position:absolute; top:-16px; left:-5px; font-weight:bold; background:rgba(255,255,255,0.8); border-radius:4px; padding:1px 4px; box-shadow:0 1px 2px rgba(0,0,0,0.3);">${i+1}</div>`});
           L.marker([s.lat, s.lng], {icon}).addTo(recapMarkersLayer);
         });
         recapMap.fitBounds(L.polyline(latlngs).getBounds(), {padding: [50, 50]});
@@ -538,7 +694,7 @@
       if(!data || data.shots.length === 0) return alert("No shot data to play for this hole.");
       
       clearRecapMap();
-      if(isHeatmapActive) drawHeatmap(currentRecapHole);
+      renderSTHO(currentRecapHole, activeProfileUserId || currentUser.id); // Keep overlay while playing
       
       const latlngs = data.shots.map(s => [s.lat, s.lng]);
       recapMap.fitBounds(L.polyline(latlngs).getBounds(), {padding: [50, 50]});
@@ -547,30 +703,16 @@
       function showNextShot() {
         if (currentShotIndex >= data.shots.length) return; 
         const s = data.shots[currentShotIndex];
-        const icon = L.divIcon({className: `shot-pin pin-${s.shot_type}`, html: `<div style="color:var(--text-main); font-family:'DM Mono'; font-size:10px; position:absolute; top:-16px; left:-5px; font-weight:bold; background:rgba(255,255,255,0.8); border-radius:4px; padding:1px 4px; box-shadow:0 1px 2px rgba(0,0,0,0.3);">${currentShotIndex+1}</div>`});
+        const icon = L.divIcon({className: `shot-pin pin-${s.shot_type}`, html: `<div style="color:#111827; font-family:'DM Mono'; font-size:10px; position:absolute; top:-16px; left:-5px; font-weight:bold; background:rgba(255,255,255,0.8); border-radius:4px; padding:1px 4px; box-shadow:0 1px 2px rgba(0,0,0,0.3);">${currentShotIndex+1}</div>`});
         L.marker([s.lat, s.lng], {icon}).addTo(recapMarkersLayer);
 
         if (currentShotIndex > 0) {
           const prevS = data.shots[currentShotIndex - 1];
-          L.polyline([[prevS.lat, prevS.lng], [s.lat, s.lng]], {color: 'var(--champ-blue-light)', weight: 4, dashArray: '5, 10'}).addTo(recapLinesLayer);
+          L.polyline([[prevS.lat, prevS.lng], [s.lat, s.lng]], {color: '#0055A4', weight: 4, dashArray: '5, 10'}).addTo(recapLinesLayer);
         }
         currentShotIndex++; movieTimeout = setTimeout(showNextShot, 1200); 
       }
       showNextShot();
-    }
-
-    function toggleHeatmap() {
-      isHeatmapActive = !isHeatmapActive;
-      const btn = document.getElementById('heatmap-toggle-btn');
-      if(isHeatmapActive) { btn.classList.add('active-heat'); drawHeatmap(currentRecapHole); } 
-      else { btn.classList.remove('active-heat'); heatmapLayer.clearLayers(); }
-    }
-
-    function drawHeatmap(holeNum) {
-      heatmapLayer.clearLayers(); const hd = beyleaData[holeNum]; if(!hd) return;
-      L.circle([hd.lat, hd.lng], { radius: 137, color: 'var(--accent-red)', fillColor: 'var(--accent-red)', fillOpacity: 0.1, weight: 1, dashArray: '4' }).addTo(heatmapLayer);
-      L.circle([hd.lat, hd.lng], { radius: 45, color: 'var(--trophy-gold)', fillColor: 'var(--trophy-gold)', fillOpacity: 0.15, weight: 1, dashArray: '4' }).addTo(heatmapLayer);
-      L.circle([hd.lat, hd.lng], { radius: 10, color: 'var(--accent-green)', fillColor: 'var(--accent-green)', fillOpacity: 0.3, weight: 2 }).addTo(heatmapLayer);
     }
 
     function changeRecapHole(dir) {
@@ -581,7 +723,7 @@
     }
     
     function closeRecapMap() {
-        clearRecapMap(); isHeatmapActive = false; document.getElementById('heatmap-toggle-btn').classList.remove('active-heat');
+        clearRecapMap(); 
         if(activeProfileLiveRoundData) switchScreen('screen-social'); else switchScreen('screen-recap-list');
     }
   </script>
