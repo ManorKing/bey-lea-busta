@@ -17,6 +17,13 @@
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
+  /* ==========================================
+     AUTOCADDY DESIGN SYSTEM
+     ==========================================
+     Vibe: Premium, Data-Driven, "Fortune 500 Caddy"
+     Purpose: A highly legible, high-contrast UI that 
+     can be read easily under direct sunlight on a golf course.
+     ========================================== */
   :root { 
     var(--bg-main): #FFFFFF; var(--bg-sub): #F3F4F6; var(--text-main): #111827; var(--text-muted): #6B7280; 
     var(--champ-blue): #003876; var(--champ-blue-light): #0055A4; var(--trophy-gold): #D4AF37; 
@@ -25,6 +32,7 @@
   body { margin:0; padding:0; font-family:'DM Sans',sans-serif; background:#F3F4F6; color:#111827; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
   button { cursor:pointer; }
   
+  /* Core UI Components */
   .auth-input, .action-btn, .menu-btn { width:100%; max-width:300px; padding:15px; border-radius:8px; border:none; font-size:16px; box-sizing:border-box; }
   .auth-input { background:#FFFFFF; color:#111827; border:1px solid #E5E7EB; margin-bottom:15px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
   .action-btn { background:#003876; color:#FFFFFF; font-family:'Syne'; font-weight:800; letter-spacing: 0.5px; box-shadow: 0 4px 6px -1px rgba(0,56,118,0.2); transition: all 0.2s; }
@@ -42,17 +50,23 @@
   
   .recap-card, .friend-card, .course-card { background:#FFFFFF; border:1px solid #E5E7EB; border-radius:12px; padding:15px; margin-bottom:12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
   
+  /* Screen Management (SPA Architecture) */
   #screen-auth, #screen-home, #screen-course-select, #screen-game, #screen-score, #screen-recap-list, #screen-recap-map, #screen-social, #screen-summary { display:none; flex-direction:column; height:100%; position:relative; }
   #screen-auth { align-items:center; justify-content:center; padding:20px; background: #FFFFFF; }
   #map-container, #recap-map-container { flex-grow:1; background:#E5E3DF; width:100%; z-index:1; box-shadow: inset 0px 5px 15px rgba(0,0,0,0.1); }
   
-  /* Map Pins */
+  /* Spatial Visuals (Map Pins & Heatmaps) */
   .leaflet-div-icon { background:transparent; border:none; }
   .shot-pin { width:12px; height:12px; border:2px solid white; border-radius:50%; box-shadow:0 2px 4px rgba(0,0,0,0.6); }
   .pin-Tee { background-color:#0055A4; } .pin-Approach { background-color:#111827; } .pin-Chip { background-color:#D4AF37; } .pin-Putt { background-color:#10B981; }
   .pin-Penalty { background-color:#EF4444; border-color:#FFFFFF; } 
+  .stho-decimal-icon { background:transparent; border:none; pointer-events: none; }
   
   /* Menus & Overlays */
+  .overlay-panel { position:absolute; top:70px; right:15px; z-index:1000; background:rgba(255,255,255,0.95); border-radius:12px; padding:8px; box-shadow:0 4px 15px rgba(0,0,0,0.15); border:1px solid #E5E7EB; display:flex; flex-direction:column; gap:6px; backdrop-filter: blur(4px); }
+  .layer-btn { background:transparent; border:1px solid transparent; color:#6B7280; font-size:10px; font-weight:bold; font-family:'DM Mono'; padding:6px 10px; border-radius:6px; text-align:left; transition:0.2s; }
+  .layer-btn.active { background:#003876; color:#FFFFFF; }
+
   .command-center { background:#FFFFFF; border-top:1px solid #E5E7EB; z-index:1000; display:flex; flex-direction:column; padding:15px; gap:12px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
   .shot-selector { display:flex; gap:5px; } 
   .shot-btn { flex:1; padding:12px 0; background:#F3F4F6; color:#6B7280; border:1px solid #E5E7EB; border-radius:6px; font-weight:bold; font-size: 13px; transition: 0.2s; }
@@ -68,8 +82,14 @@
   .num-display { font-size:32px; font-weight:800; width:40px; text-align:center; font-family:'DM Mono'; color:#111827; }
   
   .wind-badge { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:#FFFFFF; padding:3px 10px; border-radius:12px; font-size:11px; font-family:'DM Mono'; font-weight:bold; margin-top:4px; display:inline-block; }
+  .live-badge { background:#EF4444; color:white; font-size:10px; font-family:'DM Mono'; font-weight:bold; padding:4px 8px; border-radius:4px; animation: pulse 1.5s infinite; }
   
-  /* Summary Dashboard Styles */
+  /* ==========================================
+     SUMMARY DASHBOARD STYLES
+     ==========================================
+     Vibe: Premium Sports Analytics
+     Purpose: A clean, GHIN-style breakdown of the round.
+     ========================================== */
   #screen-summary { background:#F3F4F6; overflow-y:auto; }
   .summary-header { background:#003876; color:white; padding:30px 20px 40px; text-align:center; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; }
   .summary-score-big { font-size:64px; font-family:'Syne'; font-weight:800; line-height:1; margin:10px 0; color:#D4AF37; }
@@ -79,9 +99,24 @@
   .stat-label { font-size:11px; color:#6B7280; font-weight:bold; letter-spacing:0.5px; text-transform: uppercase; }
   
   .search-row { display:flex; gap:10px; flex-shrink:0; }
+  
+  /* ==========================================
+     CINEMATIC RECAP TOOLS
+     ==========================================
+     Vibe: The Director's Controls
+     Purpose: Tools for the user to navigate and replay
+     their historical rounds shot-by-shot.
+     ========================================== */
+  .recap-stats-bar { display:flex; justify-content:space-between; background:#FFFFFF; padding:12px 20px; border-bottom:1px solid #E5E7EB; font-family:'DM Mono'; font-size:14px; color:#003876; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index:100; position:relative; }
+  .recap-stat-item { text-align:center; }
+  .recap-stat-item span { display:block; color:#6B7280; font-size:10px; text-transform:uppercase; font-family:'DM Sans'; margin-bottom:2px; }
+  .recap-tools { display:flex; gap:10px; justify-content:center; padding:12px 15px; background:#FFFFFF; border-bottom:1px solid #E5E7EB; z-index:100; }
+  .tool-btn { background:#F3F4F6; color:#111827; border:1px solid #E5E7EB; padding:10px 15px; border-radius:8px; font-weight:bold; font-size:12px; flex:1; display:flex; justify-content:center; align-items:center; gap:5px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+
   .leaflet-layer { filter: saturate(1.3) contrast(1.1) brightness(1.05); }
   @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+  
   /* Course Selector Overrides */
   .fav-star { font-size:24px; cursor:pointer; margin-right:10px; transition:0.2s; -webkit-tap-highlight-color: transparent;}
 </style>
@@ -105,8 +140,37 @@
     </div>
     <div class="home-menu">
       <button class="menu-btn primary" onclick="openCourseSelect()">🏌️‍♂️ PLAY GOLF</button>
-      <button class="menu-btn" onclick="loadRecapList()">🎞️ ROUND HISTORY</button>
+      <button class="menu-btn" onclick="openSocialFeed()">👥 SOCIAL & LIVE</button>
+      <button class="menu-btn" onclick="openMyProfile()">📊 MY PROFILE</button>
+      <button class="menu-btn" onclick="loadRecapListForUser(currentUser.id, 'My Rounds')">🎞️ ROUND HISTORY</button>
     </div>
+  </div>
+
+  <div id="screen-social">
+    <div class="header-bar"><h2 style="margin:0; font-family:'Syne';">Clubhouse</h2><button class="nav-btn" onclick="switchScreen('screen-home')">HOME</button></div>
+    <div style="padding:20px; overflow-y:auto; flex-grow:1;">
+      <div class="search-row">
+        <input type="text" id="friend-search" class="auth-input" style="margin:0; flex-grow:1;" placeholder="Search usernames...">
+        <button class="action-btn" style="width:auto; padding:0 20px;" onclick="searchFriends()">Find</button>
+      </div>
+      <div id="friend-search-results" style="margin-bottom:20px;"></div>
+      <h3 style="color:#003876; font-family:'Syne'; border-bottom:1px solid #E5E7EB; padding-bottom:5px;">Live & Recent</h3>
+      <div id="friends-list-container">Loading feed...</div>
+    </div>
+  </div>
+
+  <div id="profile-modal" class="bottom-modal" style="height:75vh; overflow-y:auto; flex-direction:column;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2 id="prof-username" style="margin:0; font-family:'Syne'; color:#003876;">Username</h2>
+      <button onclick="document.getElementById('profile-modal').style.display='none'" style="background:transparent; color:#6B7280; border:none; font-size:24px;">✕</button>
+    </div>
+    <button id="prof-live-btn" class="action-btn" style="background:#EF4444; color:white; margin-bottom:20px; display:none;" onclick="jumpToLiveMap()">🔴 WATCH LIVE ROUND</button>
+    <div class="stats-grid">
+      <div class="stat-box"><div class="stat-label">AUTOCADDY INDEX</div><div class="stat-value" id="prof-busta-cap">--</div><div style="font-size:10px; color:#6B7280; margin-top:5px;">Estimated</div></div>
+      <div class="stat-box"><div class="stat-label">ROUNDS PLAYED</div><div class="stat-value" id="prof-avg-score" style="color:#003876;">--</div></div>
+    </div>
+    <h3 style="color:#003876; border-bottom:1px solid #E5E7EB; padding-bottom:5px; margin-top:10px;">Recent Rounds</h3>
+    <button class="menu-btn" style="width:100%; font-size:14px; padding:15px;" onclick="openRecapFromProfile()">View History 🎞️</button>
   </div>
 
   <div id="screen-course-select">
@@ -118,9 +182,7 @@
         <button class="action-btn" style="width:auto; padding:0 15px; background:#111827;" onclick="searchGlobalCourses()">Search Global Map</button>
       </div>
 
-      <div id="course-scroller" style="overflow-y:auto; flex-grow:1; padding-bottom:20px; margin-top:5px;">
-        </div>
-      
+      <div id="course-scroller" style="overflow-y:auto; flex-grow:1; padding-bottom:20px; margin-top:5px;"></div>
       <div id="global-course-results" style="margin-top:10px; flex-shrink:0;"></div>
     </div>
   </div>
@@ -138,12 +200,19 @@
       </div>
     </div>
     
-    <div id="map-container"></div>
+    <div id="map-container">
+      <div class="overlay-panel">
+        <div style="font-size:9px; color:#003876; font-weight:bold; text-align:center; margin-bottom:4px; font-family:'Syne';">DATA LAYERS</div>
+        <button class="layer-btn active" onclick="setOverlay('stho_personal', this)">1. My STHO Avg</button>
+        <button class="layer-btn" onclick="setOverlay('history_personal', this)">2. My Past Shots</button>
+        <button class="layer-btn" onclick="setOverlay('stho_community', this)">3. Global STHO</button>
+        <button class="layer-btn" id="layer-compare-btn" style="display:none; background:#D4AF37; color:#FFFFFF;" onclick="setOverlay('compare', this)">4. Compare STHO</button>
+      </div>
+    </div>
 
     <div id="hole-jumper-modal" class="bottom-modal">
       <h3 style="margin:0 0 5px 0; color:#003876; text-align:center;">Jump to Hole</h3>
-      <div class="hole-grid" id="hole-grid-container">
-        </div>
+      <div class="hole-grid" id="hole-grid-container"></div>
       <button onclick="document.getElementById('hole-jumper-modal').style.display='none'" style="width:100%; margin-top:15px; padding:10px; background:transparent; color:#6B7280; border:none; font-weight:bold;">Cancel</button>
     </div>
 
@@ -200,7 +269,7 @@
 
     <div class="stats-grid">
       <div class="stat-box"><div class="stat-label">Total Putts</div><div class="stat-value" id="sum-putts">--</div></div>
-      <div class="stat-box"><div class="stat-label">Strokes Gained (Pers)</div><div class="stat-value" id="sum-sg" style="color:#10B981;">--</div></div>
+      <div class="stat-box"><div class="stat-label">Strokes Gained</div><div class="stat-value" id="sum-sg" style="color:#10B981;">--</div></div>
       <div class="stat-box"><div class="stat-label">Fairways (FIR)</div><div class="stat-value" id="sum-fir">--%</div></div>
       <div class="stat-box"><div class="stat-label">Greens (GIR)</div><div class="stat-value" id="sum-gir">--%</div></div>
     </div>
@@ -218,34 +287,77 @@
         <div class="stat-label">Sand Saves</div>
         <div style="font-size:20px; font-weight:bold; color:#D4AF37;" id="sum-sand-saves">0</div>
       </div>
-      <button class="action-btn" style="background:transparent; color:#EF4444; border:1px solid #EF4444; margin-top:30px; box-shadow:none;" onclick="deleteCurrentSession()">🗑️ DELETE THIS ROUND</button>
+      
+      <button class="action-btn" style="margin-top:20px;" onclick="loadRecapMap(currentSessionHoleIds, activeCourse.id, activeCourse.name)">▶ REVIEW SHOT TRACKER</button>
+      
+      <button class="action-btn" style="background:transparent; color:#EF4444; border:1px solid #EF4444; margin-top:15px; box-shadow:none;" onclick="deleteCurrentSession()">🗑️ DELETE THIS ROUND</button>
     </div>
   </div>
 
   <div id="screen-recap-list">
-    <div class="header-bar"><h2 style="margin:0; font-family:'Syne';">Round History</h2><button class="nav-btn" onclick="switchScreen('screen-home')">BACK</button></div>
+    <div class="header-bar"><h2 id="recap-list-title" style="margin:0; font-family:'Syne';">Round History</h2><button class="nav-btn" onclick="switchScreen('screen-home')">BACK</button></div>
     <div id="recap-list-container" style="padding:20px; overflow-y:auto; flex-grow:1;"></div>
   </div>
 
+  <div id="screen-recap-map">
+    <div class="header-bar">
+      <div><h2 id="recap-map-title" style="margin:0; font-family:'Syne';">Round Recap</h2><div id="recap-map-sub" style="font-size:12px; opacity:0.8;"></div></div>
+      <button class="nav-btn" onclick="closeRecapMap()">BACK</button>
+    </div>
+    
+    <div class="recap-stats-bar">
+      <div class="recap-stat-item"><span>Score</span><strong id="recap-stat-score">--</strong></div>
+      <div class="recap-stat-item"><span>Putts</span><strong id="recap-stat-putts">--</strong></div>
+    </div>
+
+    <div id="recap-map-container">
+      <div class="overlay-panel">
+        <div style="font-size:9px; color:#003876; font-weight:bold; text-align:center; margin-bottom:4px; font-family:'Syne';">DATA LAYERS</div>
+        <button class="layer-btn active" onclick="setOverlay('stho_personal', this)">1. My STHO Avg</button>
+        <button class="layer-btn" onclick="setOverlay('history_personal', this)">2. My Past Shots</button>
+        <button class="layer-btn" onclick="setOverlay('stho_community', this)">3. Global STHO</button>
+        <button class="layer-btn" id="recap-layer-compare-btn" style="display:none; background:#D4AF37; color:#FFFFFF;" onclick="setOverlay('compare', this)">4. Compare STHO</button>
+      </div>
+    </div>
+    
+    <div class="recap-tools">
+      <button class="tool-btn" onclick="playMovieMode()">▶ PLAY MOVIE</button>
+    </div>
+
+    <div class="command-center" style="flex-direction:row; justify-content:space-between; align-items:center; padding-top:15px; border-top:none;">
+      <button class="nav-btn" style="border-color:#003876; color:#003876;" onclick="changeRecapHole(-1)">Prev</button>
+      <div id="recap-hole-indicator" style="font-family:'DM Mono'; font-weight:bold; color:#003876;">Hole 1</div>
+      <button class="nav-btn" style="border-color:#003876; color:#003876;" onclick="changeRecapHole(1)">Next</button>
+    </div>
+  </div>
+
   <script>
-    // --- SUPABASE CONFIG ---
+    // ==========================================
+    // INITIALIZATION & SUPABASE CONFIG
+    // ==========================================
     const SUPABASE_URL = 'https://nawebecmrjoyuapwhuaq.supabase.co';
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hd2ViZWNtcmpveXVhcHdodWFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY2NjEsImV4cCI6MjA5MDEwMjY2MX0.bKOoBYFDTEw0QYvFmoSuOjcqRioN44OkqgpLfX42sG0';
     let sb = null; try { if(typeof supabase !== 'undefined') sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e){}
 
+    // Global State Variables
     let currentUser = null, currentProfile = null, authMode = 'login';
     let map = null, markersLayer = null;
-    
-    // --- COURSE / DB STATE ---
     let activeCourse = null; 
     let currentHole = 1; 
     let currentShots = [], activeShotType = null, pendingPlot = null;
     let currentWindString = "-- mph"; 
     let currentSessionHoleIds = []; 
     
-    // Favorites Array & Master Course List
     let allDBCourses = [];
-    let userFavCourses = {}; // Stored locally per user ID
+    let userFavCourses = {}; 
+    let activeOverlayType = 'stho_personal';
+    let overlayLayer = null;
+    
+    // Social & Cinematic Storytelling State
+    let activeProfileUserId = null; 
+    let activeProfileLiveRoundData = null;
+    let recapMap = null, recapLinesLayer = null, recapMarkersLayer = null;
+    let recapHoleData = {}, currentRecapHole = 1, movieTimeout = null;
 
     window.onload = async () => {
       if(!sb) return;
@@ -253,29 +365,32 @@
       if (data?.session) { currentUser = data.session.user; await loadCurrentUserProfile(); switchScreen('screen-home'); }
       else switchScreen('screen-auth');
       
+      // Inject jump grid dynamically
       const grid = document.getElementById('hole-grid-container');
       for(let i=1; i<=18; i++) { grid.innerHTML += `<button class="hole-btn" onclick="jumpToHole(${i})">${i}</button>`; }
     };
 
+    // ==========================================
+    // CORE APP NAVIGATION & AUTH
+    // ==========================================
     async function loadCurrentUserProfile() {
       const {data} = await sb.from('profiles').select('username').eq('id', currentUser.id).single();
       currentProfile = data;
       document.getElementById('home-user-email').textContent = data ? data.username : currentUser.email;
-      
-      // Load local favorites
       try { userFavCourses = JSON.parse(localStorage.getItem('autocaddy_favs') || '{}'); } catch(e) { userFavCourses = {}; }
       if (!userFavCourses[currentUser.id]) userFavCourses[currentUser.id] = [];
     }
 
     function switchScreen(id) {
-      ['screen-auth','screen-home','screen-course-select','screen-game','screen-score','screen-recap-list','screen-summary'].forEach(s => {
+      ['screen-auth','screen-home','screen-course-select','screen-game','screen-score','screen-recap-list','screen-summary', 'screen-social', 'screen-recap-map'].forEach(s => {
         const el = document.getElementById(s); if(el) el.style.display = 'none';
       });
       document.getElementById(id).style.display = 'flex';
+      // Leaflet requires invalidation when a map's display shifts from none to flex
       if(id === 'screen-game' && map) setTimeout(()=>map.invalidateSize(), 100);
+      if(id === 'screen-recap-map' && recapMap) setTimeout(()=>recapMap.invalidateSize(), 100);
     }
 
-    // --- AUTHENTICATION ---
     function switchAuthTab(mode) { 
       authMode = mode; 
       document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active', i===(mode==='login'?0:1))); 
@@ -301,21 +416,22 @@
     }
     async function logOut() { await sb.auth.signOut(); currentUser = null; currentProfile = null; switchScreen('screen-auth'); }
 
-    // --- NEW COURSE SELECTION ---
+    // ==========================================
+    // COURSE SELECTION & DEDUPLICATION LOGIC
+    // ==========================================
     async function openCourseSelect() { 
       switchScreen('screen-course-select'); 
       document.getElementById('course-scroller').innerHTML = "<p style='text-align:center; padding:20px;'>Loading courses...</p>";
       document.getElementById('global-course-results').innerHTML = "";
       document.getElementById('db-course-search').value = "";
       
-      // Fetch all courses once to power the fast search & favorites
       const { data } = await sb.from('courses').select('*').order('name', {ascending: true});
       allDBCourses = data || [];
       renderCourseList();
     }
 
     function toggleFavorite(e, courseId) {
-      e.stopPropagation(); // Stop row click from launching round
+      e.stopPropagation(); 
       const favs = userFavCourses[currentUser.id];
       if (favs.includes(courseId)) { userFavCourses[currentUser.id] = favs.filter(id => id !== courseId); } 
       else { favs.push(courseId); }
@@ -327,11 +443,10 @@
       const q = document.getElementById('db-course-search').value.toLowerCase();
       const favIds = userFavCourses[currentUser.id] || [];
       const filtered = allDBCourses.filter(c => c.name.toLowerCase().includes(q));
-      
       const favs = filtered.filter(c => favIds.includes(c.id));
       const others = filtered.filter(c => !favIds.includes(c.id));
-      
       const scroller = document.getElementById('course-scroller');
+      
       if (filtered.length === 0) return scroller.innerHTML = "<div style='color:#6B7280; text-align:center; padding:20px;'>No database courses found. Try Global Map Search.</div>";
 
       let html = '';
@@ -342,7 +457,6 @@
       }
       html += `<div style="font-family:'Syne'; color:#003876; margin-bottom:10px; font-size:14px; font-weight:bold;">ALL COURSES</div>`;
       html += others.map(c => buildCourseCard(c, false)).join('');
-      
       scroller.innerHTML = html;
     }
 
@@ -360,7 +474,7 @@
     }
 
     async function searchGlobalCourses() {
-      const q = document.getElementById('db-course-search').value; // Use same input bar
+      const q = document.getElementById('db-course-search').value; 
       if(!q) return alert("Enter a course name in the search bar first!");
       const resContainer = document.getElementById('global-course-results');
       resContainer.innerHTML = "Searching globally...";
@@ -377,27 +491,31 @@
       } catch (e) { resContainer.innerHTML = "Search failed."; }
     }
 
+    async function addCourseToDB(name, lat, lng) {
+      try {
+        const { data: existing } = await sb.from('courses').select('*').ilike('name', `%${name.split(' ')[0]}%`).limit(1);
+        if (existing && existing.length > 0) { startRound(existing[0]); return; }
+
+        const { data, error } = await sb.from('courses').insert([{ name, lat, lng }]).select().single();
+        if(error) throw error; alert(`${name} added to AutoCaddy!`); startRound(data);
+      } catch (e) { alert("Error adding course: " + e.message); }
+    }
+
+    // ==========================================
+    // ENVIRONMENTAL ENGINE: WIND & LOCATION
+    // ==========================================
     async function fetchWindData(lat, lng) {
       try {
         const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
         const data = await res.json();
         const cw = data.current_weather;
-        
-        // Open-Meteo provides where wind comes FROM. 
-        // We add 180 to point the arrow where the wind is GOING.
+        // Point the arrow relative to where the wind is going
         const rotation = (cw.winddirection + 180) % 360;
-        
         currentWindString = `${cw.windspeed} mph`;
-        
-        // We use a simple Up Arrow and rotate it via CSS
-        document.getElementById('wind-display').innerHTML = 
-          `<span style="display:inline-block; transform: rotate(${rotation}deg); transition: transform 0.3s;">↑</span> ${currentWindString}`;
-      } catch (e) { 
-        document.getElementById('wind-display').innerText = "💨 -- mph"; 
-      }
+        document.getElementById('wind-display').innerHTML = `<span style="display:inline-block; transform: rotate(${rotation}deg); transition: transform 0.3s;">↑</span> ${currentWindString}`;
+      } catch (e) { document.getElementById('wind-display').innerText = "💨 -- mph"; }
     }
 
-    // --- PLAY ROUND & MAP ---
     function startRound(courseObj) { 
       activeCourse = courseObj;
       currentSessionHoleIds = []; 
@@ -418,6 +536,12 @@
       loadHole(h);
     }
 
+    // ==========================================
+    // THE MACHINE LEARNING FRAMER
+    // ==========================================
+    // Vibe: The Autonomous Caddy
+    // Automatically pulls crowd-sourced geospatial data
+    // to build perfect framing around the hole.
     async function loadHole(h) {
       currentHole = h; currentShots = []; markersLayer.clearLayers();
       document.getElementById('hole-title').innerHTML = `Hole ${h} <span style="font-size:12px; opacity:0.6;">▼</span>`;
@@ -425,34 +549,35 @@
       const { data: holeData } = await sb.from('holes').select('par').eq('course_id', activeCourse.id).eq('hole_number', h).single();
       document.getElementById('hole-details').textContent = holeData?.par ? `Par ${holeData.par}` : "Par --";
 
-      // THE FIX: Find the most recent round played by ANY user for THIS specific hole
-      const { data: recentRound } = await sb.from('rounds')
-        .select('id')
-        .eq('course_id', activeCourse.id)
-        .eq('hole_number', h)
-        .order('created_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (recentRound) {
-        // If ANYONE played it, grab their Tee and Putt plots to frame the hole
-        const { data: pastShots } = await sb.from('shots')
-          .select('lat, lng')
-          .eq('round_id', recentRound.id)
-          .in('shot_type', ['Tee', 'Putt']); 
-
-        if (pastShots && pastShots.length > 0) {
-          if (pastShots.length === 1) { 
-            map.setView([pastShots[0].lat, pastShots[0].lng], 19); 
-          } else {
-            const bounds = L.latLngBounds(pastShots.map(s => [s.lat, s.lng]));
-            map.fitBounds(bounds, { padding: [30, 30], maxZoom: 19 });
+      // Session Persistence check
+      if (currentSessionHoleIds.length > 0) {
+        const { data: sessionRound } = await sb.from('rounds').select('id').eq('course_id', activeCourse.id).eq('hole_number', h).in('id', currentSessionHoleIds).limit(1).single();
+        if (sessionRound) {
+          const { data: savedShots } = await sb.from('shots').select('*').eq('round_id', sessionRound.id);
+          if (savedShots && savedShots.length > 0) {
+            currentShots = savedShots;
+            markersLayer.clearLayers();
+            currentShots.forEach((s, index) => {
+              const marker = L.marker([s.lat, s.lng], {icon: L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`}), draggable: true}).addTo(markersLayer);
+              marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
+            });
+            return;
           }
-          return; // Stop here, map is framed perfectly!
         }
       }
 
-      // Fallback: If no history exists, use GPS or course default
+      // Crowdsourced fallback
+      const { data: recentRound } = await sb.from('rounds').select('id').eq('course_id', activeCourse.id).eq('hole_number', h).order('created_at', { ascending: false }).limit(1).single();
+      if (recentRound) {
+        const { data: pastShots } = await sb.from('shots').select('lat, lng').eq('round_id', recentRound.id).in('shot_type', ['Tee', 'Putt']); 
+        if (pastShots && pastShots.length > 0) {
+          if (pastShots.length === 1) { map.setView([pastShots[0].lat, pastShots[0].lng], 19); } 
+          else { map.fitBounds(L.latLngBounds(pastShots.map(s => [s.lat, s.lng])), { padding: [30, 30], maxZoom: 19 }); }
+          return; 
+        }
+      }
+
+      // Live GPS fallback
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => { 
@@ -465,7 +590,9 @@
       } else { map.setView([activeCourse.lat, activeCourse.lng], 17); }
     }
 
-    // --- PLOTTING ---
+    // ==========================================
+    // PLOTTING CONTROLS & LOGIC
+    // ==========================================
     function setShotType(type, btn) { activeShotType = type; document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
     
     function handleMapTap(e) {
@@ -497,30 +624,25 @@
     function clearHolePlots() {
       if(currentShots.length === 0) return;
       if(confirm("Are you sure you want to clear all plots for this hole?")) {
-        currentShots = [];
-        markersLayer.clearLayers();
+        currentShots = []; markersLayer.clearLayers();
         document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
-        activeShotType = null;
-        pendingPlot = null;
+        activeShotType = null; pendingPlot = null;
       }
     }
 
+    // ==========================================
+    // SCORING ENGINE
+    // ==========================================
     function openScoreScreen() {
       switchScreen('screen-score');
-      
-      // Calculate strokes: Penalty plots count as 2, all others count as 1
       let calculatedStrokes = 0;
-      currentShots.forEach(s => { 
-        calculatedStrokes += (s.type === 'Penalty' ? 2 : 1); 
-      });
-      
+      currentShots.forEach(s => { calculatedStrokes += (s.type === 'Penalty' ? 2 : 1); });
       document.getElementById('score-val').innerText = calculatedStrokes > 0 ? calculatedStrokes : 4;
       document.getElementById('putts-val').innerText = currentShots.filter(s => s.type === 'Putt').length || 2;
       document.getElementById('btn-save-score').innerText = currentHole === 18 ? "SAVE & FINISH ROUND" : "SAVE HOLE";
     }
     function adjustValue(id, dir) { const el=document.getElementById(id); el.innerText = Math.max(0, parseInt(el.innerText)+dir); }
 
-    // --- SAVING & SUMMARY LOGIC ---
     async function saveScoreToDB() {
       const score = parseInt(document.getElementById('score-val').innerText);
       const putts = parseInt(document.getElementById('putts-val').innerText);
@@ -549,7 +671,10 @@
       currentSessionHoleIds = []; activeCourse = null; switchScreen('screen-home');
     }
 
-    // --- GHIN-STYLE ANALYTICS ENGINE ---
+    // ==========================================
+    // GHIN-STYLE ANALYTICS ENGINE
+    // ==========================================
+    // Vibe: The Pro Tour Stat Sheet
     function calculateBearing(lat1, lon1, lat2, lon2) {
       const toRad = d => d * Math.PI / 180; const toDeg = r => r * 180 / Math.PI;
       const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
@@ -642,13 +767,81 @@
       document.getElementById('sum-miss-short').innerText = missS; document.getElementById('sum-miss-long').innerText = missLong;
     }
 
-    // --- HISTORY LIST & DELETION ---
-    async function loadRecapList() {
+    // ==========================================
+    // SOCIAL & FRIENDS SYSTEM
+    // ==========================================
+    async function openSocialFeed() {
+      switchScreen('screen-social'); document.getElementById('friends-list-container').innerHTML = "Loading feed...";
+      const {data: follows} = await sb.from('friends').select('followed_id').eq('follower_id', currentUser.id);
+      if(!follows || !follows.length) return document.getElementById('friends-list-container').innerHTML = "<div style='text-align:center; padding: 40px 20px;'><h3 style='margin:0 0 5px 0; color:#003876;'>No playing partners yet</h3><p style='color:#6B7280; font-size:14px;'>Use the search bar above to find your crew and watch their rounds live.</p></div>";
+
+      const friendIds = follows.map(f => f.followed_id);
+      const {data: profiles} = await sb.from('profiles').select('*').in('id', friendIds);
+      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString();
+      const {data: recentRounds} = await sb.from('rounds').select('user_id, created_at, hole_number, course_id, courses(name)').in('user_id', friendIds).gte('created_at', fiveHoursAgo).order('created_at', {ascending: false});
+      
+      let html = '';
+      profiles.forEach(p => {
+        const userRecent = recentRounds?.find(r => r.user_id === p.id);
+        const badgeHtml = userRecent ? `<div class="live-badge">🔴 LIVE Hole ${userRecent.hole_number}</div>` : '';
+        html += `<div class="friend-card" onclick="openProfile('${p.id}', '${p.username}')"><strong style="font-size:18px;">${p.username}</strong>${badgeHtml}</div>`;
+      });
+      document.getElementById('friends-list-container').innerHTML = html;
+    }
+
+    async function searchFriends() {
+      const q = document.getElementById('friend-search').value; if(!q) return;
+      const {data} = await sb.from('profiles').select('*').ilike('username', `%${q}%`).neq('id', currentUser.id);
+      const res = document.getElementById('friend-search-results');
+      if(!data || !data.length) return res.innerHTML = "<div style='color:#6B7280;'>No users found.</div>";
+      res.innerHTML = data.map(p => `<div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:#F3F4F6; border:1px solid #E5E7EB; margin-bottom:5px; border-radius:8px;"><span>${p.username}</span><button class="nav-btn" onclick="followUser('${p.id}')">Follow</button></div>`).join('');
+    }
+
+    async function followUser(id) { await sb.from('friends').insert({follower_id: currentUser.id, followed_id: id}); alert("Followed!"); openSocialFeed(); }
+    function openMyProfile() { openProfile(currentUser.id, currentProfile ? currentProfile.username : 'Me'); }
+
+    async function openProfile(userId, username) {
+      activeProfileUserId = userId; activeProfileLiveRoundData = null;
+      document.getElementById('prof-username').innerText = username;
+      document.getElementById('prof-live-btn').style.display = 'none'; 
+      document.getElementById('profile-modal').style.display = 'flex';
+
+      const { data: allHoles } = await sb.from('rounds').select('id, score, created_at, course_id').eq('user_id', userId).order('created_at', {ascending: false});
+      if(!allHoles || allHoles.length === 0) { document.getElementById('prof-busta-cap').innerText = "N/A"; document.getElementById('prof-avg-score').innerText = "N/A"; return; }
+
+      document.getElementById('prof-avg-score').innerText = allHoles.length; 
+      
+      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000); 
+      const latestHole = allHoles[0];
+      if(new Date(latestHole.created_at) > fiveHoursAgo) {
+         const liveHoles = allHoles.filter(h => h.course_id === latestHole.course_id && new Date(h.created_at) > fiveHoursAgo);
+         activeProfileLiveRoundData = { display: `${username} - LIVE`, holeIds: liveHoles.map(r=>r.id), courseId: latestHole.course_id };
+         document.getElementById('prof-live-btn').style.display = 'block';
+      }
+      
+      document.getElementById('layer-compare-btn').style.display = (userId !== currentUser.id) ? 'block' : 'none';
+      document.getElementById('recap-layer-compare-btn').style.display = (userId !== currentUser.id) ? 'block' : 'none';
+    }
+
+    function jumpToLiveMap() { 
+      document.getElementById('profile-modal').style.display = 'none'; 
+      loadRecapMap(activeProfileLiveRoundData.holeIds, activeProfileLiveRoundData.courseId, activeProfileLiveRoundData.display); 
+    }
+    function openRecapFromProfile() { 
+      document.getElementById('profile-modal').style.display = 'none'; 
+      loadRecapListForUser(activeProfileUserId, `${document.getElementById('prof-username').innerText}'s Rounds`); 
+    }
+
+    // ==========================================
+    // RECAP LIST (HISTORY)
+    // ==========================================
+    async function loadRecapListForUser(userId, title) {
       switchScreen('screen-recap-list');
+      document.getElementById('recap-list-title').innerText = title || "Round History";
       const container = document.getElementById('recap-list-container');
       container.innerHTML = "Loading history...";
       
-      const { data, error } = await sb.from('rounds').select(`id, created_at, course_id, courses(name)`).eq('user_id', currentUser.id).order('created_at', {ascending: false});
+      const { data, error } = await sb.from('rounds').select(`id, created_at, course_id, courses(name)`).eq('user_id', userId).order('created_at', {ascending: false});
       if(!data || data.length === 0) return container.innerHTML = "<p>No rounds recorded yet.</p>";
 
       const sessions = {};
@@ -682,6 +875,104 @@
         await sb.from('rounds').delete().in('id', currentSessionHoleIds);
         alert("Round deleted successfully."); currentSessionHoleIds = []; switchScreen('screen-home');
       } catch (e) { alert("Delete failed: " + e.message); }
+    }
+
+    // ==========================================
+    // IMMERSIVE STORYTELLING (MOVIE MODE)
+    // ==========================================
+    // Vibe: "The Highlight Reel"
+    // Purpose: Loads historical geospatial shot data and dynamically 
+    // animates lines and markers to simulate the actual sequence of the round.
+    // Extremely sticky for user retention and social flexs.
+    async function loadRecapMap(holeIds, courseId, title) {
+      switchScreen('screen-recap-map');
+      document.getElementById('recap-map-title').innerText = title || "Round Recap";
+      
+      if(!recapMap) {
+        recapMap = L.map('recap-map-container',{zoomControl:false});
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 }).addTo(recapMap);
+        recapLinesLayer = L.layerGroup().addTo(recapMap); 
+        recapMarkersLayer = L.layerGroup().addTo(recapMap);
+      }
+      
+      clearRecapMap();
+      const { data: rounds } = await sb.from('rounds').select('*').in('id', holeIds).order('hole_number', {ascending:true});
+      const { data: shots } = await sb.from('shots').select('*').in('round_id', holeIds).order('created_at', {ascending:true});
+      
+      recapHoleData = {};
+      rounds.forEach(r => { recapHoleData[r.hole_number] = { details: r, shots: shots ? shots.filter(s => s.hole_number === r.hole_number) : [] }; });
+      
+      currentRecapHole = Object.keys(recapHoleData).sort((a,b)=>a-b)[0];
+      if(currentRecapHole) drawRecapHole(currentRecapHole);
+    }
+
+    function clearRecapMap() { 
+      if(movieTimeout) clearTimeout(movieTimeout); 
+      if(recapLinesLayer) recapLinesLayer.clearLayers(); 
+      if(recapMarkersLayer) recapMarkersLayer.clearLayers(); 
+    }
+
+    // The Director: Sets the stage before the movie starts playing
+    function drawRecapHole(holeNum) {
+      if(!recapHoleData[holeNum]) return;
+      clearRecapMap();
+      document.getElementById('recap-hole-indicator').innerText = `Hole ${holeNum}`;
+      const data = recapHoleData[holeNum];
+      
+      document.getElementById('recap-stat-score').innerText = data.details.score;
+      document.getElementById('recap-stat-putts').innerText = data.details.putts;
+      
+      if(data.shots.length > 0) {
+        const latlngs = data.shots.map(s => [s.lat, s.lng]);
+        L.polyline(latlngs, {color: '#0055A4', weight: 4, dashArray: '5, 10'}).addTo(recapLinesLayer);
+        data.shots.forEach((s, i) => {
+          const icon = L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`, html: `<div style="color:#111827; font-family:'DM Mono'; font-size:10px; position:absolute; top:-16px; left:-5px; font-weight:bold; background:rgba(255,255,255,0.8); border-radius:4px; padding:1px 4px; box-shadow:0 1px 2px rgba(0,0,0,0.3);">${i+1}</div>`});
+          L.marker([s.lat, s.lng], {icon}).addTo(recapMarkersLayer);
+        });
+        recapMap.fitBounds(L.polyline(latlngs).getBounds(), {padding: [50, 50]});
+      }
+    }
+
+    // The Projector: Animates the shots sequentially 
+    function playMovieMode() {
+      const data = recapHoleData[currentRecapHole];
+      if(!data || data.shots.length === 0) return alert("No shot data to play.");
+      
+      clearRecapMap();
+      
+      const latlngs = data.shots.map(s => [s.lat, s.lng]);
+      recapMap.fitBounds(L.polyline(latlngs).getBounds(), {padding: [50, 50]});
+
+      let currentShotIndex = 0;
+      function showNextShot() {
+        if (currentShotIndex >= data.shots.length) return; 
+        const s = data.shots[currentShotIndex];
+        const icon = L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`, html: `<div style="color:#111827; font-family:'DM Mono'; font-size:10px; position:absolute; top:-16px; left:-5px; font-weight:bold; background:rgba(255,255,255,0.8); border-radius:4px; padding:1px 4px; box-shadow:0 1px 2px rgba(0,0,0,0.3);">${currentShotIndex+1}</div>`});
+        L.marker([s.lat, s.lng], {icon}).addTo(recapMarkersLayer);
+
+        if (currentShotIndex > 0) {
+          const prevS = data.shots[currentShotIndex - 1];
+          L.polyline([[prevS.lat, prevS.lng], [s.lat, s.lng]], {color: '#0055A4', weight: 4, dashArray: '5, 10'}).addTo(recapLinesLayer);
+        }
+        currentShotIndex++; movieTimeout = setTimeout(showNextShot, 1200); 
+      }
+      showNextShot();
+    }
+
+    function changeRecapHole(dir) {
+      const availableHoles = Object.keys(recapHoleData).map(Number).sort((a,b)=>a-b);
+      const currIdx = availableHoles.indexOf(Number(currentRecapHole));
+      const nextIdx = currIdx + dir;
+      if(nextIdx >= 0 && nextIdx < availableHoles.length) { 
+        currentRecapHole = availableHoles[nextIdx]; 
+        drawRecapHole(currentRecapHole); 
+      }
+    }
+    
+    function closeRecapMap() {
+        clearRecapMap(); 
+        if(activeProfileLiveRoundData) switchScreen('screen-social'); 
+        else switchScreen('screen-summary');
     }
   </script>
 </body>
