@@ -16,10 +16,9 @@
   :root { --navy:#0a1628; --navy-mid:#0f2040; --navy-light:#162d55; --green:#00d68f; --gold:#f0c040; --red:#ff4d6d; --blue:#3b82f6; --white:#f0f4ff; --muted:#8b9bb4; }
   body { margin:0; padding:0; font-family:'DM Sans',sans-serif; background:var(--navy); color:var(--white); display:flex; flex-direction:column; height:100vh; overflow:hidden; }
   button { cursor:pointer; }
-  .auth-input, .action-btn, .menu-btn { width:100%; max-width:300px; padding:15px; border-radius:8px; border:1px solid var(--navy-light); font-size:16px; }
+  .auth-input, .action-btn, .menu-btn { width:100%; max-width:300px; padding:15px; border-radius:8px; border:1px solid var(--navy-light); font-size:16px; box-sizing:border-box; }
   .auth-input { background:var(--navy-mid); color:var(--white); margin-bottom:15px; }
   .action-btn { background:var(--gold); color:var(--navy); font-family:'Syne'; font-weight:800; border:none; }
-  .action-btn:disabled { opacity:0.5; }
   .header-bar { padding:15px; display:flex; justify-content:space-between; align-items:center; background:var(--navy-mid); border-bottom:1px solid var(--navy-light); z-index:1000; }
   .auth-tabs { display:flex; margin-bottom:20px; background:var(--navy-mid); border-radius:8px; }
   .auth-tab { background:transparent; color:var(--muted); border:none; padding:10px 20px; font-family:'Syne'; font-weight:700; }
@@ -27,26 +26,42 @@
   .home-menu { flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:20px; }
   .menu-btn { padding:20px; border-radius:12px; background:var(--navy-mid); color:var(--white); font-family:'Syne'; font-weight:800; font-size:18px; }
   .menu-btn.primary { background:var(--green); color:var(--navy); border-color:var(--green); }
-  #screen-auth, #screen-home, #screen-game, #screen-data, #screen-score, #screen-recap-list, #screen-recap-map { display:none; flex-direction:column; height:100%; position:relative; }
+  
+  /* Screens */
+  #screen-auth, #screen-home, #screen-game, #screen-data, #screen-score, #screen-recap-list, #screen-recap-map, #screen-social { display:none; flex-direction:column; height:100%; position:relative; }
   #screen-auth { align-items:center; justify-content:center; padding:20px; }
-  #map-container, #data-map-container, #recap-map-container { flex-grow:1; background:#000; width:100%; z-index:1; }
+  #map-container, #recap-map-container { flex-grow:1; background:#000; width:100%; z-index:1; }
+  
   .nav-btn { background:transparent; color:var(--gold); border:1px solid var(--gold); border-radius:4px; padding:5px 15px; font-weight:bold; }
+  
+  /* Map Pins */
   .leaflet-div-icon { background:transparent; border:none; }
   .shot-pin { width:11px; height:11px; border:1.5px solid white; border-radius:50%; box-shadow:0 2px 4px rgba(0,0,0,0.9); }
   .pin-Tee { background-color:var(--red); } .pin-Approach { background-color:var(--blue); } .pin-Chip { background-color:var(--gold); } .pin-Putt { background-color:var(--green); }
-  .pin-Penalty { background-color:#8a2be2; border-color:var(--white); } /* Bright Purple for Drops */
+  .pin-Penalty { background-color:#8a2be2; border-color:var(--white); } 
+  
+  /* Controls */
   .command-center { background:var(--navy-mid); border-top:1px solid var(--navy-light); z-index:1000; display:flex; flex-direction:column; padding:10px 15px 20px 15px; gap:10px; }
   .shot-selector { display:flex; gap:5px; } .shot-btn { flex:1; padding:12px 0; background:var(--navy); color:var(--muted); border:1px solid var(--navy-light); border-radius:6px; font-weight:bold; font-size: 13px; }
   .shot-btn.active { background:var(--blue); color:var(--white); border-color:var(--blue); }
-  .status-row { display:flex; justify-content:space-between; align-items:center; padding:5px 0; }
   .bottom-modal { display:none; position:absolute; bottom:0; left:0; right:0; background:var(--navy-mid); padding:20px; border-top-left-radius:16px; border-top-right-radius:16px; z-index:2000; box-shadow:0 -5px 20px rgba(0,0,0,0.5); }
+  
   .lie-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px; } 
   .lie-btn { padding:12px; background:var(--navy); border:1px solid var(--navy-light); color:var(--white); border-radius:8px; font-weight:bold; }
   #screen-score { overflow-y:auto; background:var(--navy); }
   .number-adjuster { display:flex; align-items:center; gap:15px; } .adj-btn { width:40px; height:40px; border-radius:50%; border:1px solid var(--blue); background:transparent; color:var(--blue); font-size:24px; }
   .num-display { font-size:28px; font-weight:800; width:40px; text-align:center; font-family:'DM Mono'; }
   .wind-badge { background:rgba(0,214,143,0.2); border:1px solid var(--green); color:var(--green); padding:2px 8px; border-radius:12px; font-size:11px; font-family:'DM Mono'; font-weight:bold; margin-top:4px; display:inline-block; }
-  .recap-card { background:var(--navy-mid); border:1px solid var(--navy-light); border-radius:12px; padding:15px; margin-bottom:10px; cursor:pointer; }
+  
+  /* Social UI */
+  .recap-card, .friend-card { background:var(--navy-mid); border:1px solid var(--navy-light); border-radius:12px; padding:15px; margin-bottom:10px; cursor:pointer; display:flex; justify-content:space-between; align-items:center;}
+  .live-badge { background:var(--red); color:white; font-size:10px; font-family:'DM Mono'; font-weight:bold; padding:3px 8px; border-radius:4px; animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+  .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+  .stat-box { background:var(--navy); padding:15px; border-radius:8px; text-align:center; border:1px solid var(--navy-light); }
+  .stat-value { font-family:'Syne'; font-size:24px; color:var(--gold); }
+  .stat-label { font-size:12px; color:var(--muted); }
+  .search-row { display:flex; gap:10px; margin-bottom:20px; }
 </style>
 </head>
 <body>
@@ -55,6 +70,7 @@
     <h1 style="font-family:'Syne'; color:var(--green); font-size:36px; text-align:center; margin-bottom:5px;">BEY LEA<br>BUSTA</h1>
     <p style="color:var(--muted); margin-bottom:30px;">cause the BUSTA kept me outta handcuffs</p>
     <div class="auth-tabs"><button class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</button><button class="auth-tab" onclick="switchAuthTab('signup')">SIGN UP</button></div>
+    <input type="text" id="field-username" class="auth-input" placeholder="Username" style="display:none;">
     <input type="email" id="field-email" class="auth-input" placeholder="Email Address">
     <input type="password" id="field-pass" class="auth-input" placeholder="Password">
     <button id="auth-submit" class="action-btn" onclick="handleAuth()">LOGIN</button>
@@ -67,10 +83,49 @@
     </div>
     <div class="home-menu">
       <button class="menu-btn primary" onclick="startRound()">🏌️‍♂️ PLAY GOLF</button>
-      <button class="menu-btn" onclick="alert('Data Dash formatting in progress...')">📊 DATA ANALYSIS</button>
-      <button class="menu-btn" onclick="openRecapList()">🎞️ ROUND RECAP</button>
-      <button class="menu-btn" onclick="alert('Live Spectator mode coming soon!')">👥 WATCH FRIENDS</button>
+      <button class="menu-btn" onclick="openSocialFeed()">👥 SOCIAL & LIVE</button>
+      <button class="menu-btn" onclick="openMyProfile()">📊 MY PROFILE</button>
+      <button class="menu-btn" onclick="openRecapList(currentUser.id, 'My Rounds')">🎞️ ROUND RECAP</button>
     </div>
+  </div>
+
+  <div id="screen-social">
+    <div class="header-bar"><h2 style="margin:0; font-family:'Syne';">Clubhouse</h2><button class="nav-btn" onclick="switchScreen('screen-home')">HOME</button></div>
+    <div style="padding:20px; overflow-y:auto; flex-grow:1;">
+      <div class="search-row">
+        <input type="text" id="friend-search" class="auth-input" style="margin:0; flex-grow:1;" placeholder="Search usernames...">
+        <button class="action-btn" style="width:auto; padding:0 20px;" onclick="searchFriends()">Find</button>
+      </div>
+      <div id="friend-search-results" style="margin-bottom:20px;"></div>
+      
+      <h3 style="color:var(--green); font-family:'Syne'; border-bottom:1px solid var(--navy-light); padding-bottom:5px;">Live & Recent</h3>
+      <div id="friends-list-container">Loading feed...</div>
+    </div>
+  </div>
+
+  <div id="profile-modal" class="bottom-modal" style="height:75vh; overflow-y:auto; flex-direction:column;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+      <h2 id="prof-username" style="margin:0; font-family:'Syne'; color:var(--white);">Username</h2>
+      <button onclick="document.getElementById('profile-modal').style.display='none'" style="background:transparent; color:var(--muted); border:none; font-size:18px;">✕</button>
+    </div>
+    
+    <button id="prof-live-btn" class="action-btn" style="background:var(--red); color:white; margin-bottom:20px; display:none;" onclick="jumpToLiveMap()">🔴 WATCH LIVE ROUND</button>
+    
+    <div class="stats-grid">
+      <div class="stat-box">
+        <div class="stat-label">BEY LEA BUSTA CAP</div>
+        <div class="stat-value" id="prof-busta-cap">--</div>
+        <div style="font-size:10px; color:var(--muted); margin-top:5px;">Gold Tees • Best 8 of 20</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-label">COURSE AVERAGE</div>
+        <div class="stat-value" id="prof-avg-score" style="color:var(--white);">--</div>
+        <div style="font-size:10px; color:var(--muted); margin-top:5px;">Total strokes</div>
+      </div>
+    </div>
+    
+    <h3 style="color:var(--gold); border-bottom:1px solid var(--navy-light); padding-bottom:5px;">Recent Rounds</h3>
+    <button class="menu-btn" style="width:100%; font-size:14px; padding:15px;" onclick="openRecapFromProfile()">View Shot Maps 🎞️</button>
   </div>
 
   <div id="screen-game">
@@ -86,7 +141,6 @@
     
     <div id="lie-modal" class="bottom-modal">
       <h3 style="margin:0 0 5px 0; color:var(--gold);">Select Lie</h3>
-      <p style="margin: 0; font-size: 12px; color: var(--muted);">Where is your ball located?</p>
       <div class="lie-grid">
         <button class="lie-btn" onclick="confirmLie('Fairway')" style="background:var(--navy-light); border-color:var(--green); padding:18px; font-size:16px;">Fairway</button> 
         <button class="lie-btn" onclick="confirmLie('Rough')" style="background:var(--navy-light); border-color:var(--gold); padding:18px; font-size:16px;">Rough</button>
@@ -126,14 +180,14 @@
   </div>
 
   <div id="screen-recap-list">
-    <div class="header-bar"><h2 style="margin:0; font-family:'Syne'; color:var(--gold);">Past Rounds</h2><button class="nav-btn" onclick="switchScreen('screen-home')">HOME</button></div>
+    <div class="header-bar"><h2 id="recap-list-title" style="margin:0; font-family:'Syne'; color:var(--gold);">Rounds</h2><button class="nav-btn" onclick="switchScreen('screen-home')">BACK</button></div>
     <div id="recap-list-container" style="padding:20px; overflow-y:auto;"></div>
   </div>
 
   <div id="screen-recap-map">
     <div class="header-bar">
       <div><h2 id="recap-map-title" style="margin:0; font-family:'Syne'; color:var(--green);">Round Recap</h2><div id="recap-map-sub" style="font-size:12px; color:var(--muted);"></div></div>
-      <button class="nav-btn" onclick="switchScreen('screen-recap-list')">BACK</button>
+      <button class="nav-btn" onclick="closeRecapMap()">BACK</button>
     </div>
     <div id="recap-map-container"></div>
     <div class="command-center" style="flex-direction:row; justify-content:space-between; align-items:center;">
@@ -148,11 +202,12 @@
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hd2ViZWNtcmpveXVhcHdodWFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY2NjEsImV4cCI6MjA5MDEwMjY2MX0.bKOoBYFDTEw0QYvFmoSuOjcqRioN44OkqgpLfX42sG0';
     let sb = null; try { if(typeof supabase !== 'undefined') sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e){}
 
-    let currentUser = null, authMode = 'login';
+    let currentUser = null, currentProfile = null, authMode = 'login';
     let map = null, markersLayer = null;
     let currentHole = 1, currentShots = [], activeShotType = null, pendingPlot = null;
     let currentWindString = "-- mph"; 
 
+    // BEY LEA DATA
     const beyleaData = {
       1: { par: 4, hcp: 13, yards: 370, lat: 39.9961, lng: -74.2120 },
       2: { par: 5, hcp: 9, yards: 466, lat: 39.9980, lng: -74.2110 },
@@ -177,22 +232,49 @@
     window.onload = async () => {
       if(!sb) return;
       const { data } = await sb.auth.getSession();
-      if (data?.session) { currentUser = data.session.user; document.getElementById('home-user-email').textContent = currentUser.email; switchScreen('screen-home'); }
+      if (data?.session) { 
+        currentUser = data.session.user; 
+        await loadCurrentUserProfile();
+        switchScreen('screen-home'); 
+      }
       else switchScreen('screen-auth');
     };
 
-    function switchAuthTab(mode) { authMode = mode; document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active', i===(mode==='login'?0:1))); document.getElementById('auth-submit').textContent = mode==='signup'?'CREATE ACCOUNT':'LOGIN'; }
+    async function loadCurrentUserProfile() {
+      const {data} = await sb.from('profiles').select('username').eq('id', currentUser.id).single();
+      currentProfile = data;
+      document.getElementById('home-user-email').textContent = data ? data.username : currentUser.email;
+    }
+
+    function switchAuthTab(mode) { 
+      authMode = mode; 
+      document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active', i===(mode==='login'?0:1))); 
+      document.getElementById('auth-submit').textContent = mode==='signup'?'CREATE ACCOUNT':'LOGIN'; 
+      document.getElementById('field-username').style.display = mode==='signup'?'block':'none';
+    }
+
     async function handleAuth() {
-      const e = document.getElementById('field-email').value, p = document.getElementById('field-pass').value;
+      const e = document.getElementById('field-email').value, p = document.getElementById('field-pass').value, u = document.getElementById('field-username').value;
       try {
-        if(authMode==='signup') { await sb.auth.signUp({email:e, password:p}); alert("Created! Login now."); switchAuthTab('login'); }
-        else { const {data} = await sb.auth.signInWithPassword({email:e, password:p}); currentUser = data.user; document.getElementById('home-user-email').textContent = currentUser.email; switchScreen('screen-home'); }
+        if(authMode==='signup') { 
+          if(!u) return alert("Username required!");
+          const {data, error} = await sb.auth.signUp({email:e, password:p}); 
+          if(error) throw error;
+          await sb.from('profiles').insert({id: data.user.id, username: u});
+          alert("Created! You are now logged in."); 
+          currentUser = data.user; await loadCurrentUserProfile(); switchScreen('screen-home');
+        } else { 
+          const {data, error} = await sb.auth.signInWithPassword({email:e, password:p}); 
+          if(error) throw error;
+          currentUser = data.user; await loadCurrentUserProfile(); switchScreen('screen-home'); 
+        }
       } catch(err){ alert(err.message); }
     }
-    async function logOut() { await sb.auth.signOut(); currentUser = null; switchScreen('screen-auth'); }
+    
+    async function logOut() { await sb.auth.signOut(); currentUser = null; currentProfile = null; switchScreen('screen-auth'); }
 
     function switchScreen(id) {
-      ['screen-auth','screen-home','screen-game','screen-score','screen-recap-list','screen-recap-map'].forEach(s => {
+      ['screen-auth','screen-home','screen-game','screen-score','screen-recap-list','screen-recap-map', 'screen-social'].forEach(s => {
         const el = document.getElementById(s); if(el) el.style.display = 'none';
       });
       document.getElementById(id).style.display = 'flex';
@@ -200,26 +282,16 @@
       if(id === 'screen-recap-map' && recapMap) setTimeout(()=>recapMap.invalidateSize(), 100);
     }
 
-    // --- GAME & WIND LOGIC ---
-    async function fetchWindData(lat, lng) {
-      const windEl = document.getElementById('wind-display'); windEl.textContent = '💨 Loading...';
-      try {
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true&windspeed_unit=mph`);
-        const data = await res.json();
-        const dirs = ['N','NE','E','SE','S','SW','W','NW'];
-        const dir = dirs[Math.round(((data.current_weather.winddirection %= 360) < 0 ? data.current_weather.winddirection + 360 : data.current_weather.winddirection) / 45) % 8];
-        currentWindString = `${Math.round(data.current_weather.windspeed)} mph ${dir}`;
-        windEl.textContent = `💨 ${currentWindString}`;
-      } catch(e) { currentWindString = "-- mph"; windEl.textContent = `💨 -- mph`; }
-    }
-
-    function confirmQuit() { if(confirm("Are you sure you want to quit? Unsaved data for this hole will be lost.")) switchScreen('screen-home'); }
-
+    // --- GAME LOGIC ---
     function startRound() { 
       switchScreen('screen-game'); 
       if(!map) {
         map = L.map('map-container',{zoomControl:false}).setView([39.9961, -74.2120], 18);
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(map);
+        // THE FIX: Allow digital zoom so it doesn't black out
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 22,
+          maxNativeZoom: 18
+        }).addTo(map);
         markersLayer = L.layerGroup().addTo(map);
         map.on('click', handleMapTap);
       }
@@ -232,31 +304,22 @@
       document.getElementById('hole-title').textContent = `Hole ${h}`;
       document.getElementById('hole-details').textContent = `Par ${hd.par} • HCP ${hd.hcp} • ${hd.yards} yds`;
       map.setView([hd.lat, hd.lng], 18);
-      fetchWindData(hd.lat, hd.lng);
     }
 
     function setShotType(type, btn) { activeShotType = type; document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
     function handleMapTap(e) {
-      if(!activeShotType) return alert("Select a shot type first (Tee, App, etc)");
+      if(!activeShotType) return alert("Select a shot type first");
       pendingPlot = { lat: e.latlng.lat, lng: e.latlng.lng, type: activeShotType };
-      
-      if(activeShotType === 'Tee') { confirmLie('Tee Box'); } 
-      else if (activeShotType === 'Penalty') { confirmLie('Drop Zone'); } 
-      else { document.getElementById('lie-modal').style.display = 'block'; }
+      if(activeShotType === 'Tee') confirmLie('Tee Box');
+      else if (activeShotType === 'Penalty') confirmLie('Drop Zone');
+      else document.getElementById('lie-modal').style.display = 'block';
     }
-    
-    function cancelLie() {
-      document.getElementById('lie-modal').style.display = 'none';
-      pendingPlot = null;
-    }
-
+    function cancelLie() { document.getElementById('lie-modal').style.display = 'none'; pendingPlot = null; }
     function confirmLie(lie) {
-      pendingPlot.lie = lie;
-      currentShots.push(pendingPlot);
+      pendingPlot.lie = lie; currentShots.push(pendingPlot);
       const icon = L.divIcon({className: `shot-pin pin-${pendingPlot.type}`});
       L.marker([pendingPlot.lat, pendingPlot.lng], {icon}).addTo(markersLayer);
-      document.getElementById('lie-modal').style.display = 'none';
-      pendingPlot = null;
+      document.getElementById('lie-modal').style.display = 'none'; pendingPlot = null;
     }
 
     function openScoreScreen() {
@@ -267,48 +330,178 @@
     function adjustValue(id, dir) { const el=document.getElementById(id); el.innerText = Math.max(0, parseInt(el.innerText)+dir); }
 
     async function saveScoreToDB() {
-      if(!sb) return alert("No DB connection.");
       const score = parseInt(document.getElementById('score-val').innerText);
       const putts = parseInt(document.getElementById('putts-val').innerText);
       try {
         const { data: round, error: rErr } = await sb.from('rounds').insert([{
-          user_id: currentUser.id, hole_number: currentHole, score: score, putts: putts, wind: currentWindString
+          user_id: currentUser.id, course_id: 1, hole_number: currentHole, score: score, putts: putts, wind: currentWindString
         }]).select().single();
         if(rErr) throw rErr;
-        
         if(currentShots.length > 0) {
-          const shotInserts = currentShots.map(s => ({
-            user_id: currentUser.id, round_id: round.id, hole_number: currentHole, shot_type: s.type, lie: s.lie, lat: s.lat, lng: s.lng
-          }));
+          const shotInserts = currentShots.map(s => ({ user_id: currentUser.id, round_id: round.id, hole_number: currentHole, shot_type: s.type, lie: s.lie, lat: s.lat, lng: s.lng }));
           await sb.from('shots').insert(shotInserts);
         }
-        alert("Hole saved!"); loadHole(currentHole + 1); switchScreen('screen-game');
-      } catch(e) { alert("Error saving: " + e.message); }
+        alert("Saved!"); loadHole(currentHole + 1); switchScreen('screen-game');
+      } catch(e) { alert("Error: " + e.message); }
     }
 
-    // ==========================================
-    // PHASE 1 & 2: ROUND RECAP LOGIC
-    // ==========================================
+    // --- SOCIAL & HANDICAP LOGIC ---
+    let activeProfileUserId = null;
+    let activeProfileLiveRoundData = null;
+
+    async function openSocialFeed() {
+      switchScreen('screen-social');
+      const container = document.getElementById('friends-list-container'); container.innerHTML = "Loading feed...";
+      
+      // Get friends
+      const {data: follows} = await sb.from('friends').select('followed_id').eq('follower_id', currentUser.id);
+      if(!follows || !follows.length) return container.innerHTML = "<p style='color:var(--muted)'>You aren't following anyone yet. Search for a username above!</p>";
+      
+      const friendIds = follows.map(f => f.followed_id);
+      const {data: profiles} = await sb.from('profiles').select('*').in('id', friendIds);
+      
+      // Check for Live Rounds (Rows created in last 5 hours)
+      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString();
+      const {data: recentRounds} = await sb.from('rounds').select('user_id, created_at, hole_number').in('user_id', friendIds).gte('created_at', fiveHoursAgo).order('created_at', {ascending: false});
+      
+      let html = '';
+      profiles.forEach(p => {
+        const userRecent = recentRounds?.find(r => r.user_id === p.id);
+        const isLive = !!userRecent;
+        const badgeHtml = isLive ? `<div class="live-badge">🔴 LIVE Hole ${userRecent.hole_number}</div>` : '';
+        html += `<div class="friend-card" onclick="openProfile('${p.id}', '${p.username}')">
+                   <strong style="font-size:18px;">${p.username}</strong>
+                   ${badgeHtml}
+                 </div>`;
+      });
+      container.innerHTML = html;
+    }
+
+    async function searchFriends() {
+      const q = document.getElementById('friend-search').value;
+      if(!q) return;
+      const {data} = await sb.from('profiles').select('*').ilike('username', `%${q}%`).neq('id', currentUser.id);
+      const res = document.getElementById('friend-search-results');
+      if(!data || !data.length) return res.innerHTML = "<div style='color:var(--muted);'>No users found.</div>";
+      
+      res.innerHTML = data.map(p => `
+        <div style="display:flex; justify-content:space-between; padding:10px; background:var(--navy); border:1px solid var(--navy-light); margin-bottom:5px; border-radius:8px;">
+          <span>${p.username}</span>
+          <button class="nav-btn" onclick="followUser('${p.id}')">Follow</button>
+        </div>
+      `).join('');
+    }
+
+    async function followUser(id) {
+      await sb.from('friends').insert({follower_id: currentUser.id, followed_id: id});
+      alert("Followed!"); openSocialFeed();
+    }
+
+    function openMyProfile() { openProfile(currentUser.id, currentProfile ? currentProfile.username : 'Me'); }
+
+    async function openProfile(userId, username) {
+      activeProfileUserId = userId;
+      activeProfileLiveRoundData = null;
+      document.getElementById('prof-username').innerText = username;
+      document.getElementById('prof-busta-cap').innerText = "Calc...";
+      document.getElementById('prof-avg-score').innerText = "Calc...";
+      document.getElementById('prof-live-btn').style.display = 'none';
+      document.getElementById('profile-modal').style.display = 'flex';
+      
+      // Calculate Busta Cap & Course Avg
+      const { data: allHoles } = await sb.from('rounds').select('*').eq('user_id', userId).order('created_at', {ascending: false});
+      
+      if(!allHoles || allHoles.length === 0) {
+        document.getElementById('prof-busta-cap').innerText = "N/A";
+        document.getElementById('prof-avg-score').innerText = "N/A";
+        return;
+      }
+
+      // Group holes into rounds by date string
+      const roundsByDay = {};
+      allHoles.forEach(row => {
+        const date = new Date(row.created_at).toLocaleDateString();
+        if(!roundsByDay[date]) roundsByDay[date] = { total: 0, adjusted: 0, holes: 0, rows: [] };
+        roundsByDay[date].total += row.score;
+        const par = beyleaData[row.hole_number]?.par || 4;
+        roundsByDay[date].adjusted += Math.min(row.score, par + 2); // Net Double Bogey cap
+        roundsByDay[date].holes += 1;
+        roundsByDay[date].rows.push(row);
+      });
+
+      // Filter valid rounds (need at least 9 holes to extrapolate)
+      const validRounds = Object.values(roundsByDay).filter(r => r.holes >= 9);
+      
+      if(validRounds.length > 0) {
+        // Pure Average Score (Scaled to 18)
+        const avg = (validRounds.reduce((acc, r) => acc + ((r.total / r.holes) * 18), 0) / validRounds.length).toFixed(1);
+        document.getElementById('prof-avg-score').innerText = avg;
+        
+        // Busta Cap Math (Gold Tees: Rating 70.0, Slope 125)
+        const differentials = validRounds.map(r => {
+          const scaledAdj = (r.adjusted / r.holes) * 18;
+          return (scaledAdj - 70.0) * (113 / 125.0);
+        }).sort((a,b) => a - b);
+        
+        const countToUse = Math.max(1, Math.floor(Math.min(differentials.length, 20) * 0.4)); // best 8 of 20
+        const bestDiffs = differentials.slice(0, countToUse);
+        let bustaCap = (bestDiffs.reduce((a,b)=>a+b, 0) / bestDiffs.length).toFixed(1);
+        document.getElementById('prof-busta-cap').innerText = `+${bustaCap}`;
+      } else {
+        document.getElementById('prof-busta-cap').innerText = "Needs 9 holes";
+        document.getElementById('prof-avg-score').innerText = "N/A";
+      }
+
+      // Check if Live right now
+      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
+      const todayDateStr = new Date().toLocaleDateString();
+      if(roundsByDay[todayDateStr]) {
+        const latestHole = roundsByDay[todayDateStr].rows[0];
+        if(new Date(latestHole.created_at) > fiveHoursAgo) {
+          activeProfileLiveRoundData = { display: `${username} - LIVE`, rounds: roundsByDay[todayDateStr].rows };
+          document.getElementById('prof-live-btn').style.display = 'block';
+        }
+      }
+    }
+
+    function jumpToLiveMap() {
+      document.getElementById('profile-modal').style.display = 'none';
+      loadRecapMap(activeProfileLiveRoundData);
+    }
+    
+    function openRecapFromProfile() {
+      document.getElementById('profile-modal').style.display = 'none';
+      const name = document.getElementById('prof-username').innerText;
+      openRecapList(activeProfileUserId, `${name}'s Rounds`);
+    }
+
+    // --- RECAP MAP LOGIC ---
     let recapMap = null, recapLinesLayer = null, recapMarkersLayer = null;
     let recapHoleData = {}, currentRecapHole = 1;
+    let lastScreenBeforeRecap = 'screen-home';
 
-    async function openRecapList() {
+    async function openRecapList(userId, title) {
+      lastScreenBeforeRecap = document.getElementById('screen-social').style.display === 'flex' ? 'screen-social' : 'screen-home';
       switchScreen('screen-recap-list');
+      document.getElementById('recap-list-title').innerText = title;
       const container = document.getElementById('recap-list-container'); container.innerHTML = "Loading...";
-      const { data, error } = await sb.from('rounds').select('id, hole_number, score, putts, played_at, wind').eq('user_id', currentUser.id).order('played_at', {ascending:false});
-      if(error || !data.length) return container.innerHTML = "No rounds found.";
+      const { data, error } = await sb.from('rounds').select('*').eq('user_id', userId).order('created_at', {ascending:false});
+      if(error || !data || !data.length) return container.innerHTML = "No rounds found.";
 
       const grouped = {};
       data.forEach(r => {
-        const dStr = new Date(r.played_at).toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
-        if(!grouped[dStr]) grouped[dStr] = { display: dStr, sort: r.played_at, score: 0, rounds: [] };
+        const dStr = new Date(r.created_at).toLocaleDateString(undefined, {weekday:'short', month:'short', day:'numeric'});
+        if(!grouped[dStr]) grouped[dStr] = { display: dStr, score: 0, rounds: [] };
         grouped[dStr].score += r.score; grouped[dStr].rounds.push(r);
       });
 
       container.innerHTML = Object.values(grouped).map(g => `
-        <div class="recap-card" onclick='loadRecapMap(${JSON.stringify(g)})'>
-          <h3 style="margin:0; color:var(--white);">${g.display}</h3>
-          <p style="margin:5px 0 0 0; color:var(--muted); font-family:'DM Mono';">Score: ${g.score} | Holes: ${g.rounds.length}</p>
+        <div class="recap-card" onclick='loadRecapMap(${JSON.stringify(g).replace(/'/g, "&#39;")})'>
+          <div>
+             <h3 style="margin:0; color:var(--white);">${g.display}</h3>
+             <p style="margin:5px 0 0 0; color:var(--muted); font-family:'DM Mono';">Score: ${g.score} | Holes: ${g.rounds.length}</p>
+          </div>
+          <span style="font-size:20px;">▶</span>
         </div>
       `).join('');
     }
@@ -319,7 +512,10 @@
       
       if(!recapMap) {
         recapMap = L.map('recap-map-container',{zoomControl:false}).setView([39.9961, -74.2120], 18);
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}').addTo(recapMap);
+        // THE FIX: Digital Zoom
+        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 22, maxNativeZoom: 18
+        }).addTo(recapMap);
         recapLinesLayer = L.layerGroup().addTo(recapMap); recapMarkersLayer = L.layerGroup().addTo(recapMap);
       }
       
@@ -343,7 +539,7 @@
       document.getElementById('recap-hole-indicator').innerText = `Hole ${holeNum}`;
       
       const data = recapHoleData[holeNum];
-      document.getElementById('recap-map-sub').innerText = `Score: ${data.details.score} | Wind: ${data.details.wind || 'Unknown'}`;
+      document.getElementById('recap-map-sub').innerText = `Score: ${data.details.score} | Putts: ${data.details.putts}`;
 
       if(data.shots.length > 0) {
         const latlngs = data.shots.map(s => [s.lat, s.lng]);
@@ -368,6 +564,11 @@
         currentRecapHole = availableHoles[nextIdx];
         drawRecapHole(currentRecapHole);
       }
+    }
+    
+    function closeRecapMap() {
+        if(activeProfileLiveRoundData) switchScreen('screen-social');
+        else switchScreen('screen-recap-list');
     }
   </script>
 </body>
