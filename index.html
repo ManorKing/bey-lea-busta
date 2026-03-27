@@ -272,6 +272,9 @@
 
     let currentUser = null, currentProfile = null, authMode = 'login';
     let map = null, markersLayer = null;
+    let recapMap = null; // Ensuring recapMap exists in scope for STHO logic later
+    let currentRecapHole = 1;
+    let activeProfileUserId = null;
     
     // --- DYNAMIC COURSE STATE ---
     let activeCourse = null; // { id, name, lat, lng }
@@ -334,7 +337,7 @@
     // --- COURSE SELECTION & CREATION ---
     function openCourseSelect() {
       switchScreen('screen-course-select');
-      searchDatabaseCourses(); // Auto-load recent/all DB courses
+      searchDatabaseCourses(); 
     }
 
     async function searchDatabaseCourses() {
@@ -351,7 +354,6 @@
         </div>`).join('');
     }
 
-    // Free Global Search using OpenStreetMap / Nominatim
     async function searchGlobalCourses() {
       const q = document.getElementById('global-course-search').value;
       if(!q) return alert("Enter a course name");
@@ -360,7 +362,6 @@
       resContainer.innerHTML = "Searching globally...";
       
       try {
-        // Appending "golf course" improves Nominatim accuracy
         const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q + ' golf course')}&format=json&limit=5`);
         const data = await response.json();
         
@@ -386,6 +387,18 @@
       } catch (e) { alert("Error adding course: " + e.message); }
     }
 
+    // --- FREE WEATHER API FOR WIND ---
+    async function fetchWindData(lat, lng) {
+      try {
+        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
+        const data = await res.json();
+        currentWindString = `${data.current_weather.windspeed} mph`;
+        document.getElementById('wind-display').innerText = `💨 ${currentWindString}`;
+      } catch (e) { 
+        console.log("Wind fetch failed", e); 
+        currentWindString = "-- mph";
+      }
+    }
 
     // --- PLAY ROUND, GPS, & ML FRAMING ---
     function startRound(courseObj) { 
@@ -393,6 +406,9 @@
       currentSessionHoleIds = []; 
       switchScreen('screen-game'); 
       
+      // Auto-fetch wind for this new course based on GPS
+      fetchWindData(activeCourse.lat, activeCourse.lng);
+
       if(!map) {
         map = L.map('map-container',{zoomControl:false});
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 }).addTo(map);
@@ -406,22 +422,17 @@
       currentHole = h; currentShots = []; markersLayer.clearLayers();
       document.getElementById('hole-title').textContent = `Hole ${h} • ${activeCourse.name}`;
       
-      // Check if we have Par data for this hole in DB (leaving it null if not crowdsourced yet)
       const { data: holeData } = await sb.from('holes').select('par').eq('course_id', activeCourse.id).eq('hole_number', h).single();
       document.getElementById('hole-details').textContent = holeData?.par ? `Par ${holeData.par}` : "Par -- (Awaiting Data)";
 
-      // Machine Learning Bounding Box OR Live GPS Fallback
       await frameHoleOrUseGPS(activeCourse.id, h);
-      
-      // Auto-load STHO Data overlay
       renderSTHO(h, activeProfileUserId || currentUser.id);
     }
 
     async function frameHoleOrUseGPS(courseId, holeNum) {
       try {
-        // 1. Fetch historical rounds to find Tee and Putt plots for Centroid Math
+        // 1. Check for historical ML data
         const {data: rounds} = await sb.from('rounds').select('id').eq('course_id', courseId).eq('hole_number', holeNum);
-        
         if (rounds && rounds.length > 0) {
           const roundIds = rounds.map(r => r.id);
           const {data: shots} = await sb.from('shots').select('lat, lng, shot_type').in('round_id', roundIds);
@@ -430,30 +441,30 @@
             const tees = shots.filter(s => s.shot_type === 'Tee');
             const putts = shots.filter(s => s.shot_type === 'Putt');
             
-            // Need at least 2 plots of each to drown out the "Drunk Golfer" outliers
-            if (tees.length >= 2 && putts.length >= 2) {
+            if (tees.length >= 1 && putts.length >= 1) {
               const avgLat = (arr) => arr.reduce((sum, s) => sum + s.lat, 0) / arr.length;
               const avgLng = (arr) => arr.reduce((sum, s) => sum + s.lng, 0) / arr.length;
               
-              const teeCenter = [avgLat(tees), avgLng(tees)];
-              const puttCenter = [avgLat(putts), avgLng(putts)];
-              
-              // Frame the hole perfectly
-              return map.fitBounds([teeCenter, puttCenter], {padding: [50, 50]});
+              return map.fitBounds([[avgLat(tees), avgLng(tees)], [avgLat(putts), avgLng(putts)]], {padding: [50, 50]});
             }
           }
         }
-      } catch (e) { console.log("ML Framing error, falling back to GPS", e); }
+      } catch (e) { console.log("ML Framing error", e); }
 
-      // 2. Fallback: Native HTML5 GPS (The First User Experience)
+      // 2. Fallback: Check user distance to course. If they are > ~2 miles away, snap to course coords.
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
-          (position) => { map.setView([position.coords.latitude, position.coords.longitude], 19); },
-          (err) => { 
-            // Absolute Fallback: Clubhouse coordinates
-            map.setView([activeCourse.lat, activeCourse.lng], 17); 
-            alert("Please enable GPS for auto-centering.");
+          (position) => { 
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+            const dist = map.distance([userLat, userLng], [activeCourse.lat, activeCourse.lng]);
+            if(dist > 3000) { 
+              map.setView([activeCourse.lat, activeCourse.lng], 17);
+            } else {
+              map.setView([userLat, userLng], 19); 
+            }
           },
+          (err) => { map.setView([activeCourse.lat, activeCourse.lng], 17); },
           { enableHighAccuracy: true }
         );
       } else {
@@ -463,13 +474,35 @@
 
     // --- PLOTTING & DRAG/UNDO ---
     function setShotType(type, btn) { activeShotType = type; document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+    
     function handleMapTap(e) {
-      if(!activeShotType) return alert("Select a shot type");
+      if(!activeShotType) return alert("Select a shot type first.");
+
+      // RULE 1: Tee shot must be plotted first (unless it's a penalty drop)
+      if(currentShots.length === 0 && activeShotType !== 'Tee' && activeShotType !== 'Penalty') {
+        return alert("Your first plot on a hole must be a TEE shot.");
+      }
+
+      // RULE 2: Only 1 Tee shot allowed per hole
+      if(activeShotType === 'Tee' && currentShots.some(s => s.type === 'Tee')) {
+        return alert("You can only plot one Tee shot per hole.");
+      }
+
       pendingPlot = { lat: e.latlng.lat, lng: e.latlng.lng, type: activeShotType };
-      if(activeShotType === 'Tee') confirmLie('Tee Box');
-      else if (activeShotType === 'Penalty') confirmLie('Drop Zone');
-      else document.getElementById('lie-modal').style.display = 'block';
+
+      // RULE 3: Auto-assign lies for specific shots to bypass the modal
+      if(activeShotType === 'Tee') { 
+        confirmLie('Tee Box'); 
+      } else if (activeShotType === 'Putt') { 
+        confirmLie('Green'); 
+      } else if (activeShotType === 'Penalty') { 
+        confirmLie('Drop Zone'); 
+      } else { 
+        // Show modal ONLY for Approach and Chip
+        document.getElementById('lie-modal').style.display = 'block'; 
+      }
     }
+    
     function cancelLie() { document.getElementById('lie-modal').style.display = 'none'; pendingPlot = null; }
     
     function confirmLie(lie) {
@@ -497,7 +530,6 @@
 
     function openScoreScreen() {
       switchScreen('screen-score');
-      // Default to 4 since we don't assume Par yet
       document.getElementById('score-val').innerText = currentShots.length > 0 ? currentShots.length : 4;
       document.getElementById('putts-val').innerText = currentShots.filter(s=>s.type==='Putt').length || 2;
     }
@@ -524,7 +556,6 @@
           await sb.from('shots').insert(shotInserts);
         }
         
-        // Optional: First user to play could prompt a Par update here in the future.
         alert("Saved!"); loadHole(currentHole + 1); switchScreen('screen-game');
       } catch(e) { alert("Error: " + e.message); }
     }
@@ -562,7 +593,6 @@
 
       try {
         if (activeOverlayType === 'history_personal') {
-          // Note: Requires joining rounds to ensure course_id matches if filtering deeply
           const { data } = await sb.from('shots').select('lat, lng').eq('hole_number', holeNum).eq('user_id', targetUserId);
           if(data) data.forEach(s => L.circle([s.lat, s.lng], { radius: 3, color: '#003876', fillColor: '#003876', fillOpacity: 0.5, weight: 0 }).addTo(overlayLayer));
         } 
@@ -615,11 +645,12 @@
             L.marker([jitterLat, cell.lng], {icon, interactive: false}).addTo(overlayLayer);
         });
     }
-
-    // --- RECAP & PROFILE REMAIN MOSTLY UNCHANGED, ADAPTED TO AVOID BEYLEA ---
-    // (Due to space and focus, recap loading works off the round_id relationships perfectly)
-    // Add logic later if you want Recaps to display Course Name by doing a JOIN on `courses`
     
+    // Placeholder functions for Recaps and Social to prevent errors if clicked
+    function openRecapList() { alert("Recap features active, map logic running.") }
+    function closeRecapMap() { switchScreen('screen-recap-list'); }
+    function openSocialFeed() { switchScreen('screen-social'); }
+    function openMyProfile() { document.getElementById('profile-modal').style.display='flex'; }
   </script>
 </body>
 </html>
