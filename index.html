@@ -41,7 +41,7 @@
   .nav-btn { background:transparent; color:#D4AF37; border:1px solid #D4AF37; border-radius:4px; padding:5px 15px; font-weight:bold; }
   
   .auth-tabs { display:flex; margin-bottom:20px; background:#FFFFFF; border-radius:8px; border: 1px solid #E5E7EB; overflow: hidden;}
-  .auth-tab { background:transparent; color:#6B7280; border:none; padding:12px 20px; font-family:'Syne'; font-weight:700; flex:1; }
+  .auth-tab { background:transparent; color:#6B7280; border:none; padding:12px 20px; font-family:'Syne'; font-weight:700; flex:1; transition:0.2s;}
   .auth-tab.active { background:#003876; color:#FFFFFF; }
   
   .home-menu { flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:20px; padding:20px; background:#FFFFFF; }
@@ -86,9 +86,6 @@
   
   /* ==========================================
      SUMMARY DASHBOARD STYLES
-     ==========================================
-     Vibe: Premium Sports Analytics
-     Purpose: A clean, GHIN-style breakdown of the round.
      ========================================== */
   #screen-summary { background:#F3F4F6; overflow-y:auto; }
   .summary-header { background:#003876; color:white; padding:30px 20px 40px; text-align:center; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; }
@@ -102,10 +99,6 @@
   
   /* ==========================================
      CINEMATIC RECAP TOOLS
-     ==========================================
-     Vibe: The Director's Controls
-     Purpose: Tools for the user to navigate and replay
-     their historical rounds shot-by-shot.
      ========================================== */
   .recap-stats-bar { display:flex; justify-content:space-between; background:#FFFFFF; padding:12px 20px; border-bottom:1px solid #E5E7EB; font-family:'DM Mono'; font-size:14px; color:#003876; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index:100; position:relative; }
   .recap-stat-item { text-align:center; }
@@ -117,7 +110,6 @@
   @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
   @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
   
-  /* Course Selector Overrides */
   .fav-star { font-size:24px; cursor:pointer; margin-right:10px; transition:0.2s; -webkit-tap-highlight-color: transparent;}
 </style>
 </head>
@@ -128,7 +120,7 @@
     <p style="color:#6B7280; margin-bottom:30px; font-weight:500;">Precision Golf Mapping & Tracking</p>
     <div class="auth-tabs"><button class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</button><button class="auth-tab" onclick="switchAuthTab('signup')">SIGN UP</button></div>
     <input type="text" id="field-username" class="auth-input" placeholder="Username" style="display:none;">
-    <input type="email" id="field-email" class="auth-input" placeholder="Email Address">
+    <input type="text" id="field-email" class="auth-input" placeholder="Email or Username">
     <input type="password" id="field-pass" class="auth-input" placeholder="Password">
     <button id="auth-submit" class="action-btn" onclick="handleAuth()">LOGIN</button>
   </div>
@@ -159,18 +151,41 @@
     </div>
   </div>
 
-  <div id="profile-modal" class="bottom-modal" style="height:75vh; overflow-y:auto; flex-direction:column;">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-      <h2 id="prof-username" style="margin:0; font-family:'Syne'; color:#003876;">Username</h2>
+  <div id="profile-modal" class="bottom-modal" style="height:85vh; overflow-y:auto; flex-direction:column; padding-top:10px;">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; margin-top:10px;">
+      <h2 id="prof-username" style="margin:0; font-family:'Syne'; color:#003876; font-size:28px;">Username</h2>
       <button onclick="document.getElementById('profile-modal').style.display='none'" style="background:transparent; color:#6B7280; border:none; font-size:24px;">✕</button>
     </div>
-    <button id="prof-live-btn" class="action-btn" style="background:#EF4444; color:white; margin-bottom:20px; display:none;" onclick="jumpToLiveMap()">🔴 WATCH LIVE ROUND</button>
-    <div class="stats-grid">
-      <div class="stat-box"><div class="stat-label">AUTOCADDY INDEX</div><div class="stat-value" id="prof-busta-cap">--</div><div style="font-size:10px; color:#6B7280; margin-top:5px;">Estimated</div></div>
-      <div class="stat-box"><div class="stat-label">ROUNDS PLAYED</div><div class="stat-value" id="prof-avg-score" style="color:#003876;">--</div></div>
+    <button id="prof-live-btn" class="action-btn" style="background:#EF4444; color:white; margin-bottom:15px; display:none; animation: pulse 1.5s infinite;" onclick="jumpToLiveMap()">🔴 WATCH LIVE ROUND</button>
+    
+    <div class="stats-grid" style="margin-top:0;">
+      <div class="stat-box"><div class="stat-label" id="prof-home-course-label">HOME COURSE</div><div class="stat-value" id="prof-busta-cap" style="color:#D4AF37;">--</div><div style="font-size:10px; color:#6B7280; margin-top:5px; font-weight:bold;">BUSTA CAP</div></div>
+      <div class="stat-box"><div class="stat-label">COURSE AVG</div><div class="stat-value" id="prof-avg-score" style="color:#003876;">--</div><div style="font-size:10px; color:#6B7280; margin-top:5px; font-weight:bold;">TOTAL STROKES</div></div>
     </div>
-    <h3 style="color:#003876; border-bottom:1px solid #E5E7EB; padding-bottom:5px; margin-top:10px;">Recent Rounds</h3>
-    <button class="menu-btn" style="width:100%; font-size:14px; padding:15px;" onclick="openRecapFromProfile()">View History 🎞️</button>
+
+    <div class="auth-tabs" style="margin-top:10px; margin-bottom:15px; border-radius:8px;">
+      <button class="auth-tab active" id="tab-btn-history" onclick="switchProfileTab('history')">HISTORY</button>
+      <button class="auth-tab" id="tab-btn-accolades" onclick="switchProfileTab('accolades')">ACCOLADES</button>
+    </div>
+
+    <div id="profile-history-tab" style="display:block; flex-grow:1;">
+       <div id="profile-history-container"></div>
+    </div>
+
+    <div id="profile-accolades-tab" style="display:none; flex-grow:1;">
+       <div class="course-card" style="display:block; text-align:center;">
+         <h4 style="margin:0 0 5px; color:#6B7280; text-transform:uppercase; font-size:12px;">Lowest Score Recorded</h4>
+         <div style="font-size:36px; font-family:'Syne'; color:#10B981; font-weight:800;" id="acc-low-score">--</div>
+       </div>
+       <div class="course-card" style="display:block; text-align:center;">
+         <h4 style="margin:0 0 5px; color:#6B7280; text-transform:uppercase; font-size:12px;">Lowest Putts Recorded</h4>
+         <div style="font-size:36px; font-family:'Syne'; color:#D4AF37; font-weight:800;" id="acc-low-putts">--</div>
+       </div>
+       <div class="course-card" style="display:block; text-align:center;">
+         <h4 style="margin:0 0 5px; color:#6B7280; text-transform:uppercase; font-size:12px;">Most Rounds Played At</h4>
+         <div style="font-size:20px; font-family:'Syne'; color:#003876; font-weight:800; margin-top:5px;" id="acc-fav-course">--</div>
+       </div>
+    </div>
   </div>
 
   <div id="screen-course-select">
@@ -386,7 +401,6 @@
         const el = document.getElementById(s); if(el) el.style.display = 'none';
       });
       document.getElementById(id).style.display = 'flex';
-      // Leaflet requires invalidation when a map's display shifts from none to flex
       if(id === 'screen-game' && map) setTimeout(()=>map.invalidateSize(), 100);
       if(id === 'screen-recap-map' && recapMap) setTimeout(()=>recapMap.invalidateSize(), 100);
     }
@@ -396,6 +410,7 @@
       document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active', i===(mode==='login'?0:1))); 
       document.getElementById('auth-submit').textContent = mode==='signup'?'CREATE ACCOUNT':'LOGIN'; 
       document.getElementById('field-username').style.display = mode==='signup'?'block':'none';
+      document.getElementById('field-email').placeholder = mode==='signup'?'Email Address':'Email or Username';
     }
 
     async function handleAuth() {
@@ -403,12 +418,21 @@
       try {
         if(authMode==='signup') { 
           if(!u) return alert("Username required!");
+          // Sign up with Supabase using Email/Password
           const {data, error} = await sb.auth.signUp({email:e, password:p}); 
           if(error) throw error;
-          await sb.from('profiles').insert({id: data.user.id, username: u});
+          // Note: Requires an 'email' column added to your 'profiles' table for username lookup to work flawlessly!
+          await sb.from('profiles').insert({id: data.user.id, username: u, email: e});
           currentUser = data.user; await loadCurrentUserProfile(); switchScreen('screen-home');
         } else { 
-          const {data, error} = await sb.auth.signInWithPassword({email:e, password:p}); 
+          let loginEmail = e;
+          // USERNAME LOGIN ENGINE: If they didn't type an '@', assume it's a username and fetch the mapped email.
+          if (!e.includes('@')) {
+            const {data: pData} = await sb.from('profiles').select('email').eq('username', e).single();
+            if (pData && pData.email) { loginEmail = pData.email; } 
+            else { throw new Error("Username not found or no email linked to this username."); }
+          }
+          const {data, error} = await sb.auth.signInWithPassword({email:loginEmail, password:p}); 
           if(error) throw error;
           currentUser = data.user; await loadCurrentUserProfile(); switchScreen('screen-home'); 
         }
@@ -493,6 +517,7 @@
 
     async function addCourseToDB(name, lat, lng) {
       try {
+        // DEDUPLICATION: Check if similarly named course already exists
         const { data: existing } = await sb.from('courses').select('*').ilike('name', `%${name.split(' ')[0]}%`).limit(1);
         if (existing && existing.length > 0) { startRound(existing[0]); return; }
 
@@ -509,7 +534,6 @@
         const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
         const data = await res.json();
         const cw = data.current_weather;
-        // Point the arrow relative to where the wind is going
         const rotation = (cw.winddirection + 180) % 360;
         currentWindString = `${cw.windspeed} mph`;
         document.getElementById('wind-display').innerHTML = `<span style="display:inline-block; transform: rotate(${rotation}deg); transition: transform 0.3s;">↑</span> ${currentWindString}`;
@@ -539,9 +563,6 @@
     // ==========================================
     // THE MACHINE LEARNING FRAMER
     // ==========================================
-    // Vibe: The Autonomous Caddy
-    // Automatically pulls crowd-sourced geospatial data
-    // to build perfect framing around the hole.
     async function loadHole(h) {
       currentHole = h; currentShots = []; markersLayer.clearLayers();
       document.getElementById('hole-title').innerHTML = `Hole ${h} <span style="font-size:12px; opacity:0.6;">▼</span>`;
@@ -549,7 +570,6 @@
       const { data: holeData } = await sb.from('holes').select('par').eq('course_id', activeCourse.id).eq('hole_number', h).single();
       document.getElementById('hole-details').textContent = holeData?.par ? `Par ${holeData.par}` : "Par --";
 
-      // Session Persistence check
       if (currentSessionHoleIds.length > 0) {
         const { data: sessionRound } = await sb.from('rounds').select('id').eq('course_id', activeCourse.id).eq('hole_number', h).in('id', currentSessionHoleIds).limit(1).single();
         if (sessionRound) {
@@ -566,7 +586,6 @@
         }
       }
 
-      // Crowdsourced fallback
       const { data: recentRound } = await sb.from('rounds').select('id').eq('course_id', activeCourse.id).eq('hole_number', h).order('created_at', { ascending: false }).limit(1).single();
       if (recentRound) {
         const { data: pastShots } = await sb.from('shots').select('lat, lng').eq('round_id', recentRound.id).in('shot_type', ['Tee', 'Putt']); 
@@ -577,7 +596,6 @@
         }
       }
 
-      // Live GPS fallback
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => { 
@@ -674,7 +692,6 @@
     // ==========================================
     // GHIN-STYLE ANALYTICS ENGINE
     // ==========================================
-    // Vibe: The Pro Tour Stat Sheet
     function calculateBearing(lat1, lon1, lat2, lon2) {
       const toRad = d => d * Math.PI / 180; const toDeg = r => r * 180 / Math.PI;
       const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
@@ -768,7 +785,7 @@
     }
 
     // ==========================================
-    // SOCIAL & FRIENDS SYSTEM
+    // SOCIAL, FRIENDS & PROFILES SYSTEM
     // ==========================================
     async function openSocialFeed() {
       switchScreen('screen-social'); document.getElementById('friends-list-container').innerHTML = "Loading feed...";
@@ -777,6 +794,8 @@
 
       const friendIds = follows.map(f => f.followed_id);
       const {data: profiles} = await sb.from('profiles').select('*').in('id', friendIds);
+      
+      // LIVE LOGIC FIX: User must have plotted within the last 5 hours to be marked live
       const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString();
       const {data: recentRounds} = await sb.from('rounds').select('user_id, created_at, hole_number, course_id, courses(name)').in('user_id', friendIds).gte('created_at', fiveHoursAgo).order('created_at', {ascending: false});
       
@@ -798,29 +817,98 @@
     }
 
     async function followUser(id) { await sb.from('friends').insert({follower_id: currentUser.id, followed_id: id}); alert("Followed!"); openSocialFeed(); }
+    
     function openMyProfile() { openProfile(currentUser.id, currentProfile ? currentProfile.username : 'Me'); }
+
+    function switchProfileTab(tab) {
+      document.getElementById('tab-btn-history').classList.toggle('active', tab === 'history');
+      document.getElementById('tab-btn-accolades').classList.toggle('active', tab === 'accolades');
+      document.getElementById('profile-history-tab').style.display = tab === 'history' ? 'block' : 'none';
+      document.getElementById('profile-accolades-tab').style.display = tab === 'accolades' ? 'block' : 'none';
+    }
 
     async function openProfile(userId, username) {
       activeProfileUserId = userId; activeProfileLiveRoundData = null;
       document.getElementById('prof-username').innerText = username;
       document.getElementById('prof-live-btn').style.display = 'none'; 
+      switchProfileTab('history');
       document.getElementById('profile-modal').style.display = 'flex';
+      document.getElementById('profile-history-container').innerHTML = "<p style='text-align:center;'>Loading profile...</p>";
 
-      const { data: allHoles } = await sb.from('rounds').select('id, score, created_at, course_id').eq('user_id', userId).order('created_at', {ascending: false});
-      if(!allHoles || allHoles.length === 0) { document.getElementById('prof-busta-cap').innerText = "N/A"; document.getElementById('prof-avg-score').innerText = "N/A"; return; }
+      // Fetch all rounds for Busta Cap & Accolades
+      const { data: allHoles } = await sb.from('rounds').select('id, score, putts, created_at, course_id, courses(name)').eq('user_id', userId).order('created_at', {ascending: false});
+      
+      if(!allHoles || allHoles.length === 0) { 
+        document.getElementById('prof-busta-cap').innerText = "N/A"; 
+        document.getElementById('prof-avg-score').innerText = "0"; 
+        document.getElementById('profile-history-container').innerHTML = "<p style='text-align:center;'>No rounds yet.</p>";
+        return; 
+      }
 
       document.getElementById('prof-avg-score').innerText = allHoles.length; 
       
+      // --- BUSTA CAP ALGORITHM ---
+      // 1. Group holes by course_id
+      const courseCounts = {};
+      allHoles.forEach(h => {
+        if (!courseCounts[h.course_id]) courseCounts[h.course_id] = { name: h.courses.name, scores: [] };
+        courseCounts[h.course_id].scores.push(h.score);
+      });
+      // 2. Find "Home Course" (most holes played)
+      let homeCourseId = Object.keys(courseCounts).sort((a,b) => courseCounts[b].scores.length - courseCounts[a].scores.length)[0];
+      let homeData = courseCounts[homeCourseId];
+      let avgScoreAtHome = (homeData.scores.reduce((a,b)=>a+b,0) / homeData.scores.length).toFixed(1);
+      
+      // Basic Handicap estimate: Average Score minus an assumed Par of 4 per hole
+      let bustaCap = (avgScoreAtHome - 4.0).toFixed(1);
+      
+      document.getElementById('prof-home-course-label').innerText = homeData.name.toUpperCase().substring(0,15);
+      document.getElementById('prof-busta-cap').innerText = (bustaCap > 0 ? "+" : "") + bustaCap;
+
+      // --- ACCOLADES CALCULATION ---
+      let minScore = 999;
+      let minPutts = 999;
+      allHoles.forEach(h => {
+        if(h.score < minScore) minScore = h.score;
+        if(h.putts < minPutts) minPutts = h.putts;
+      });
+      document.getElementById('acc-low-score').innerText = minScore !== 999 ? minScore : "--";
+      document.getElementById('acc-low-putts').innerText = minPutts !== 999 ? minPutts : "--";
+      document.getElementById('acc-fav-course').innerText = homeData.name;
+
+      // --- LIVE & HISTORY UI ---
       const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000); 
       const latestHole = allHoles[0];
+      
       if(new Date(latestHole.created_at) > fiveHoursAgo) {
          const liveHoles = allHoles.filter(h => h.course_id === latestHole.course_id && new Date(h.created_at) > fiveHoursAgo);
          activeProfileLiveRoundData = { display: `${username} - LIVE`, holeIds: liveHoles.map(r=>r.id), courseId: latestHole.course_id };
          document.getElementById('prof-live-btn').style.display = 'block';
       }
-      
-      document.getElementById('layer-compare-btn').style.display = (userId !== currentUser.id) ? 'block' : 'none';
-      document.getElementById('recap-layer-compare-btn').style.display = (userId !== currentUser.id) ? 'block' : 'none';
+
+      // Render Top 10 History in Scroller
+      const sessions = {};
+      allHoles.slice(0, 50).forEach(r => { // Look at last 50 holes to build up to 10 rounds
+        const dateKey = r.created_at.split('T')[0];
+        const key = `${dateKey}_${r.course_id}`;
+        if(!sessions[key]) sessions[key] = { date: dateKey, courseName: r.courses.name, courseId: r.course_id, holeIds: [], totalScore: 0 };
+        sessions[key].holeIds.push(r.id);
+        sessions[key].totalScore += r.score;
+      });
+
+      const top10 = Object.values(sessions).slice(0, 10);
+      document.getElementById('profile-history-container').innerHTML = top10.map(s => `
+        <div class="course-card" onclick='document.getElementById("profile-modal").style.display="none"; viewHistoricalSession(${JSON.stringify(s.holeIds)}, ${s.courseId}, "${s.courseName}")'>
+          <div>
+            <strong style="display:block; color:#003876;">${s.courseName}</strong>
+            <span style="font-size:12px; color:#6B7280;">${s.date} • ${s.holeIds.length} Holes</span>
+          </div>
+          <div style="text-align:right;">
+             <span style="display:block; font-family:'Syne'; font-size:20px; color:#111827;">${s.totalScore}</span>
+             <span style="color:#D4AF37; font-family:'Syne'; font-size:10px;">SUMMARY ▶</span>
+          </div>
+        </div>
+      `).join('');
     }
 
     function jumpToLiveMap() { 
@@ -833,57 +921,8 @@
     }
 
     // ==========================================
-    // RECAP LIST (HISTORY)
-    // ==========================================
-    async function loadRecapListForUser(userId, title) {
-      switchScreen('screen-recap-list');
-      document.getElementById('recap-list-title').innerText = title || "Round History";
-      const container = document.getElementById('recap-list-container');
-      container.innerHTML = "Loading history...";
-      
-      const { data, error } = await sb.from('rounds').select(`id, created_at, course_id, courses(name)`).eq('user_id', userId).order('created_at', {ascending: false});
-      if(!data || data.length === 0) return container.innerHTML = "<p>No rounds recorded yet.</p>";
-
-      const sessions = {};
-      data.forEach(r => {
-        const dateKey = r.created_at.split('T')[0];
-        const key = `${dateKey}_${r.course_id}`;
-        if(!sessions[key]) sessions[key] = { date: dateKey, courseName: r.courses.name, courseId: r.course_id, holeIds: [] };
-        sessions[key].holeIds.push(r.id);
-      });
-
-      container.innerHTML = Object.values(sessions).map(s => `
-        <div class="course-card" onclick='viewHistoricalSession(${JSON.stringify(s.holeIds)}, ${s.courseId}, "${s.courseName}")'>
-          <div>
-            <strong style="display:block; color:#003876;">${s.courseName}</strong>
-            <span style="font-size:12px; color:#6B7280;">${s.date} • ${s.holeIds.length} Holes</span>
-          </div>
-          <span style="color:#D4AF37; font-family:'Syne'; font-size:12px;">VIEW STATS ▶</span>
-        </div>
-      `).join('');
-    }
-
-    function viewHistoricalSession(holeIds, cId, cName) {
-      activeCourse = { id: cId, name: cName };
-      currentSessionHoleIds = holeIds;
-      generateSummary(holeIds);
-    }
-
-    async function deleteCurrentSession() {
-      if(!confirm("Are you SURE? This will permanently delete this round and all GPS plotted shots from the database.")) return;
-      try {
-        await sb.from('rounds').delete().in('id', currentSessionHoleIds);
-        alert("Round deleted successfully."); currentSessionHoleIds = []; switchScreen('screen-home');
-      } catch (e) { alert("Delete failed: " + e.message); }
-    }
-
-    // ==========================================
     // IMMERSIVE STORYTELLING (MOVIE MODE)
     // ==========================================
-    // Vibe: "The Highlight Reel"
-    // Purpose: Loads historical geospatial shot data and dynamically 
-    // animates lines and markers to simulate the actual sequence of the round.
-    // Extremely sticky for user retention and social flexs.
     async function loadRecapMap(holeIds, courseId, title) {
       switchScreen('screen-recap-map');
       document.getElementById('recap-map-title').innerText = title || "Round Recap";
@@ -912,7 +951,6 @@
       if(recapMarkersLayer) recapMarkersLayer.clearLayers(); 
     }
 
-    // The Director: Sets the stage before the movie starts playing
     function drawRecapHole(holeNum) {
       if(!recapHoleData[holeNum]) return;
       clearRecapMap();
@@ -933,7 +971,6 @@
       }
     }
 
-    // The Projector: Animates the shots sequentially 
     function playMovieMode() {
       const data = recapHoleData[currentRecapHole];
       if(!data || data.shots.length === 0) return alert("No shot data to play.");
