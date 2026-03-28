@@ -186,11 +186,13 @@
 
   <div id="screen-course-select">
     <div class="header-bar"><h2 style="margin:0; font-family:'Syne';">Select Course</h2><button class="nav-btn" onclick="switchScreen('screen-home')">BACK</button></div>
+    
     <div style="padding:20px; display:flex; flex-direction:column; flex-grow:1; height:100%; overflow:hidden; background:#F3F4F6;">
       <div class="search-row" style="margin-bottom:15px;">
         <input type="text" id="db-course-search" class="auth-input" style="margin:0; flex-grow:1;" placeholder="Search AutoCaddy DB..." onkeyup="renderCourseList()">
         <button class="action-btn" style="width:auto; padding:0 15px; background:#111827;" onclick="searchGlobalCourses()">Search Global Map</button>
       </div>
+
       <div id="course-scroller" style="overflow-y:auto; flex-grow:1; padding-bottom:20px; margin-top:5px;"></div>
       <div id="global-course-results" style="margin-top:10px; flex-shrink:0;"></div>
     </div>
@@ -345,6 +347,24 @@
     const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hd2ViZWNtcmpveXVhcHdodWFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY2NjEsImV4cCI6MjA5MDEwMjY2MX0.bKOoBYFDTEw0QYvFmoSuOjcqRioN44OkqgpLfX42sG0';
     let sb = null; try { if(typeof supabase !== 'undefined') sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e){}
 
+    // ==========================================
+    // GEOSPATIAL MATH HELPERS (THE ENGINE FIX)
+    // ==========================================
+    function calcDistMeters(lat1, lon1, lat2, lon2) {
+      const R = 6371e3; 
+      const p1 = lat1 * Math.PI/180, p2 = lat2 * Math.PI/180;
+      const dp = (lat2-lat1) * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
+      const a = Math.sin(dp/2)*Math.sin(dp/2) + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)*Math.sin(dl/2);
+      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+    }
+
+    function calculateBearing(lat1, lon1, lat2, lon2) {
+      const p1 = lat1 * Math.PI/180, p2 = lat2 * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
+      const y = Math.sin(dl) * Math.cos(p2);
+      const x = Math.cos(p1)*Math.sin(p2) - Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
+      return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+    }
+
     // Global State Variables
     let currentUser = null, currentProfile = null, authMode = 'login';
     let map = null, markersLayer = null;
@@ -370,24 +390,6 @@
     let recapMap = null, recapLinesLayer = null, recapMarkersLayer = null;
     let recapHoleData = {}, currentRecapHole = 1, movieTimeout = null;
 
-    // ==========================================
-    // GEOSPATIAL MATH HELPERS (THE FIX)
-    // ==========================================
-    function calcDistMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; 
-      const p1 = lat1 * Math.PI/180, p2 = lat2 * Math.PI/180;
-      const dp = (lat2-lat1) * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
-      const a = Math.sin(dp/2)*Math.sin(dp/2) + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)*Math.sin(dl/2);
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-
-    function calculateBearing(lat1, lon1, lat2, lon2) {
-      const p1 = lat1 * Math.PI/180, p2 = lat2 * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
-      const y = Math.sin(dl) * Math.cos(p2);
-      const x = Math.cos(p1)*Math.sin(p2) - Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
-      return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-    }
-    
     window.onload = async () => {
       if(!sb) return;
       const { data } = await sb.auth.getSession();
@@ -1057,7 +1059,6 @@
     function playMovieMode() {
       const data = recapHoleData[currentRecapHole];
       if(!data || data.shots.length === 0) {
-          // If no shots to show, jump to next hole after short delay
           movieTimeout = setTimeout(() => { changeRecapHole(1); setTimeout(playMovieMode, 500); }, 1500);
           return;
       }
@@ -1070,13 +1071,12 @@
       let currentShotIndex = 0;
       function showNextShot() {
         if (currentShotIndex >= data.shots.length) {
-            // Auto-jump to next hole after 2.5 second dramatic pause
             movieTimeout = setTimeout(() => {
                 const availableHoles = Object.keys(recapHoleData).map(Number).sort((a,b)=>a-b);
                 const currIdx = availableHoles.indexOf(Number(currentRecapHole));
                 if (currIdx + 1 < availableHoles.length) {
                     changeRecapHole(1);
-                    movieTimeout = setTimeout(playMovieMode, 500); // Give map time to breathe before playing next
+                    movieTimeout = setTimeout(playMovieMode, 500); 
                 } else {
                     alert("Round Complete! What a show.");
                 }
