@@ -19,10 +19,7 @@
 <style>
   /* ==========================================
      AUTOCADDY DESIGN SYSTEM
-     ==========================================
-     Vibe: Premium, Data-Driven, "Fortune 500 Caddy"
-     Purpose: A highly legible, high-contrast UI that 
-     can be read easily under direct sunlight on a golf course.
+     Vibe: Premium, Minimalist, "Fortune 500 Caddy"
      ========================================== */
   :root { 
     var(--bg-main): #FFFFFF; var(--bg-sub): #F3F4F6; var(--text-main): #111827; var(--text-muted): #6B7280; 
@@ -30,15 +27,16 @@
     var(--accent-red): #EF4444; var(--accent-green): #10B981; var(--border-light): #E5E7EB;
   }
   body { margin:0; padding:0; font-family:'DM Sans',sans-serif; background:#F3F4F6; color:#111827; display:flex; flex-direction:column; height:100vh; overflow:hidden; }
-  button { cursor:pointer; }
+  button { cursor:pointer; -webkit-tap-highlight-color: transparent; }
   
   /* Core UI Components */
   .auth-input, .action-btn, .menu-btn { width:100%; max-width:300px; padding:15px; border-radius:8px; border:none; font-size:16px; box-sizing:border-box; }
   .auth-input { background:#FFFFFF; color:#111827; border:1px solid #E5E7EB; margin-bottom:15px; box-shadow: inset 0 1px 2px rgba(0,0,0,0.05); }
   .action-btn { background:#003876; color:#FFFFFF; font-family:'Syne'; font-weight:800; letter-spacing: 0.5px; box-shadow: 0 4px 6px -1px rgba(0,56,118,0.2); transition: all 0.2s; }
   
-  .header-bar { padding:15px; display:flex; justify-content:space-between; align-items:center; background:#003876; color:#FFFFFF; z-index:1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-  .nav-btn { background:transparent; color:#D4AF37; border:1px solid #D4AF37; border-radius:4px; padding:5px 15px; font-weight:bold; }
+  /* Modern Compact Header */
+  .header-bar { padding:10px 15px; display:flex; justify-content:space-between; align-items:center; background:#003876; color:#FFFFFF; z-index:1000; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+  .nav-btn { background:transparent; color:#D4AF37; border:1px solid #D4AF37; border-radius:4px; padding:5px 12px; font-weight:bold; font-size:12px; }
   
   .auth-tabs { display:flex; margin-bottom:20px; background:#FFFFFF; border-radius:8px; border: 1px solid #E5E7EB; overflow: hidden;}
   .auth-tab { background:transparent; color:#6B7280; border:none; padding:12px 20px; font-family:'Syne'; font-weight:700; flex:1; transition:0.2s;}
@@ -50,43 +48,46 @@
   
   .recap-card, .friend-card, .course-card { background:#FFFFFF; border:1px solid #E5E7EB; border-radius:12px; padding:15px; margin-bottom:12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; box-shadow: 0 2px 4px rgba(0,0,0,0.03); }
   
-  /* Screen Management (SPA Architecture) */
+  /* Screen Management */
   #screen-auth, #screen-home, #screen-course-select, #screen-game, #screen-score, #screen-recap-list, #screen-recap-map, #screen-social, #screen-summary { display:none; flex-direction:column; height:100%; position:relative; }
   #screen-auth { align-items:center; justify-content:center; padding:20px; background: #FFFFFF; }
   #map-container, #recap-map-container { flex-grow:1; background:#E5E3DF; width:100%; z-index:1; box-shadow: inset 0px 5px 15px rgba(0,0,0,0.1); }
   
-  /* Spatial Visuals (Map Pins & Heatmaps) */
+  /* Map Pins */
   .leaflet-div-icon { background:transparent; border:none; }
   .shot-pin { width:12px; height:12px; border:2px solid white; border-radius:50%; box-shadow:0 2px 4px rgba(0,0,0,0.6); }
   .pin-Tee { background-color:#0055A4; } .pin-Approach { background-color:#111827; } .pin-Chip { background-color:#D4AF37; } .pin-Putt { background-color:#10B981; }
   .pin-Penalty { background-color:#EF4444; border-color:#FFFFFF; } 
   .stho-decimal-icon { background:transparent; border:none; pointer-events: none; }
   
-  /* Menus & Overlays */
-  .overlay-panel { position:absolute; top:70px; right:15px; z-index:1000; background:rgba(255,255,255,0.95); border-radius:12px; padding:8px; box-shadow:0 4px 15px rgba(0,0,0,0.15); border:1px solid #E5E7EB; display:flex; flex-direction:column; gap:6px; backdrop-filter: blur(4px); }
-  .layer-btn { background:transparent; border:1px solid transparent; color:#6B7280; font-size:10px; font-weight:bold; font-family:'DM Mono'; padding:6px 10px; border-radius:6px; text-align:left; transition:0.2s; }
+  /* Sleek Horizontal Data Layers Menu (GHIN Style) */
+  .layer-menu { display:flex; overflow-x:auto; gap:8px; padding:8px 15px; background:#FFFFFF; border-top:1px solid #E5E7EB; border-bottom:1px solid #E5E7EB; scrollbar-width: none; z-index:1000; }
+  .layer-menu::-webkit-scrollbar { display: none; }
+  .layer-btn { background:#F3F4F6; border:1px solid transparent; color:#6B7280; font-size:11px; font-weight:bold; font-family:'DM Sans'; padding:6px 12px; border-radius:16px; white-space:nowrap; transition:0.2s; }
   .layer-btn.active { background:#003876; color:#FFFFFF; }
 
-  .command-center { background:#FFFFFF; border-top:1px solid #E5E7EB; z-index:1000; display:flex; flex-direction:column; padding:15px; gap:12px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
+  /* Command Center */
+  .command-center { background:#FFFFFF; z-index:1000; display:flex; flex-direction:column; padding:12px 15px 15px; gap:10px; box-shadow: 0 -4px 10px rgba(0,0,0,0.05); }
   .shot-selector { display:flex; gap:5px; } 
-  .shot-btn { flex:1; padding:12px 0; background:#F3F4F6; color:#6B7280; border:1px solid #E5E7EB; border-radius:6px; font-weight:bold; font-size: 13px; transition: 0.2s; }
+  .shot-btn { flex:1; padding:10px 0; background:#F3F4F6; color:#6B7280; border:1px solid #E5E7EB; border-radius:6px; font-weight:bold; font-size: 12px; transition: 0.2s; }
   .shot-btn.active { background:#003876; color:#FFFFFF; border-color:#003876; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
   
+  /* Modals */
   .bottom-modal { display:none; position:absolute; bottom:0; left:0; right:0; background:#FFFFFF; padding:20px; border-top-left-radius:24px; border-top-right-radius:24px; z-index:2000; box-shadow:0 -10px 25px rgba(0,0,0,0.15); animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; will-change: transform; }
   .lie-grid, .hole-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(80px, 1fr)); gap:10px; margin-top:15px; } 
   .lie-btn, .hole-btn { padding:14px; background:#F3F4F6; border:1px solid #E5E7EB; color:#111827; border-radius:8px; font-weight:bold; text-align:center; }
   
+  /* Score Adjuster */
   #screen-score { overflow-y:auto; background:#F3F4F6; }
   .number-adjuster { display:flex; align-items:center; gap:15px; } 
   .adj-btn { width:44px; height:44px; border-radius:50%; border:2px solid #E5E7EB; background:#FFFFFF; color:#003876; font-size:24px; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
   .num-display { font-size:32px; font-weight:800; width:40px; text-align:center; font-family:'DM Mono'; color:#111827; }
   
-  .wind-badge { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:#FFFFFF; padding:3px 10px; border-radius:12px; font-size:11px; font-family:'DM Mono'; font-weight:bold; margin-top:4px; display:inline-block; }
+  /* Badges */
+  .wind-badge { background:rgba(255,255,255,0.2); border:1px solid rgba(255,255,255,0.4); color:#FFFFFF; padding:3px 8px; border-radius:12px; font-size:10px; font-family:'DM Mono'; font-weight:bold; margin-top:2px; display:inline-block; }
   .live-badge { background:#EF4444; color:white; font-size:10px; font-family:'DM Mono'; font-weight:bold; padding:4px 8px; border-radius:4px; animation: pulse 1.5s infinite; }
   
-  /* ==========================================
-     SUMMARY DASHBOARD STYLES
-     ========================================== */
+  /* Summary Dashboard */
   #screen-summary { background:#F3F4F6; overflow-y:auto; }
   .summary-header { background:#003876; color:white; padding:30px 20px 40px; text-align:center; border-bottom-left-radius: 24px; border-bottom-right-radius: 24px; }
   .summary-score-big { font-size:64px; font-family:'Syne'; font-weight:800; line-height:1; margin:10px 0; color:#D4AF37; }
@@ -97,9 +98,7 @@
   
   .search-row { display:flex; gap:10px; flex-shrink:0; }
   
-  /* ==========================================
-     CINEMATIC RECAP TOOLS
-     ========================================== */
+  /* Cinematic Recap Tools */
   .recap-stats-bar { display:flex; justify-content:space-between; background:#FFFFFF; padding:12px 20px; border-bottom:1px solid #E5E7EB; font-family:'DM Mono'; font-size:14px; color:#003876; font-weight:bold; box-shadow: 0 2px 4px rgba(0,0,0,0.05); z-index:100; position:relative; }
   .recap-stat-item { text-align:center; }
   .recap-stat-item span { display:block; color:#6B7280; font-size:10px; text-transform:uppercase; font-family:'DM Sans'; margin-bottom:2px; }
@@ -168,10 +167,7 @@
       <button class="auth-tab" id="tab-btn-accolades" onclick="switchProfileTab('accolades')">ACCOLADES</button>
     </div>
 
-    <div id="profile-history-tab" style="display:block; flex-grow:1;">
-       <div id="profile-history-container"></div>
-    </div>
-
+    <div id="profile-history-tab" style="display:block; flex-grow:1;"><div id="profile-history-container"></div></div>
     <div id="profile-accolades-tab" style="display:none; flex-grow:1;">
        <div class="course-card" style="display:block; text-align:center;">
          <h4 style="margin:0 0 5px; color:#6B7280; text-transform:uppercase; font-size:12px;">Lowest Score Recorded</h4>
@@ -190,13 +186,11 @@
 
   <div id="screen-course-select">
     <div class="header-bar"><h2 style="margin:0; font-family:'Syne';">Select Course</h2><button class="nav-btn" onclick="switchScreen('screen-home')">BACK</button></div>
-    
     <div style="padding:20px; display:flex; flex-direction:column; flex-grow:1; height:100%; overflow:hidden; background:#F3F4F6;">
       <div class="search-row" style="margin-bottom:15px;">
         <input type="text" id="db-course-search" class="auth-input" style="margin:0; flex-grow:1;" placeholder="Search AutoCaddy DB..." onkeyup="renderCourseList()">
         <button class="action-btn" style="width:auto; padding:0 15px; background:#111827;" onclick="searchGlobalCourses()">Search Global Map</button>
       </div>
-
       <div id="course-scroller" style="overflow-y:auto; flex-grow:1; padding-bottom:20px; margin-top:5px;"></div>
       <div id="global-course-results" style="margin-top:10px; flex-shrink:0;"></div>
     </div>
@@ -205,24 +199,22 @@
   <div id="screen-game">
     <div class="header-bar">
       <div style="cursor:pointer;" onclick="document.getElementById('hole-jumper-modal').style.display='block'">
-        <h2 id="hole-title" style="margin:0; font-family:'Syne'; display:flex; align-items:center; gap:5px;">Hole 1 <span style="font-size:12px;">▼</span></h2>
-        <div id="hole-details" style="font-size:12px; opacity:0.8; font-family:'DM Mono';">Par --</div>
-        <div id="wind-display" class="wind-badge">💨 -- mph</div>
+        <h2 id="hole-title" style="margin:0; font-family:'Syne'; display:flex; align-items:center; gap:5px; font-size:22px;">Hole 1 <span style="font-size:10px;">▼</span></h2>
+        <div id="hole-details" style="font-size:11px; opacity:0.9; font-family:'DM Mono'; margin-top:2px;">Par -- • ~--- yds • Avg: --</div>
       </div>
-      <div style="display:flex; gap:10px;">
-        <button class="nav-btn" style="border-color:#10B981; color:#FFFFFF; background:#10B981;" onclick="finishRoundEarly()">FINISH</button>
-        <button class="nav-btn" style="border-color:#EF4444; color:#FFFFFF; background:#EF4444;" onclick="confirmQuit()">QUIT</button>
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:5px;">
+        <button class="nav-btn" style="border-color:#10B981; color:#FFFFFF; background:#10B981; padding:4px 10px;" onclick="finishRoundEarly()">FINISH</button>
+        <div id="wind-display" class="wind-badge">💨 -- mph</div>
       </div>
     </div>
     
-    <div id="map-container">
-      <div class="overlay-panel">
-        <div style="font-size:9px; color:#003876; font-weight:bold; text-align:center; margin-bottom:4px; font-family:'Syne';">DATA LAYERS</div>
-        <button class="layer-btn active" onclick="setOverlay('stho_personal', this)">1. My STHO Avg</button>
-        <button class="layer-btn" onclick="setOverlay('history_personal', this)">2. My Past Shots</button>
-        <button class="layer-btn" onclick="setOverlay('stho_community', this)">3. Global STHO</button>
-        <button class="layer-btn" id="layer-compare-btn" style="display:none; background:#D4AF37; color:#FFFFFF;" onclick="setOverlay('compare', this)">4. Compare STHO</button>
-      </div>
+    <div id="map-container"></div>
+    
+    <div class="layer-menu" id="game-layer-menu">
+      <button class="layer-btn active" onclick="setOverlay('stho_personal', this)">Shots to hole out</button>
+      <button class="layer-btn" onclick="setOverlay('history_personal', this)">All shots</button>
+      <button class="layer-btn" onclick="setOverlay('stho_community', this)">Community STHO</button>
+      <button class="layer-btn" id="layer-compare-btn" style="display:none; color:#D4AF37; border-color:#D4AF37;" onclick="setOverlay('compare', this)">Compare Player</button>
     </div>
 
     <div id="hole-jumper-modal" class="bottom-modal">
@@ -243,16 +235,16 @@
     </div>
     
     <div class="command-center">
-      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:5px;">
-         <span style="font-size:12px; font-weight:bold; color:#6B7280; text-transform:uppercase;">Select Shot Type</span>
-         <button onclick="clearHolePlots()" style="background:transparent; border:none; color:#EF4444; font-size:12px; font-weight:bold; padding:0;">🗑️ Clear Shots</button>
+      <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:2px;">
+         <span style="font-size:11px; font-weight:bold; color:#6B7280; text-transform:uppercase;">Select Shot Type</span>
+         <button onclick="undoLastShot()" style="background:transparent; border:none; color:#EF4444; font-size:12px; font-weight:bold; padding:0;">↺ Undo Shot</button>
       </div>
       <div class="shot-selector" id="shot-selector">
         <button class="shot-btn" onclick="setShotType('Tee', this)">TEE</button>
         <button class="shot-btn" onclick="setShotType('Approach', this)">APP.</button>
         <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button>
         <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
-        <button class="shot-btn" onclick="setShotType('Penalty', this)" style="border-color:#EF4444; color:#EF4444; line-height:1.2; font-size:11px;">AFTER<br>PENALTY</button>
+        <button class="shot-btn" onclick="setShotType('Penalty', this)" style="border-color:#EF4444; color:#EF4444; line-height:1.2; font-size:10px;">AFTER<br>PENALTY</button>
       </div>
       <button id="save-hole-btn" class="action-btn" onclick="openScoreScreen()">Enter Score</button>
     </div>
@@ -325,16 +317,15 @@
       <div class="recap-stat-item"><span>Putts</span><strong id="recap-stat-putts">--</strong></div>
     </div>
 
-    <div id="recap-map-container">
-      <div class="overlay-panel">
-        <div style="font-size:9px; color:#003876; font-weight:bold; text-align:center; margin-bottom:4px; font-family:'Syne';">DATA LAYERS</div>
-        <button class="layer-btn active" onclick="setOverlay('stho_personal', this)">1. My STHO Avg</button>
-        <button class="layer-btn" onclick="setOverlay('history_personal', this)">2. My Past Shots</button>
-        <button class="layer-btn" onclick="setOverlay('stho_community', this)">3. Global STHO</button>
-        <button class="layer-btn" id="recap-layer-compare-btn" style="display:none; background:#D4AF37; color:#FFFFFF;" onclick="setOverlay('compare', this)">4. Compare STHO</button>
-      </div>
-    </div>
+    <div id="recap-map-container"></div>
     
+    <div class="layer-menu" id="recap-layer-menu">
+      <button class="layer-btn active" onclick="setOverlay('stho_personal', this)">Shots to hole out</button>
+      <button class="layer-btn" onclick="setOverlay('history_personal', this)">All shots</button>
+      <button class="layer-btn" onclick="setOverlay('stho_community', this)">Community STHO</button>
+      <button class="layer-btn" id="recap-layer-compare-btn" style="display:none; color:#D4AF37; border-color:#D4AF37;" onclick="setOverlay('compare', this)">Compare Player</button>
+    </div>
+
     <div class="recap-tools">
       <button class="tool-btn" onclick="playMovieMode()">▶ PLAY MOVIE</button>
     </div>
@@ -363,6 +354,11 @@
     let currentWindString = "-- mph"; 
     let currentSessionHoleIds = []; 
     
+    // Predictive Framing Globals
+    let windowHoleBounds = null;
+    let windowAvgTee = null;
+    let windowAvgPutt = null;
+    
     let allDBCourses = [];
     let userFavCourses = {}; 
     let activeOverlayType = 'stho_personal';
@@ -380,7 +376,6 @@
       if (data?.session) { currentUser = data.session.user; await loadCurrentUserProfile(); switchScreen('screen-home'); }
       else switchScreen('screen-auth');
       
-      // Inject jump grid dynamically
       const grid = document.getElementById('hole-grid-container');
       for(let i=1; i<=18; i++) { grid.innerHTML += `<button class="hole-btn" onclick="jumpToHole(${i})">${i}</button>`; }
     };
@@ -418,15 +413,12 @@
       try {
         if(authMode==='signup') { 
           if(!u) return alert("Username required!");
-          // Sign up with Supabase using Email/Password
           const {data, error} = await sb.auth.signUp({email:e, password:p}); 
           if(error) throw error;
-          // Note: Requires an 'email' column added to your 'profiles' table for username lookup to work flawlessly!
           await sb.from('profiles').insert({id: data.user.id, username: u, email: e});
           currentUser = data.user; await loadCurrentUserProfile(); switchScreen('screen-home');
         } else { 
           let loginEmail = e;
-          // USERNAME LOGIN ENGINE: If they didn't type an '@', assume it's a username and fetch the mapped email.
           if (!e.includes('@')) {
             const {data: pData} = await sb.from('profiles').select('email').eq('username', e).single();
             if (pData && pData.email) { loginEmail = pData.email; } 
@@ -441,7 +433,7 @@
     async function logOut() { await sb.auth.signOut(); currentUser = null; currentProfile = null; switchScreen('screen-auth'); }
 
     // ==========================================
-    // COURSE SELECTION & DEDUPLICATION LOGIC
+    // COURSE SELECTION & DEDUPLICATION
     // ==========================================
     async function openCourseSelect() { 
       switchScreen('screen-course-select'); 
@@ -517,7 +509,6 @@
 
     async function addCourseToDB(name, lat, lng) {
       try {
-        // DEDUPLICATION: Check if similarly named course already exists
         const { data: existing } = await sb.from('courses').select('*').ilike('name', `%${name.split(' ')[0]}%`).limit(1);
         if (existing && existing.length > 0) { startRound(existing[0]); return; }
 
@@ -561,15 +552,49 @@
     }
 
     // ==========================================
-    // THE MACHINE LEARNING FRAMER
+    // THE MACHINE LEARNING FRAMER & DYNAMIC INFO
     // ==========================================
     async function loadHole(h) {
       currentHole = h; currentShots = []; markersLayer.clearLayers();
-      document.getElementById('hole-title').innerHTML = `Hole ${h} <span style="font-size:12px; opacity:0.6;">▼</span>`;
+      document.getElementById('hole-title').innerHTML = `Hole ${h} <span style="font-size:10px; opacity:0.6;">▼</span>`;
+      windowHoleBounds = null; windowAvgTee = null; windowAvgPutt = null;
       
       const { data: holeData } = await sb.from('holes').select('par').eq('course_id', activeCourse.id).eq('hole_number', h).single();
-      document.getElementById('hole-details').textContent = holeData?.par ? `Par ${holeData.par}` : "Par --";
+      const parStr = holeData?.par ? `Par ${holeData.par}` : "Par --";
 
+      // Calculate Crowdsourced Averages & Projected Yardage
+      const { data: commRounds } = await sb.from('rounds').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', h);
+      let avgScoreStr = "--";
+      let yardageStr = "---";
+      let commRoundIds = [];
+      
+      if (commRounds && commRounds.length > 0) {
+         let sum = 0; commRounds.forEach(r => {sum += r.score; commRoundIds.push(r.id)});
+         avgScoreStr = (sum / commRounds.length).toFixed(1);
+      }
+
+      if (commRoundIds.length > 0) {
+         const { data: commShots } = await sb.from('shots').select('lat, lng, shot_type').in('round_id', commRoundIds);
+         if (commShots && commShots.length > 0) {
+            // Establish bounding box of all shots for approach view
+            windowHoleBounds = L.latLngBounds(commShots.map(s => [s.lat, s.lng]));
+            
+            const tees = commShots.filter(s => s.shot_type === 'Tee');
+            const putts = commShots.filter(s => s.shot_type === 'Putt');
+            
+            if (tees.length > 0) { windowAvgTee = { lat: tees.reduce((sum, s)=>sum+s.lat, 0)/tees.length, lng: tees.reduce((sum, s)=>sum+s.lng, 0)/tees.length }; }
+            if (putts.length > 0) { windowAvgPutt = { lat: putts.reduce((sum, s)=>sum+s.lat, 0)/putts.length, lng: putts.reduce((sum, s)=>sum+s.lng, 0)/putts.length }; }
+            
+            if (windowAvgTee && windowAvgPutt) {
+               const meters = calcDistMeters(windowAvgTee.lat, windowAvgTee.lng, windowAvgPutt.lat, windowAvgPutt.lng);
+               yardageStr = Math.round(meters * 1.09361); 
+            }
+         }
+      }
+      
+      document.getElementById('hole-details').textContent = `${parStr} • ~${yardageStr} yds • Avg: ${avgScoreStr}`;
+
+      // Set initial framing
       if (currentSessionHoleIds.length > 0) {
         const { data: sessionRound } = await sb.from('rounds').select('id').eq('course_id', activeCourse.id).eq('hole_number', h).in('id', currentSessionHoleIds).limit(1).single();
         if (sessionRound) {
@@ -581,22 +606,16 @@
               const marker = L.marker([s.lat, s.lng], {icon: L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`}), draggable: true}).addTo(markersLayer);
               marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
             });
+            // Re-render overlays for current hole
+            const activeBtn = document.querySelector('#game-layer-menu .layer-btn.active');
+            if(activeBtn) setOverlay(activeOverlayType, activeBtn);
             return;
           }
         }
       }
 
-      const { data: recentRound } = await sb.from('rounds').select('id').eq('course_id', activeCourse.id).eq('hole_number', h).order('created_at', { ascending: false }).limit(1).single();
-      if (recentRound) {
-        const { data: pastShots } = await sb.from('shots').select('lat, lng').eq('round_id', recentRound.id).in('shot_type', ['Tee', 'Putt']); 
-        if (pastShots && pastShots.length > 0) {
-          if (pastShots.length === 1) { map.setView([pastShots[0].lat, pastShots[0].lng], 19); } 
-          else { map.fitBounds(L.latLngBounds(pastShots.map(s => [s.lat, s.lng])), { padding: [30, 30], maxZoom: 19 }); }
-          return; 
-        }
-      }
-
-      if (navigator.geolocation) {
+      if (windowHoleBounds) { map.fitBounds(windowHoleBounds, { padding: [30, 30], maxZoom: 19 }); }
+      else if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           (position) => { 
             const uLat = position.coords.latitude, uLng = position.coords.longitude;
@@ -606,12 +625,34 @@
           () => map.setView([activeCourse.lat, activeCourse.lng], 17), { enableHighAccuracy: true }
         );
       } else { map.setView([activeCourse.lat, activeCourse.lng], 17); }
+      
+      const activeBtn = document.querySelector('#game-layer-menu .layer-btn.active');
+      if(activeBtn) setOverlay(activeOverlayType, activeBtn);
     }
 
     // ==========================================
-    // PLOTTING CONTROLS & LOGIC
+    // PLOTTING CONTROLS & PREDICTIVE CAMERA
     // ==========================================
-    function setShotType(type, btn) { activeShotType = type; document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); }
+    function setShotType(type, btn) { 
+      activeShotType = type; 
+      document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active')); 
+      btn.classList.add('active'); 
+      
+      // Predictive Camera Logic based on Shot Type Selection
+      if (windowAvgTee && windowAvgPutt) {
+        if (type === 'Approach' || type === 'Penalty') {
+          map.flyToBounds(windowHoleBounds, {padding: [30, 30], duration: 1.2});
+        } else if (type === 'Tee') {
+          const midLat = (windowAvgTee.lat + windowAvgPutt.lat) / 2;
+          const midLng = (windowAvgTee.lng + windowAvgPutt.lng) / 2;
+          map.flyToBounds(L.latLngBounds([windowAvgTee.lat, windowAvgTee.lng], [midLat, midLng]), {padding: [30, 30], duration: 1.2});
+        } else if (type === 'Chip') {
+          map.flyTo([windowAvgPutt.lat, windowAvgPutt.lng], 19, {duration: 1.2});
+        } else if (type === 'Putt') {
+          map.flyTo([windowAvgPutt.lat, windowAvgPutt.lng], 20, {duration: 1.2});
+        }
+      }
+    }
     
     function handleMapTap(e) {
       if(!activeShotType) return alert("Select a shot type first.");
@@ -639,13 +680,14 @@
       document.getElementById('lie-modal').style.display = 'none'; pendingPlot = null;
     }
     
-    function clearHolePlots() {
+    function undoLastShot() {
       if(currentShots.length === 0) return;
-      if(confirm("Are you sure you want to clear all plots for this hole?")) {
-        currentShots = []; markersLayer.clearLayers();
-        document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active'));
-        activeShotType = null; pendingPlot = null;
-      }
+      currentShots.pop(); 
+      markersLayer.clearLayers();
+      currentShots.forEach((s, index) => {
+        const marker = L.marker([s.lat, s.lng], {icon: L.divIcon({className: `shot-pin pin-${s.type}`}), draggable: true}).addTo(markersLayer);
+        marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
+      });
     }
 
     // ==========================================
@@ -692,19 +734,6 @@
     // ==========================================
     // GHIN-STYLE ANALYTICS ENGINE
     // ==========================================
-    function calculateBearing(lat1, lon1, lat2, lon2) {
-      const toRad = d => d * Math.PI / 180; const toDeg = r => r * 180 / Math.PI;
-      const y = Math.sin(toRad(lon2 - lon1)) * Math.cos(toRad(lat2));
-      const x = Math.cos(toRad(lat1)) * Math.sin(toRad(lat2)) - Math.sin(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.cos(toRad(lon2 - lon1));
-      return (toDeg(Math.atan2(y, x)) + 360) % 360;
-    }
-    function calcDistMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; const φ1 = lat1 * Math.PI/180, φ2 = lat2 * Math.PI/180;
-      const Δφ = (lat2-lat1) * Math.PI/180, Δλ = (lon2-lon1) * Math.PI/180;
-      const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) + Math.cos(φ1) * Math.cos(φ2) * Math.sin(Δλ/2) * Math.sin(Δλ/2);
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-
     async function generateSummary(holeIdsArray) {
       if(!holeIdsArray || holeIdsArray.length === 0) { alert("No holes played yet!"); return switchScreen('screen-home'); }
       
@@ -795,7 +824,6 @@
       const friendIds = follows.map(f => f.followed_id);
       const {data: profiles} = await sb.from('profiles').select('*').in('id', friendIds);
       
-      // LIVE LOGIC FIX: User must have plotted within the last 5 hours to be marked live
       const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString();
       const {data: recentRounds} = await sb.from('rounds').select('user_id, created_at, hole_number, course_id, courses(name)').in('user_id', friendIds).gte('created_at', fiveHoursAgo).order('created_at', {ascending: false});
       
@@ -817,7 +845,6 @@
     }
 
     async function followUser(id) { await sb.from('friends').insert({follower_id: currentUser.id, followed_id: id}); alert("Followed!"); openSocialFeed(); }
-    
     function openMyProfile() { openProfile(currentUser.id, currentProfile ? currentProfile.username : 'Me'); }
 
     function switchProfileTab(tab) {
@@ -835,7 +862,6 @@
       document.getElementById('profile-modal').style.display = 'flex';
       document.getElementById('profile-history-container').innerHTML = "<p style='text-align:center;'>Loading profile...</p>";
 
-      // Fetch all rounds for Busta Cap & Accolades
       const { data: allHoles } = await sb.from('rounds').select('id, score, putts, created_at, course_id, courses(name)').eq('user_id', userId).order('created_at', {ascending: false});
       
       if(!allHoles || allHoles.length === 0) { 
@@ -847,27 +873,20 @@
 
       document.getElementById('prof-avg-score').innerText = allHoles.length; 
       
-      // --- BUSTA CAP ALGORITHM ---
-      // 1. Group holes by course_id
       const courseCounts = {};
       allHoles.forEach(h => {
         if (!courseCounts[h.course_id]) courseCounts[h.course_id] = { name: h.courses.name, scores: [] };
         courseCounts[h.course_id].scores.push(h.score);
       });
-      // 2. Find "Home Course" (most holes played)
       let homeCourseId = Object.keys(courseCounts).sort((a,b) => courseCounts[b].scores.length - courseCounts[a].scores.length)[0];
       let homeData = courseCounts[homeCourseId];
       let avgScoreAtHome = (homeData.scores.reduce((a,b)=>a+b,0) / homeData.scores.length).toFixed(1);
-      
-      // Basic Handicap estimate: Average Score minus an assumed Par of 4 per hole
       let bustaCap = (avgScoreAtHome - 4.0).toFixed(1);
       
       document.getElementById('prof-home-course-label').innerText = homeData.name.toUpperCase().substring(0,15);
       document.getElementById('prof-busta-cap').innerText = (bustaCap > 0 ? "+" : "") + bustaCap;
 
-      // --- ACCOLADES CALCULATION ---
-      let minScore = 999;
-      let minPutts = 999;
+      let minScore = 999; let minPutts = 999;
       allHoles.forEach(h => {
         if(h.score < minScore) minScore = h.score;
         if(h.putts < minPutts) minPutts = h.putts;
@@ -876,7 +895,6 @@
       document.getElementById('acc-low-putts').innerText = minPutts !== 999 ? minPutts : "--";
       document.getElementById('acc-fav-course').innerText = homeData.name;
 
-      // --- LIVE & HISTORY UI ---
       const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000); 
       const latestHole = allHoles[0];
       
@@ -886,9 +904,8 @@
          document.getElementById('prof-live-btn').style.display = 'block';
       }
 
-      // Render Top 10 History in Scroller
       const sessions = {};
-      allHoles.slice(0, 50).forEach(r => { // Look at last 50 holes to build up to 10 rounds
+      allHoles.slice(0, 50).forEach(r => { 
         const dateKey = r.created_at.split('T')[0];
         const key = `${dateKey}_${r.course_id}`;
         if(!sessions[key]) sessions[key] = { date: dateKey, courseName: r.courses.name, courseId: r.course_id, holeIds: [], totalScore: 0 };
@@ -921,7 +938,52 @@
     }
 
     // ==========================================
-    // IMMERSIVE STORYTELLING (MOVIE MODE)
+    // RECAP LIST (HISTORY)
+    // ==========================================
+    async function loadRecapListForUser(userId, title) {
+      switchScreen('screen-recap-list');
+      document.getElementById('recap-list-title').innerText = title || "Round History";
+      const container = document.getElementById('recap-list-container');
+      container.innerHTML = "Loading history...";
+      
+      const { data, error } = await sb.from('rounds').select(`id, created_at, course_id, courses(name)`).eq('user_id', userId).order('created_at', {ascending: false});
+      if(!data || data.length === 0) return container.innerHTML = "<p>No rounds recorded yet.</p>";
+
+      const sessions = {};
+      data.forEach(r => {
+        const dateKey = r.created_at.split('T')[0];
+        const key = `${dateKey}_${r.course_id}`;
+        if(!sessions[key]) sessions[key] = { date: dateKey, courseName: r.courses.name, courseId: r.course_id, holeIds: [] };
+        sessions[key].holeIds.push(r.id);
+      });
+
+      container.innerHTML = Object.values(sessions).map(s => `
+        <div class="course-card" onclick='viewHistoricalSession(${JSON.stringify(s.holeIds)}, ${s.courseId}, "${s.courseName}")'>
+          <div>
+            <strong style="display:block; color:#003876;">${s.courseName}</strong>
+            <span style="font-size:12px; color:#6B7280;">${s.date} • ${s.holeIds.length} Holes</span>
+          </div>
+          <span style="color:#D4AF37; font-family:'Syne'; font-size:12px;">VIEW STATS ▶</span>
+        </div>
+      `).join('');
+    }
+
+    function viewHistoricalSession(holeIds, cId, cName) {
+      activeCourse = { id: cId, name: cName };
+      currentSessionHoleIds = holeIds;
+      generateSummary(holeIds);
+    }
+
+    async function deleteCurrentSession() {
+      if(!confirm("Are you SURE? This will permanently delete this round and all GPS plotted shots from the database.")) return;
+      try {
+        await sb.from('rounds').delete().in('id', currentSessionHoleIds);
+        alert("Round deleted successfully."); currentSessionHoleIds = []; switchScreen('screen-home');
+      } catch (e) { alert("Delete failed: " + e.message); }
+    }
+
+    // ==========================================
+    // IMMERSIVE STORYTELLING (AUTO-PLAYING MOVIE MODE)
     // ==========================================
     async function loadRecapMap(holeIds, courseId, title) {
       switchScreen('screen-recap-map');
@@ -969,11 +1031,18 @@
         });
         recapMap.fitBounds(L.polyline(latlngs).getBounds(), {padding: [50, 50]});
       }
+      
+      const activeBtn = document.querySelector('#recap-layer-menu .layer-btn.active');
+      if(activeBtn) setOverlay(activeOverlayType, activeBtn);
     }
 
     function playMovieMode() {
       const data = recapHoleData[currentRecapHole];
-      if(!data || data.shots.length === 0) return alert("No shot data to play.");
+      if(!data || data.shots.length === 0) {
+          // If no shots to show, jump to next hole after short delay
+          movieTimeout = setTimeout(() => { changeRecapHole(1); setTimeout(playMovieMode, 500); }, 1500);
+          return;
+      }
       
       clearRecapMap();
       
@@ -982,7 +1051,21 @@
 
       let currentShotIndex = 0;
       function showNextShot() {
-        if (currentShotIndex >= data.shots.length) return; 
+        if (currentShotIndex >= data.shots.length) {
+            // Auto-jump to next hole after 2.5 second dramatic pause
+            movieTimeout = setTimeout(() => {
+                const availableHoles = Object.keys(recapHoleData).map(Number).sort((a,b)=>a-b);
+                const currIdx = availableHoles.indexOf(Number(currentRecapHole));
+                if (currIdx + 1 < availableHoles.length) {
+                    changeRecapHole(1);
+                    movieTimeout = setTimeout(playMovieMode, 500); // Give map time to breathe before playing next
+                } else {
+                    alert("Round Complete! What a show.");
+                }
+            }, 2500);
+            return; 
+        }
+        
         const s = data.shots[currentShotIndex];
         const icon = L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`, html: `<div style="color:#111827; font-family:'DM Mono'; font-size:10px; position:absolute; top:-16px; left:-5px; font-weight:bold; background:rgba(255,255,255,0.8); border-radius:4px; padding:1px 4px; box-shadow:0 1px 2px rgba(0,0,0,0.3);">${currentShotIndex+1}</div>`});
         L.marker([s.lat, s.lng], {icon}).addTo(recapMarkersLayer);
@@ -1010,6 +1093,83 @@
         clearRecapMap(); 
         if(activeProfileLiveRoundData) switchScreen('screen-social'); 
         else switchScreen('screen-summary');
+    }
+
+    // ==========================================
+    // STHO SPATIAL ENGINE (DATA LAYERS)
+    // ==========================================
+    function setOverlay(type, btnElement) {
+      activeOverlayType = type;
+      const menu = btnElement.closest('.layer-menu');
+      menu.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
+      btnElement.classList.add('active');
+      const isRecap = document.getElementById('screen-recap-map').style.display === 'flex';
+      const targetHole = isRecap ? currentRecapHole : currentHole;
+      const targetUser = activeProfileUserId || currentUser.id;
+      renderSTHO(targetHole, targetUser, isRecap);
+    }
+
+    async function renderSTHO(holeNum, targetUserId, isRecap = false) {
+      if(!activeCourse) return;
+      const targetMap = isRecap ? recapMap : map;
+      if(!targetMap) return;
+      
+      if(!overlayLayer) overlayLayer = L.layerGroup().addTo(targetMap);
+      overlayLayer.clearLayers();
+
+      try {
+        if (activeOverlayType === 'history_personal') {
+          const { data } = await sb.from('shots').select('lat, lng').eq('hole_number', holeNum).eq('user_id', targetUserId);
+          if(data) data.forEach(s => L.circle([s.lat, s.lng], { radius: 3, color: '#003876', fillColor: '#003876', fillOpacity: 0.5, weight: 0 }).addTo(overlayLayer));
+        } 
+        else if (activeOverlayType === 'stho_personal') {
+          const { data: rounds } = await sb.from('rounds').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', holeNum).eq('user_id', targetUserId);
+          await processAndDrawSTHOGrid(rounds, '#003876'); 
+        } 
+        else if (activeOverlayType === 'stho_community') {
+          const { data: rounds } = await sb.from('rounds').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', holeNum);
+          await processAndDrawSTHOGrid(rounds, '#111827'); 
+        }
+        else if (activeOverlayType === 'compare') {
+          const { data: friendRounds } = await sb.from('rounds').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', holeNum).eq('user_id', targetUserId);
+          const { data: myRounds } = await sb.from('rounds').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', holeNum).eq('user_id', currentUser.id);
+          await processAndDrawSTHOGrid(myRounds, '#003876');
+          await processAndDrawSTHOGrid(friendRounds, '#D4AF37');
+        }
+      } catch(e) { console.log("Overlay error", e); }
+    }
+
+    async function processAndDrawSTHOGrid(roundsArray, colorCode) {
+        if(!roundsArray || roundsArray.length === 0) return;
+        const roundScores = {}; roundsArray.forEach(r => roundScores[r.id] = r.score);
+        const roundIds = Object.keys(roundScores);
+        
+        const { data: shots } = await sb.from('shots').select('lat, lng, round_id, created_at').in('round_id', roundIds).order('created_at', {ascending: true});
+        if(!shots) return;
+
+        const shotsByRound = {};
+        shots.forEach(s => { if(!shotsByRound[s.round_id]) shotsByRound[s.round_id] = []; shotsByRound[s.round_id].push(s); });
+
+        const grid = {};
+        Object.keys(shotsByRound).forEach(roundId => {
+            const roundShots = shotsByRound[roundId];
+            const totalScore = roundScores[roundId];
+            roundShots.forEach((shot, index) => {
+                const stho = totalScore - index;
+                const gridLat = (Math.round(shot.lat * 10000) / 10000).toFixed(4);
+                const gridLng = (Math.round(shot.lng * 10000) / 10000).toFixed(4);
+                const key = `${gridLat},${gridLng}`;
+                if(!grid[key]) grid[key] = { sum: 0, count: 0, lat: parseFloat(gridLat), lng: parseFloat(gridLng) };
+                grid[key].sum += stho; grid[key].count += 1;
+            });
+        });
+
+        Object.values(grid).forEach(cell => {
+            const avgSTHO = (cell.sum / cell.count).toFixed(2);
+            const icon = L.divIcon({ className: 'stho-decimal-icon', html: `<div style="color:${colorCode}; font-family:'DM Mono', monospace; font-weight:800; font-size:13px; text-shadow: 1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff, 0px 2px 4px rgba(0,0,0,0.3); text-align:center; transform: translate(-50%, -50%);">${avgSTHO}</div>`});
+            const jitterLat = cell.lat + (colorCode === '#D4AF37' ? 0.00003 : 0);
+            L.marker([jitterLat, cell.lng], {icon, interactive: false}).addTo(overlayLayer);
+        });
     }
   </script>
 </body>
