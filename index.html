@@ -8,7 +8,6 @@
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="AutoCaddy">
 <link rel="apple-touch-icon" href="icon-192.png">
 
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;800&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
@@ -20,122 +19,125 @@
 
 <style>
   /* ==========================================
-     AUTOCADDY PRO DESIGN SYSTEM
-     Vibe: Elite, Clinical, Data-Driven
+     AUTOCADDY PRO V3: CAD & BLUEPRINT AESTHETIC
      ========================================== */
   :root { 
-    --bg-main: #F8FAFC; 
+    --bg-main: #F1F5F9; 
     --surface: #FFFFFF;
     --text-primary: #0F172A; 
     --text-muted: #64748B; 
-    --brand-primary: #0F172A; /* Sleek Slate */
-    --brand-accent: #3B82F6; /* Tech Blue */
-    --gold: #EAB308;
-    --danger: #EF4444; 
-    --success: #10B981; 
+    --brand-primary: #0F172A; /* Slate 900 */
+    --brand-accent: #2563EB; /* Blueprint Blue */
+    --gold: #D97706;
+    --danger: #DC2626; 
+    --success: #059669; 
     --border: #E2E8F0;
     --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     --shadow-lg: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.85);
+    --glass-bg: rgba(255, 255, 255, 0.90);
+    
+    /* Blueprint Grid Pattern */
+    --blueprint-grid: linear-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
   }
   
-  body { margin:0; padding:0; font-family:'DM Sans', sans-serif; background:var(--bg-main); color:var(--text-primary); display:flex; flex-direction:column; height:100vh; overflow:hidden; -webkit-font-smoothing: antialiased; }
+  body { margin:0; padding:0; font-family:'DM Sans', sans-serif; background:var(--bg-main); background-image:var(--blueprint-grid); background-size: 20px 20px; color:var(--text-primary); display:flex; flex-direction:column; height:100vh; overflow:hidden; -webkit-font-smoothing: antialiased; }
   button { cursor:pointer; -webkit-tap-highlight-color: transparent; outline: none; }
   
   /* Modern Inputs & Buttons */
-  .auth-input { width:100%; padding:16px; background:#F1F5F9; border:1px solid transparent; border-radius:16px; font-size:15px; font-family:'DM Sans'; color:var(--text-primary); margin-bottom:16px; box-sizing:border-box; transition:0.2s; font-weight:500; }
-  .auth-input:focus { border-color:var(--brand-accent); background:var(--surface); box-shadow:0 0 0 4px rgba(59,130,246,0.1); }
+  .auth-input { width:100%; padding:16px; background:var(--surface); border:1px solid var(--border); border-radius:12px; font-size:15px; font-family:'DM Mono'; color:var(--brand-primary); margin-bottom:16px; box-sizing:border-box; transition:0.2s; font-weight:500; }
+  .auth-input:focus { border-color:var(--brand-accent); box-shadow:0 0 0 4px rgba(37,99,235,0.1); }
   
-  .action-btn { width:100%; padding:18px; background:var(--brand-primary); color:#FFFFFF; font-family:'Syne', sans-serif; font-weight:800; font-size:15px; letter-spacing:0.5px; border:none; border-radius:16px; transition:0.2s; box-shadow: 0 10px 20px rgba(15,23,42,0.15); display:flex; justify-content:center; align-items:center; gap:8px; }
+  .action-btn { width:100%; padding:16px; background:var(--brand-primary); color:#FFFFFF; font-family:'Syne', sans-serif; font-weight:800; font-size:14px; letter-spacing:1px; text-transform:uppercase; border:none; border-radius:12px; transition:0.2s; box-shadow: 0 10px 20px rgba(15,23,42,0.15); display:flex; justify-content:center; align-items:center; gap:8px; }
   .action-btn:active { transform: scale(0.98); }
+  .action-btn-outline { background:transparent; color:var(--brand-primary); border:2px solid var(--brand-primary); box-shadow:none; }
   
   /* Glassmorphic Headers */
   .header-bar { padding:20px; display:flex; justify-content:space-between; align-items:center; background:var(--surface); z-index:1000; border-bottom:1px solid var(--border); }
-  .header-title { font-family:'Syne', sans-serif; font-size:24px; color:var(--text-primary); margin:0; }
-  .nav-btn-subtle { background:transparent; color:var(--text-muted); border:1px solid var(--border); border-radius:12px; padding:8px 16px; font-weight:600; font-size:13px; display:flex; align-items:center; gap:6px; transition:0.2s; }
+  .header-title { font-family:'Syne', sans-serif; font-size:24px; font-weight:800; color:var(--brand-primary); margin:0; }
+  .nav-btn-subtle { background:transparent; color:var(--text-muted); border:1px solid var(--border); border-radius:8px; padding:8px 16px; font-weight:600; font-size:13px; font-family:'DM Mono'; text-transform:uppercase; display:flex; align-items:center; gap:6px; transition:0.2s; }
   
-  /* Authentication Screen */
-  #screen-auth { align-items:center; justify-content:center; padding:20px; background: radial-gradient(circle at top right, #E0E7FF, var(--bg-main)); }
-  .auth-card { background:var(--surface); padding:30px 20px; border-radius:24px; box-shadow:var(--shadow-lg); width:100%; max-width:340px; border:1px solid rgba(255,255,255,0.5); }
-  .auth-tabs { display:flex; margin-bottom:24px; background:#F1F5F9; border-radius:12px; padding:4px; }
-  .auth-tab { background:transparent; color:var(--text-muted); border:none; padding:12px 20px; font-family:'DM Sans'; font-weight:700; flex:1; border-radius:10px; transition:0.2s; font-size:13px; }
-  .auth-tab.active { background:var(--surface); color:var(--text-primary); box-shadow:var(--shadow-sm); }
+  /* Screens */
+  #screen-auth, #screen-home, #screen-course-select, #screen-game, #screen-score, #screen-recap-list, #screen-recap-map, #screen-social, #screen-summary, #screen-round-review { display:none; flex-direction:column; height:100%; position:relative; }
   
-  /* Home Dashboard Grid */
+  /* Auth Screen */
+  #screen-auth { align-items:center; justify-content:center; padding:20px; background: radial-gradient(circle at top right, #DBEAFE, var(--bg-main)); }
+  .auth-card { background:var(--surface); padding:40px 24px; border-radius:16px; box-shadow:var(--shadow-lg); width:100%; max-width:340px; border:1px solid var(--border); }
+  .auth-tabs { display:flex; margin-bottom:24px; background:#F8FAFC; border-radius:8px; padding:4px; border:1px solid var(--border); }
+  .auth-tab { background:transparent; color:var(--text-muted); border:none; padding:12px; font-family:'DM Mono'; font-weight:700; flex:1; border-radius:6px; transition:0.2s; font-size:12px; text-transform:uppercase; }
+  .auth-tab.active { background:var(--surface); color:var(--brand-primary); box-shadow:var(--shadow-sm); }
+  
+  /* Home Dashboard */
   .home-header { padding:30px 20px 20px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
   .dashboard-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:20px; }
-  .dash-card { background:var(--surface); border:1px solid var(--border); border-radius:24px; padding:24px 15px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; box-shadow:var(--shadow-sm); transition:0.2s; cursor:pointer; }
-  .dash-card:active { transform: scale(0.97); }
-  .dash-icon { font-size:32px; color:var(--brand-primary); }
-  .dash-title { font-family:'Syne'; font-weight:800; font-size:15px; color:var(--text-primary); text-align:center; }
+  .dash-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px 15px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; box-shadow:var(--shadow-sm); transition:0.2s; cursor:pointer; }
+  .dash-icon { font-size:32px; color:var(--brand-accent); }
+  .dash-title { font-family:'DM Mono'; font-weight:800; font-size:13px; color:var(--brand-primary); text-transform:uppercase; letter-spacing:0.5px; text-align:center; }
 
   /* Map & Floating Game UI */
   #map-container, #recap-map-container { flex-grow:1; background:#E5E3DF; width:100%; position:absolute; top:0; left:0; right:0; bottom:0; z-index:0; }
   
-  .floating-header { position:absolute; top:15px; left:15px; right:15px; z-index:1000; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-radius:20px; padding:15px; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-lg); border:1px solid rgba(255,255,255,0.4); }
+  .floating-header { position:absolute; top:15px; left:15px; right:15px; z-index:1000; background:var(--glass-bg); backdrop-filter:blur(12px); border-radius:12px; padding:15px; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-lg); border:1px solid var(--border); }
   
-  .floating-command { position:absolute; bottom:15px; left:15px; right:15px; z-index:1000; background:var(--glass-bg); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border-radius:24px; padding:15px; box-shadow:var(--shadow-lg); border:1px solid rgba(255,255,255,0.4); display:flex; flex-direction:column; gap:12px; }
+  .floating-command { position:absolute; bottom:15px; left:15px; right:15px; z-index:1000; background:var(--glass-bg); backdrop-filter:blur(12px); border-radius:16px; padding:15px; box-shadow:var(--shadow-lg); border:1px solid var(--border); display:flex; flex-direction:column; gap:12px; }
   
+  /* Integrated Layers Menu (Moved to Command Center) */
+  .integrated-layers { display:flex; overflow-x:auto; gap:8px; padding-bottom:8px; border-bottom:1px dashed var(--border); scrollbar-width: none; }
+  .integrated-layers::-webkit-scrollbar { display: none; }
+  .layer-btn { background:#F1F5F9; border:1px solid var(--border); color:var(--text-muted); font-size:11px; font-weight:700; font-family:'DM Mono'; padding:8px 12px; border-radius:8px; white-space:nowrap; transition:0.2s; display:flex; align-items:center; gap:4px; text-transform:uppercase;}
+  .layer-btn.active { background:var(--brand-accent); color:#FFFFFF; border-color:var(--brand-accent); }
+
   .shot-selector { display:flex; gap:6px; } 
-  .shot-btn { flex:1; padding:12px 0; background:rgba(255,255,255,0.8); color:var(--text-muted); border:1px solid var(--border); border-radius:12px; font-weight:700; font-size:12px; transition:0.2s; }
+  .shot-btn { flex:1; padding:12px 0; background:#F8FAFC; color:var(--text-muted); border:1px solid var(--border); border-radius:8px; font-family:'DM Mono'; font-weight:700; font-size:11px; transition:0.2s; text-transform:uppercase;}
   .shot-btn.active { background:var(--brand-primary); color:#FFFFFF; border-color:var(--brand-primary); }
   
-  .wind-badge { display:flex; align-items:center; gap:6px; background:rgba(15,23,42,0.05); color:var(--text-primary); padding:6px 12px; border-radius:12px; font-size:12px; font-family:'DM Mono'; font-weight:600; border:1px solid rgba(15,23,42,0.1); }
+  .wind-badge { display:flex; align-items:center; gap:6px; background:rgba(15,23,42,0.05); color:var(--brand-primary); padding:6px 12px; border-radius:8px; font-size:12px; font-family:'DM Mono'; font-weight:800; border:1px solid var(--border); }
   
-  .layer-menu { position:absolute; top:85px; right:15px; z-index:1000; display:flex; flex-direction:column; gap:8px; }
-  .layer-btn { background:var(--glass-bg); backdrop-filter:blur(8px); border:1px solid rgba(255,255,255,0.5); color:var(--text-muted); font-size:11px; font-weight:700; font-family:'DM Sans'; padding:10px; border-radius:12px; box-shadow:var(--shadow-sm); transition:0.2s; text-align:left; display:flex; align-items:center; gap:6px; }
-  .layer-btn.active { background:var(--brand-primary); color:#FFFFFF; border-color:var(--brand-primary); }
-
-  /* Map Pins */
+  /* Map Pins & CAD Styling */
   .leaflet-div-icon { background:transparent; border:none; }
   .shot-pin { width:14px; height:14px; border:2px solid white; border-radius:50%; box-shadow:0 3px 6px rgba(0,0,0,0.5); }
-  .pin-Tee { background-color:var(--brand-primary); } .pin-Approach { background-color:var(--text-muted); } .pin-Chip { background-color:var(--gold); } .pin-Putt { background-color:var(--success); }
+  .pin-Tee { background-color:var(--brand-primary); } .pin-Approach { background-color:var(--brand-accent); } .pin-Chip { background-color:var(--gold); } .pin-Putt { background-color:var(--success); }
   .pin-Penalty { background-color:var(--danger); border-color:#FFFFFF; } 
-  .stho-decimal-icon { background:transparent; border:none; pointer-events: none; }
+  .stho-cad-icon { background:rgba(255,255,255,0.9); border:1px dashed var(--brand-accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'DM Mono'; font-weight:800; font-size:11px; color:var(--brand-primary); box-shadow:var(--shadow-sm); pointer-events: none; }
 
   /* Modals */
-  .bottom-modal { display:none; position:absolute; bottom:0; left:0; right:0; background:var(--surface); padding:24px; border-top-left-radius:32px; border-top-right-radius:32px; z-index:2000; box-shadow:0 -10px 40px rgba(0,0,0,0.15); animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .bottom-modal { display:none; position:absolute; bottom:0; left:0; right:0; background:var(--surface); padding:24px; border-top-left-radius:24px; border-top-right-radius:24px; z-index:2000; box-shadow:0 -10px 40px rgba(0,0,0,0.15); animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   .lie-grid, .hole-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(80px, 1fr)); gap:10px; margin-top:15px; } 
-  .lie-btn, .hole-btn { padding:16px; background:#F1F5F9; border:1px solid transparent; color:var(--text-primary); border-radius:16px; font-weight:700; text-align:center; transition:0.2s; }
+  .lie-btn, .hole-btn { padding:16px; background:#F8FAFC; border:1px solid var(--border); color:var(--brand-primary); border-radius:12px; font-family:'DM Mono'; font-weight:700; text-align:center; transition:0.2s; text-transform:uppercase; font-size:12px;}
   
-  /* Screens */
-  #screen-auth, #screen-home, #screen-course-select, #screen-game, #screen-score, #screen-recap-list, #screen-recap-map, #screen-social, #screen-summary { display:none; flex-direction:column; height:100%; position:relative; }
+  /* Smart Scorecard UI */
+  .scorecard-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:var(--shadow-sm); margin-bottom:15px; }
+  .score-row { display:flex; justify-content:space-between; align-items:center; padding:15px 0; border-bottom:1px dashed var(--border); }
+  .score-row:last-child { border-bottom:none; }
+  .score-label { font-family:'DM Mono'; font-weight:800; font-size:14px; color:var(--brand-primary); text-transform:uppercase; }
+  .number-adjuster { display:flex; align-items:center; gap:15px; } 
+  .adj-btn { width:36px; height:36px; border-radius:8px; border:1px solid var(--border); background:#F8FAFC; color:var(--brand-primary); font-size:18px; font-weight:bold; display:flex; align-items:center; justify-content:center; }
+  .num-display { font-size:28px; font-weight:800; width:40px; text-align:center; font-family:'Syne'; color:var(--brand-primary); }
   
-  /* Strava-Style Feed */
-  .feed-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:20px; margin-bottom:16px; box-shadow:var(--shadow-sm); }
+  /* Social Feed */
+  .feed-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:16px; box-shadow:var(--shadow-sm); }
   .feed-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
-  .feed-avatar { width:44px; height:44px; border-radius:50%; background:var(--brand-primary); color:white; display:flex; align-items:center; justify-content:center; font-family:'Syne'; font-weight:800; font-size:18px; margin-right:12px; }
-  .feed-title { font-size:15px; color:var(--text-primary); line-height:1.3; }
-  .feed-time { font-size:12px; color:var(--text-muted); font-family:'DM Sans'; margin-top:2px; }
-  .feed-stats { display:flex; gap:12px; background:#F8FAFC; padding:16px; border-radius:16px; margin-bottom:16px; }
+  .feed-avatar { width:44px; height:44px; border-radius:12px; background:var(--brand-primary); color:white; display:flex; align-items:center; justify-content:center; font-family:'Syne'; font-weight:800; font-size:18px; margin-right:12px; }
+  .feed-title { font-size:15px; color:var(--brand-primary); font-weight:600; line-height:1.3; }
+  .feed-stats { display:flex; gap:12px; background:#F8FAFC; padding:16px; border-radius:12px; margin-bottom:16px; border:1px dashed var(--border); }
   .feed-stat-item { flex:1; text-align:center; }
-  .feed-stat-val { font-family:'Syne'; font-size:24px; color:var(--brand-primary); font-weight:800; }
-  .feed-stat-label { font-size:10px; color:var(--text-muted); text-transform:uppercase; font-weight:700; letter-spacing:0.5px; margin-top:4px; }
-  .feed-actions { display:flex; gap:12px; }
-  .hype-btn { flex:1; background:#F1F5F9; color:var(--text-primary); padding:12px; border-radius:12px; font-weight:700; font-size:13px; display:flex; align-items:center; justify-content:center; gap:6px; transition:0.2s; border:none; }
-  .hype-btn.hyped { background:#FEF3C7; color:#B45309; }
-  .watch-btn { flex:2; background:var(--brand-primary); color:white; border:none; padding:12px; border-radius:12px; font-weight:800; font-size:13px; font-family:'Syne'; text-align:center; display:flex; justify-content:center; align-items:center; gap:6px; box-shadow:0 4px 10px rgba(15,23,42,0.2); }
-  
-  /* Course/History Cards */
-  .course-card { background:var(--surface); border:1px solid var(--border); border-radius:20px; padding:20px; margin-bottom:12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-sm); transition:0.2s; }
-  
-  /* Summary Data Grid */
-  .stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 20px; }
-  .stat-box { background:var(--surface); padding:20px; border-radius:20px; text-align:center; border:1px solid var(--border); box-shadow:var(--shadow-sm); }
-  .stat-value { font-family:'Syne'; font-size:32px; color:var(--text-primary); font-weight:800; margin-bottom:4px; }
+  .feed-stat-val { font-family:'DM Mono'; font-size:22px; color:var(--brand-accent); font-weight:800; }
+  .feed-stat-label { font-size:10px; font-family:'DM Mono'; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-top:4px; }
+  .hype-btn { background:#F8FAFC; color:var(--brand-primary); padding:10px 16px; border-radius:8px; font-family:'DM Mono'; font-weight:700; font-size:12px; border:1px solid var(--border); display:flex; align-items:center; gap:6px; text-transform:uppercase; }
+  .hype-btn.hyped { background:#EFF6FF; color:var(--brand-accent); border-color:var(--brand-accent); }
 
   @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-  @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+  @keyframes spin { 100% { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-  <div id="screen-auth" style="display:flex;">
+  <div id="screen-auth">
     <div class="auth-card">
       <div style="text-align:center; margin-bottom:30px;">
-        <i class="ph-fill ph-crosshair" style="font-size:48px; color:var(--brand-primary); margin-bottom:10px;"></i>
-        <h1 style="font-family:'Syne'; color:var(--text-primary); font-size:32px; margin:0;">AutoCaddy</h1>
-        <p style="color:var(--text-muted); margin-top:5px; font-size:14px;">Precision Spatial Analytics</p>
+        <i class="ph-bold ph-compass" style="font-size:48px; color:var(--brand-accent); margin-bottom:10px;"></i>
+        <h1 style="font-family:'Syne'; color:var(--brand-primary); font-size:32px; font-weight:800; margin:0;">AutoCaddy Pro</h1>
+        <p style="color:var(--text-muted); margin-top:5px; font-size:12px; font-family:'DM Mono'; text-transform:uppercase; letter-spacing:1px;">Spatial Golf Analytics</p>
       </div>
       
       <div class="auth-tabs">
@@ -156,31 +158,31 @@
   <div id="screen-home">
     <div class="home-header">
       <div>
-        <span style="color:var(--text-muted); font-size:12px; font-weight:600; text-transform:uppercase;">Player Profile</span><br>
-        <strong id="home-user-email" style="color:var(--text-primary); font-family:'Syne'; font-size:20px;">--</strong>
+        <span style="color:var(--text-muted); font-size:11px; font-family:'DM Mono'; font-weight:700; text-transform:uppercase; letter-spacing:1px;">System Active</span><br>
+        <strong id="home-user-email" style="color:var(--brand-primary); font-family:'Syne'; font-size:22px; font-weight:800;">--</strong>
       </div>
       <button onclick="logOut()" class="nav-btn-subtle" style="color:var(--danger); border-color:var(--danger);">
-        <i class="ph-bold ph-sign-out"></i>
+        <i class="ph-bold ph-power"></i>
       </button>
     </div>
     
-    <div style="flex-grow:1; display:flex; align-items:center; background:var(--bg-main);">
+    <div style="flex-grow:1; display:flex; align-items:center;">
       <div class="dashboard-grid" style="width:100%;">
         <div class="dash-card" onclick="openCourseSelect()">
-          <i class="ph-fill ph-flag-pennant dash-icon"></i>
-          <span class="dash-title">Start Round</span>
+          <i class="ph-bold ph-crosshair dash-icon"></i>
+          <span class="dash-title">Deploy Tracker</span>
         </div>
         <div class="dash-card" onclick="openSocialFeed()">
-          <i class="ph-fill ph-users-three dash-icon"></i>
-          <span class="dash-title">Clubhouse</span>
+          <i class="ph-bold ph-users-three dash-icon"></i>
+          <span class="dash-title">Clubhouse Feed</span>
         </div>
         <div class="dash-card" onclick="openMyProfile()">
-          <i class="ph-fill ph-chart-polar dash-icon"></i>
+          <i class="ph-bold ph-chart-line-up dash-icon"></i>
           <span class="dash-title">Performance</span>
         </div>
-        <div class="dash-card" onclick="loadRecapListForUser(currentUser?.id, 'My Rounds')">
-          <i class="ph-fill ph-clock-counter-clockwise dash-icon"></i>
-          <span class="dash-title">History</span>
+        <div class="dash-card" onclick="loadRecapListForUser(currentUser?.id, 'My Archives')">
+          <i class="ph-bold ph-database dash-icon"></i>
+          <span class="dash-title">Data Archives</span>
         </div>
       </div>
     </div>
@@ -193,35 +195,34 @@
     </div>
     <div style="padding:20px; overflow-y:auto; flex-grow:1;">
       <div class="search-row" style="margin-bottom:20px;">
-        <input type="text" id="friend-search" class="auth-input" style="margin:0; flex-grow:1;" placeholder="Search players...">
-        <button class="action-btn" style="width:auto; padding:0 20px; border-radius:16px;" onclick="searchFriends()"><i class="ph-bold ph-magnifying-glass"></i></button>
+        <input type="text" id="friend-search" class="auth-input" style="margin:0; flex-grow:1;" placeholder="Query Database...">
+        <button class="action-btn" style="width:auto; padding:0 20px; border-radius:12px;" onclick="searchFriends()"><i class="ph-bold ph-magnifying-glass"></i></button>
       </div>
       <div id="friend-search-results" style="margin-bottom:20px;"></div>
-      <div id="friends-list-container">
-        </div>
+      <div id="friends-list-container"></div>
     </div>
   </div>
 
   <div id="profile-modal" class="bottom-modal" style="height:90vh; overflow-y:auto; flex-direction:column; padding:0;">
     <div style="padding:24px 24px 0;">
       <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 id="prof-username" style="margin:0; font-family:'Syne'; color:var(--text-primary); font-size:28px; font-weight:800;">Username</h2>
+        <h2 id="prof-username" style="margin:0; font-family:'Syne'; font-weight:800; color:var(--brand-primary); font-size:28px;">Username</h2>
         <button onclick="document.getElementById('profile-modal').style.display='none'" style="background:transparent; color:var(--text-muted); border:none; font-size:24px;"><i class="ph-bold ph-x"></i></button>
       </div>
       <button id="prof-live-btn" class="action-btn" style="background:var(--danger); margin-bottom:20px; display:none;" onclick="jumpToLiveMap()">
-        <i class="ph-fill ph-record" style="animation: pulse 1.5s infinite;"></i> WATCH LIVE
+        <i class="ph-fill ph-record" style="animation: pulse 1.5s infinite;"></i> INTERCEPT LIVE FEED
       </button>
     </div>
     
-    <div class="stats-grid" style="padding:0 24px;">
-      <div class="stat-box"><div class="stat-value" id="prof-busta-cap" style="color:var(--gold);">--</div><div class="stat-label">Busta Cap</div></div>
-      <div class="stat-box"><div class="stat-value" id="prof-avg-score">--</div><div class="stat-label">Total Strokes</div></div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 24px;">
+      <div class="scorecard-card" style="text-align:center; padding:15px; margin:0;"><div class="score-label">BUSTA CAP</div><div style="font-family:'DM Mono'; font-size:28px; font-weight:800; color:var(--brand-accent);" id="prof-busta-cap">--</div></div>
+      <div class="scorecard-card" style="text-align:center; padding:15px; margin:0;"><div class="score-label">TOTAL SHOTS</div><div style="font-family:'DM Mono'; font-size:28px; font-weight:800; color:var(--brand-primary);" id="prof-avg-score">--</div></div>
     </div>
 
     <div style="padding:20px 24px;">
       <div class="auth-tabs" style="margin:0;">
-        <button class="auth-tab active" id="tab-btn-history" onclick="switchProfileTab('history')">HISTORY</button>
-        <button class="auth-tab" id="tab-btn-accolades" onclick="switchProfileTab('accolades')">ACCOLADES</button>
+        <button class="auth-tab active" id="tab-btn-history" onclick="switchProfileTab('history')">ARCHIVES</button>
+        <button class="auth-tab" id="tab-btn-accolades" onclick="switchProfileTab('accolades')">PERFORMANCE</button>
       </div>
     </div>
 
@@ -230,31 +231,27 @@
     </div>
     
     <div id="profile-accolades-tab" style="display:none; flex-grow:1; padding:0 24px 24px;">
-       <div class="course-card" style="display:block; text-align:center;">
-         <div class="stat-label" style="margin-bottom:8px;">Lowest Score</div>
-         <div style="font-size:42px; font-family:'Syne'; color:var(--success); font-weight:800;" id="acc-low-score">--</div>
+       <div class="scorecard-card" style="text-align:center;">
+         <div class="score-label" style="margin-bottom:8px;">Lowest Recorded Score</div>
+         <div style="font-size:42px; font-family:'DM Mono'; color:var(--success); font-weight:800;" id="acc-low-score">--</div>
        </div>
-       <div class="course-card" style="display:block; text-align:center;">
-         <div class="stat-label" style="margin-bottom:8px;">Lowest Putts</div>
-         <div style="font-size:42px; font-family:'Syne'; color:var(--gold); font-weight:800;" id="acc-low-putts">--</div>
-       </div>
-       <div class="course-card" style="display:block; text-align:center;">
-         <div class="stat-label" style="margin-bottom:8px;">Most Played Course</div>
-         <div style="font-size:18px; font-family:'Syne'; color:var(--brand-primary); font-weight:800; margin-top:5px;" id="acc-fav-course">--</div>
+       <div class="scorecard-card" style="text-align:center;">
+         <div class="score-label" style="margin-bottom:8px;">Highest Scrambling %</div>
+         <div style="font-size:42px; font-family:'DM Mono'; color:var(--gold); font-weight:800;" id="acc-low-putts">--</div>
        </div>
     </div>
   </div>
 
   <div id="screen-course-select">
     <div class="header-bar">
-      <h2 class="header-title">Select Course</h2>
+      <h2 class="header-title">Select Target</h2>
       <button class="nav-btn-subtle" onclick="switchScreen('screen-home')"><i class="ph-bold ph-arrow-left"></i> Back</button>
     </div>
     <div style="padding:20px; display:flex; flex-direction:column; flex-grow:1; height:100%; overflow:hidden;">
       <div class="search-row" style="margin-bottom:15px;">
-        <input type="text" id="db-course-search" class="auth-input" style="margin:0; flex-grow:1;" placeholder="Search Database..." onkeyup="renderCourseList()">
-        <button class="action-btn" style="width:auto; padding:0 20px; border-radius:16px; background:var(--text-primary);" onclick="searchGlobalCourses()">
-          <i class="ph-bold ph-globe"></i> Global
+        <input type="text" id="db-course-search" class="auth-input" style="margin:0; flex-grow:1;" placeholder="Query Database..." onkeyup="renderCourseList()">
+        <button class="action-btn" style="width:auto; padding:0 20px; border-radius:12px; background:var(--brand-primary);" onclick="searchGlobalCourses()">
+          <i class="ph-bold ph-globe"></i>
         </button>
       </div>
       <div id="course-scroller" style="overflow-y:auto; flex-grow:1; padding-bottom:20px;"></div>
@@ -267,29 +264,30 @@
     
     <div class="floating-header">
       <div style="cursor:pointer;" onclick="document.getElementById('hole-jumper-modal').style.display='block'">
-        <h2 id="hole-title" style="margin:0; font-family:'Syne'; font-size:24px; color:var(--text-primary); display:flex; align-items:center; gap:6px;">
-          Hole 1 <i class="ph-bold ph-caret-down" style="font-size:14px; color:var(--text-muted);"></i>
+        <h2 id="hole-title" style="margin:0; font-family:'Syne'; font-size:24px; font-weight:800; color:var(--brand-primary); display:flex; align-items:center; gap:6px;">
+          Hole 1 <i class="ph-bold ph-caret-down" style="font-size:14px; color:var(--brand-accent);"></i>
         </h2>
-        <div id="hole-details" style="font-size:12px; font-weight:600; color:var(--text-muted); margin-top:4px;">Par -- • ~--- yds • Avg: --</div>
+        <div id="hole-details" style="font-size:12px; font-weight:700; font-family:'DM Mono'; color:var(--text-muted); margin-top:4px;">Par -- • ~--- yds • Avg: --</div>
       </div>
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-        <button class="nav-btn-subtle" style="background:var(--success); color:white; border:none; box-shadow:var(--shadow-sm);" onclick="finishRoundEarly()">
-          <i class="ph-bold ph-check-circle"></i> Finish
+        <button class="nav-btn-subtle" style="background:var(--success); color:white; border:none;" onclick="finishRoundEarly()">
+          <i class="ph-bold ph-flag-checkered"></i> Finish
         </button>
         <div id="wind-display" class="wind-badge"><i class="ph-bold ph-wind"></i> -- mph</div>
       </div>
     </div>
     
-    <div class="layer-menu" id="game-layer-menu">
-      <button class="layer-btn active" onclick="setOverlay('stho_personal', this)"><i class="ph-bold ph-target"></i> STHO Target</button>
-      <button class="layer-btn" onclick="setOverlay('history_personal', this)"><i class="ph-bold ph-dots-nine"></i> All Shots</button>
-      <button class="layer-btn" onclick="setOverlay('stho_community', this)"><i class="ph-bold ph-users"></i> Global STHO</button>
-    </div>
-
     <div class="floating-command">
-      <div style="display:flex; justify-content:space-between; align-items:center;">
-         <span style="font-size:11px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">Plot Tracker</span>
-         <button onclick="undoLastShot()" style="background:transparent; border:none; color:var(--danger); font-size:13px; font-weight:700; display:flex; align-items:center; gap:4px;">
+      <div class="integrated-layers" id="game-layer-menu">
+        <button class="layer-btn active" onclick="setOverlay('none', this)"><i class="ph-bold ph-prohibit"></i> Clean Map</button>
+        <button class="layer-btn" onclick="setOverlay('blueprint_vector', this)"><i class="ph-bold ph-compass"></i> Vector CAD</button>
+        <button class="layer-btn" onclick="setOverlay('stho_personal', this)"><i class="ph-bold ph-target"></i> My STHO</button>
+        <button class="layer-btn" onclick="setOverlay('stho_community', this)"><i class="ph-bold ph-users"></i> Global STHO</button>
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+         <span style="font-size:11px; font-weight:800; font-family:'DM Mono'; color:var(--text-muted); text-transform:uppercase;">Plot Tracker</span>
+         <button onclick="undoLastShot()" style="background:transparent; border:none; color:var(--danger); font-size:12px; font-family:'DM Mono'; font-weight:800; display:flex; align-items:center; gap:4px; text-transform:uppercase;">
            <i class="ph-bold ph-arrow-u-up-left"></i> Undo
          </button>
       </div>
@@ -298,94 +296,104 @@
         <button class="shot-btn" onclick="setShotType('Approach', this)">APP</button>
         <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button>
         <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
-        <button class="shot-btn" onclick="setShotType('Penalty', this)" style="color:var(--danger);">DROP</button>
+        <button class="shot-btn" onclick="setShotType('Penalty', this)" style="color:var(--danger); border-color:rgba(220,38,38,0.2);">DROP</button>
       </div>
       <button id="save-hole-btn" class="action-btn" onclick="openScoreScreen()">
-        <i class="ph-bold ph-floppy-disk"></i> ENTER SCORE
+        REVIEW SCORECARD <i class="ph-bold ph-arrow-right"></i>
       </button>
     </div>
 
     <div id="hole-jumper-modal" class="bottom-modal">
-      <h3 style="margin:0 0 10px; font-family:'Syne'; color:var(--text-primary); text-align:center;">Select Hole</h3>
+      <h3 style="margin:0 0 15px; font-family:'Syne'; font-weight:800; color:var(--brand-primary); text-align:center;">Select Vector</h3>
       <div class="hole-grid" id="hole-grid-container"></div>
-      <button onclick="document.getElementById('hole-jumper-modal').style.display='none'" class="action-btn" style="margin-top:20px; background:#F1F5F9; color:var(--text-primary); box-shadow:none;">Cancel</button>
+      <button onclick="document.getElementById('hole-jumper-modal').style.display='none'" class="action-btn action-btn-outline" style="margin-top:20px;">Cancel</button>
     </div>
 
     <div id="lie-modal" class="bottom-modal">
-      <h3 style="margin:0 0 10px; font-family:'Syne'; color:var(--text-primary); text-align:center;">Select Lie</h3>
+      <h3 style="margin:0 0 15px; font-family:'Syne'; font-weight:800; color:var(--brand-primary); text-align:center;">Select Topography</h3>
       <div class="lie-grid">
-        <button class="lie-btn" onclick="confirmLie('Fairway')" style="background:#ECFDF5; color:#059669;">Fairway</button> 
-        <button class="lie-btn" onclick="confirmLie('Rough')" style="background:#FEF3C7; color:#D97706;">Rough</button>
+        <button class="lie-btn" onclick="confirmLie('Fairway')" style="border-color:var(--success); color:var(--success);">Fairway</button> 
+        <button class="lie-btn" onclick="confirmLie('Rough')" style="border-color:var(--gold); color:var(--gold);">Rough</button>
         <button class="lie-btn" onclick="confirmLie('Sand')">Sand</button> 
         <button class="lie-btn" onclick="confirmLie('Fringe')">Fringe</button>
         <button class="lie-btn" onclick="confirmLie('Recovery/Tree')">Recovery</button> 
         <button class="lie-btn" onclick="confirmLie('Mogul')">Mogul</button>
       </div>
-      <button onclick="cancelLie()" class="action-btn" style="margin-top:20px; background:var(--danger); box-shadow:none;">Cancel Plot</button>
+      <button onclick="cancelLie()" class="action-btn" style="margin-top:20px; background:var(--danger);">Abort Plot</button>
     </div>
   </div>
 
   <div id="screen-score">
     <div class="header-bar">
       <h2 class="header-title">Scorecard</h2>
-      <button class="nav-btn-subtle" onclick="switchScreen('screen-game')">Cancel</button>
+      <button class="nav-btn-subtle" onclick="switchScreen('screen-game')"><i class="ph-bold ph-arrow-left"></i> Edit Plots</button>
     </div>
-    <div style="padding:30px 20px; flex-grow:1; display:flex; flex-direction:column; gap:20px;">
-      <div class="feed-card" style="display:flex; justify-content:space-between; align-items:center; margin:0;">
-        <div style="font-size:18px; font-weight:700; color:var(--text-primary);">Total Score</div>
-        <div class="number-adjuster">
-          <button class="adj-btn" onclick="adjustValue('score-val',-1)"><i class="ph-bold ph-minus"></i></button>
-          <div class="num-display" id="score-val">0</div>
-          <button class="adj-btn" onclick="adjustValue('score-val',1)"><i class="ph-bold ph-plus"></i></button>
-        </div>
+    <div style="padding:20px; flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+      
+      <div class="scorecard-card" style="width:100%; max-width:400px;">
+         <div style="text-align:center; margin-bottom:20px; border-bottom:1px dashed var(--border); padding-bottom:15px;">
+            <div style="font-family:'Syne'; font-weight:800; font-size:24px; color:var(--brand-primary);" id="sc-hole-title">Hole 1</div>
+            <div style="font-family:'DM Mono'; font-weight:700; font-size:12px; color:var(--text-muted);" id="sc-hole-sub">Par 4 • 412 Yds</div>
+         </div>
+         
+         <div class="score-row">
+            <div class="score-label">Total Strokes</div>
+            <div class="number-adjuster">
+              <button class="adj-btn" onclick="adjustValue('score-val',-1)"><i class="ph-bold ph-minus"></i></button>
+              <div class="num-display" id="score-val">4</div>
+              <button class="adj-btn" onclick="adjustValue('score-val',1)"><i class="ph-bold ph-plus"></i></button>
+            </div>
+         </div>
+         <div class="score-row">
+            <div class="score-label">Putts Taken</div>
+            <div class="number-adjuster">
+              <button class="adj-btn" onclick="adjustValue('putts-val',-1)"><i class="ph-bold ph-minus"></i></button>
+              <div class="num-display" id="putts-val">2</div>
+              <button class="adj-btn" onclick="adjustValue('putts-val',1)"><i class="ph-bold ph-plus"></i></button>
+            </div>
+         </div>
+         <div class="score-row" style="background:#F8FAFC; padding:15px; border-radius:8px; margin-top:10px;">
+            <div class="score-label">Fairway Hit (FIR)</div>
+            <div style="font-family:'DM Mono'; font-weight:800; font-size:18px;" id="sc-fir-val">YES</div>
+         </div>
+         <div class="score-row" style="background:#F8FAFC; padding:15px; border-radius:8px; margin-top:10px;">
+            <div class="score-label">Green Hit (GIR)</div>
+            <div style="font-family:'DM Mono'; font-weight:800; font-size:18px;" id="sc-gir-val">YES</div>
+         </div>
       </div>
-      <div class="feed-card" style="display:flex; justify-content:space-between; align-items:center; margin:0;">
-        <div style="font-size:18px; font-weight:700; color:var(--text-primary);">Putts</div>
-        <div class="number-adjuster">
-          <button class="adj-btn" onclick="adjustValue('putts-val',-1)"><i class="ph-bold ph-minus"></i></button>
-          <div class="num-display" id="putts-val">0</div>
-          <button class="adj-btn" onclick="adjustValue('putts-val',1)"><i class="ph-bold ph-plus"></i></button>
-        </div>
-      </div>
-    </div>
-    <div style="padding:20px; background:var(--surface); border-top:1px solid var(--border);">
-      <button class="action-btn" id="btn-save-score" onclick="saveScoreToDB()"><i class="ph-bold ph-check"></i> SAVE HOLE</button>
+      
+      <button class="action-btn" id="btn-save-score" style="background:var(--success); max-width:400px;" onclick="saveScoreToDB()">
+        <i class="ph-bold ph-check-circle"></i> CONFIRM SCORE
+      </button>
     </div>
   </div>
 
-  <div id="screen-summary">
+  <div id="screen-round-review">
     <div class="header-bar">
-      <h2 class="header-title">Performance</h2>
-      <button class="nav-btn-subtle" onclick="switchScreen('screen-home')"><i class="ph-bold ph-house"></i> Home</button>
+      <h2 class="header-title">Session Data</h2>
+      <button class="nav-btn-subtle" onclick="closeRoundReview()"><i class="ph-bold ph-x"></i></button>
     </div>
     
-    <div style="background:var(--brand-primary); color:white; padding:40px 20px; text-align:center; border-bottom-left-radius:32px; border-bottom-right-radius:32px; margin-bottom:20px;">
-      <div style="font-size:13px; font-weight:700; color:rgba(255,255,255,0.7); text-transform:uppercase; letter-spacing:1px;" id="sum-course-name">Course Name</div>
-      <div style="font-size:80px; font-family:'Syne'; font-weight:800; line-height:1; margin:10px 0; color:var(--gold);" id="sum-total-score">--</div>
-      <div style="font-size:14px; font-weight:600;" id="sum-relation-par">Par --</div>
+    <div style="padding:20px; flex-grow:1; display:flex; flex-direction:column; justify-content:center;">
+       <div class="scorecard-card" style="text-align:center;">
+         <div style="font-family:'DM Mono'; font-weight:800; font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;" id="rr-course-name">Course Name</div>
+         <div style="font-family:'Syne'; font-weight:800; font-size:72px; color:var(--brand-primary); margin:10px 0;" id="rr-total-score">--</div>
+         <div style="font-family:'DM Mono'; font-weight:800; font-size:14px; color:var(--brand-accent);" id="rr-relation">Holes Played: --</div>
+       </div>
+       
+       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
+         <div class="scorecard-card" style="text-align:center; padding:15px; margin:0;"><div class="score-label">Putts</div><div style="font-family:'DM Mono'; font-size:24px; font-weight:800; color:var(--brand-primary);" id="rr-putts">--</div></div>
+         <div class="scorecard-card" style="text-align:center; padding:15px; margin:0;"><div class="score-label">Scrambling</div><div style="font-family:'DM Mono'; font-size:24px; font-weight:800; color:var(--gold);" id="rr-scramble">--</div></div>
+       </div>
+       
+       <button class="action-btn" id="rr-watch-btn" style="background:var(--brand-accent);">
+         <i class="ph-fill ph-play-circle" style="font-size:20px;"></i> INITIALIZE SHOT TRACKER
+       </button>
+       
+       <button id="rr-delete-btn" class="action-btn action-btn-outline" style="margin-top:15px; color:var(--danger); border-color:var(--danger); display:none;" onclick="deleteCurrentSession()">
+         <i class="ph-bold ph-trash"></i> DELETE SESSION
+       </button>
     </div>
-
-    <div class="stats-grid">
-      <div class="stat-box"><div class="stat-value" id="sum-putts">--</div><div class="stat-label">Total Putts</div></div>
-      <div class="stat-box"><div class="stat-value" id="sum-sg" style="color:var(--success);">--</div><div class="stat-label">Holes Played</div></div>
-    </div>
-
-    <div style="padding:20px;">
-      <button class="action-btn" style="margin-bottom:15px;" onclick="loadRecapMap(currentSessionId, activeCourse.name)">
-        <i class="ph-fill ph-play-circle" style="font-size:20px;"></i> SHOT TRACKER
-      </button>
-      <button class="action-btn" style="background:#F1F5F9; color:var(--danger); box-shadow:none;" onclick="deleteCurrentSession()">
-        <i class="ph-bold ph-trash"></i> DELETE ROUND
-      </button>
-    </div>
-  </div>
-
-  <div id="screen-recap-list">
-    <div class="header-bar">
-      <h2 id="recap-list-title" class="header-title">History</h2>
-      <button class="nav-btn-subtle" onclick="switchScreen('screen-home')"><i class="ph-bold ph-arrow-left"></i> Back</button>
-    </div>
-    <div id="recap-list-container" style="padding:20px; overflow-y:auto; flex-grow:1;"></div>
   </div>
 
   <div id="screen-recap-map">
@@ -393,38 +401,38 @@
     
     <div class="floating-header">
       <div>
-        <h2 id="recap-map-title" style="margin:0; font-family:'Syne'; font-size:20px; color:var(--text-primary);">Round Recap</h2>
-        <div id="recap-map-sub" style="font-size:11px; font-weight:600; color:var(--text-muted); margin-top:2px;"></div>
+        <h2 id="recap-map-title" style="margin:0; font-family:'Syne'; font-size:20px; font-weight:800; color:var(--brand-primary);">Round Recap</h2>
+        <div id="recap-map-sub" style="font-size:11px; font-weight:700; font-family:'DM Mono'; color:var(--text-muted); margin-top:2px;"></div>
       </div>
       <button class="nav-btn-subtle" onclick="closeRecapMap()"><i class="ph-bold ph-x"></i></button>
     </div>
     
-    <div class="layer-menu" id="recap-layer-menu">
-      <button class="layer-btn active" onclick="setOverlay('stho_personal', this)"><i class="ph-bold ph-target"></i> STHO Target</button>
-      <button class="layer-btn" onclick="setOverlay('history_personal', this)"><i class="ph-bold ph-dots-nine"></i> All Shots</button>
-      <button class="layer-btn" onclick="setOverlay('stho_community', this)"><i class="ph-bold ph-users"></i> Global STHO</button>
-    </div>
+    <div class="floating-command" style="gap:12px;">
+      <div class="integrated-layers" id="recap-layer-menu">
+        <button class="layer-btn active" onclick="setOverlay('none', this)"><i class="ph-bold ph-prohibit"></i> Clean Map</button>
+        <button class="layer-btn" onclick="setOverlay('blueprint_vector', this)"><i class="ph-bold ph-compass"></i> Vector CAD</button>
+        <button class="layer-btn" onclick="setOverlay('stho_personal', this)"><i class="ph-bold ph-target"></i> STHO Target</button>
+      </div>
 
-    <div class="floating-command" style="gap:16px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; background:#F1F5F9; padding:12px; border-radius:16px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; padding:12px; border-radius:12px; border:1px solid var(--border);">
         <div style="text-align:center; flex:1;">
-          <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Score</div>
-          <div id="recap-stat-score" style="font-family:'Syne'; font-size:20px; font-weight:800; color:var(--brand-primary);">--</div>
+          <div style="font-size:10px; font-weight:800; font-family:'DM Mono'; color:var(--text-muted); text-transform:uppercase;">Score</div>
+          <div id="recap-stat-score" style="font-family:'Syne'; font-size:24px; font-weight:800; color:var(--brand-primary);">--</div>
         </div>
         <div style="width:1px; background:var(--border); height:30px;"></div>
         <div style="text-align:center; flex:1;">
-          <div style="font-size:10px; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Putts</div>
-          <div id="recap-stat-putts" style="font-family:'Syne'; font-size:20px; font-weight:800; color:var(--brand-primary);">--</div>
+          <div style="font-size:10px; font-weight:800; font-family:'DM Mono'; color:var(--text-muted); text-transform:uppercase;">Putts</div>
+          <div id="recap-stat-putts" style="font-family:'Syne'; font-size:24px; font-weight:800; color:var(--brand-primary);">--</div>
         </div>
       </div>
       
       <button class="action-btn" onclick="playMovieMode()">
-        <i class="ph-fill ph-play-circle" style="font-size:22px;"></i> PLAY MOVIE
+        <i class="ph-fill ph-play-circle" style="font-size:20px;"></i> PLAY SEQUENCE
       </button>
 
       <div style="display:flex; justify-content:space-between; align-items:center; padding-top:4px;">
         <button class="nav-btn-subtle" onclick="changeRecapHole(-1)"><i class="ph-bold ph-caret-left"></i> Prev</button>
-        <div id="recap-hole-indicator" style="font-family:'DM Mono'; font-weight:800; color:var(--text-primary); font-size:16px;">Hole 1</div>
+        <div id="recap-hole-indicator" style="font-family:'DM Mono'; font-weight:800; color:var(--brand-primary); font-size:14px; text-transform:uppercase;">Hole 1</div>
         <button class="nav-btn-subtle" onclick="changeRecapHole(1)">Next <i class="ph-bold ph-caret-right"></i></button>
       </div>
     </div>
@@ -439,11 +447,10 @@
     let sb = null; try { if(typeof supabase !== 'undefined') sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e){}
 
     // ==========================================
-    // GEOSPATIAL MATH HELPERS
+    // GEOSPATIAL MATH & DISPERSION ENGINE
     // ==========================================
     function calcDistMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; 
-      const p1 = lat1 * Math.PI/180, p2 = lat2 * Math.PI/180;
+      const R = 6371e3; const p1 = lat1 * Math.PI/180, p2 = lat2 * Math.PI/180;
       const dp = (lat2-lat1) * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
       const a = Math.sin(dp/2)*Math.sin(dp/2) + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)*Math.sin(dl/2);
       return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
@@ -456,40 +463,37 @@
       return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
     }
 
+    // Calculates a new coordinate given a starting point, distance (meters), and bearing
+    function destinationPoint(lat, lng, distance, bearing) {
+      const R = 6371e3; const brng = bearing * Math.PI / 180;
+      const lat1 = lat * Math.PI / 180, lon1 = lng * Math.PI / 180;
+      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance/R) + Math.cos(lat1) * Math.sin(distance/R) * Math.cos(brng));
+      const lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(distance/R) * Math.cos(lat1), Math.cos(distance/R) - Math.sin(lat1) * Math.sin(lat2));
+      return { lat: lat2 * 180 / Math.PI, lng: lon2 * 180 / Math.PI };
+    }
+
     // Global State Variables
     let currentUser = null, currentProfile = null, authMode = 'login';
     let map = null, markersLayer = null;
-    let activeCourse = null; 
-    let currentHole = 1; 
-    let currentShots = [], activeShotType = null, pendingPlot = null;
-    let currentWindString = "-- mph"; 
-    
-    // DB Architecture IDs
-    let currentSessionId = null; 
-    
-    // Predictive Framing
+    let activeCourse = null, currentHole = 1, currentShots = [], activeShotType = null, pendingPlot = null;
+    let currentWindString = "-- mph", currentSessionId = null; 
     let windowHoleBounds = null, windowAvgTee = null, windowAvgPutt = null;
-    
     let allDBCourses = [], userFavCourses = {}; 
-    let activeOverlayType = 'stho_personal', overlayLayer = null;
-    
-    // Cinematic State
+    let activeOverlayType = 'none', overlayLayer = null, vectorLayer = null;
     let activeProfileUserId = null, activeProfileLiveSessionId = null, activeProfileLiveCourseName = null;
     let recapMap = null, recapLinesLayer = null, recapMarkersLayer = null;
     let recapHoleData = {}, currentRecapHole = 1, movieTimeout = null;
+    let activeReviewSessionId = null, reviewOriginScreen = 'screen-home';
 
     window.onload = async () => {
       if(!sb) return;
       const { data } = await sb.auth.getSession();
-      
-      // Auto-Heal check: Does session exist BUT profile failed to build?
       if (data?.session) { 
           currentUser = data.session.user; 
           const valid = await loadCurrentUserProfile(); 
           if(valid) switchScreen('screen-home'); 
           else { await sb.auth.signOut(); currentUser = null; switchScreen('screen-auth'); }
-      }
-      else switchScreen('screen-auth');
+      } else switchScreen('screen-auth');
       
       const grid = document.getElementById('hole-grid-container');
       for(let i=1; i<=18; i++) { grid.innerHTML += `<button class="hole-btn" onclick="jumpToHole(${i})">${i}</button>`; }
@@ -511,7 +515,7 @@
     }
 
     function switchScreen(id) {
-      ['screen-auth','screen-home','screen-course-select','screen-game','screen-score','screen-recap-list','screen-recap-map','screen-social','screen-summary'].forEach(s => {
+      ['screen-auth','screen-home','screen-course-select','screen-game','screen-score','screen-recap-list','screen-recap-map','screen-social','screen-round-review'].forEach(s => {
         const el = document.getElementById(s); if(el) el.style.display = 'none';
       });
       document.getElementById(id).style.display = 'flex';
@@ -529,51 +533,33 @@
 
     async function handleAuth() {
       const e = document.getElementById('field-email').value, p = document.getElementById('field-pass').value, u = document.getElementById('field-username').value;
-      const btn = document.getElementById('auth-submit');
-      const originalText = btn.innerHTML;
+      const btn = document.getElementById('auth-submit'); const originalText = btn.innerHTML;
       btn.innerHTML = '<i class="ph-bold ph-spinner" style="animation: spin 1s linear infinite;"></i> Loading...';
       
       try {
         if(authMode==='signup') { 
           if(!u) throw new Error("Username required!");
-          // 1. Check if Username is taken BEFORE touching Auth
           const { data: existingUser } = await sb.from('profiles').select('username').eq('username', u).single();
           if (existingUser) throw new Error("Username already taken. Please choose another.");
-
-          // 2. Execute Auth Signup
           const {data, error} = await sb.auth.signUp({email:e, password:p}); 
           if(error) throw error;
-          
-          // 3. Execute Profile Build
           const {error: profileErr} = await sb.from('profiles').insert({id: data.user.id, username: u, email: e});
-          if(profileErr) {
-             await sb.auth.signOut();
-             throw new Error("Profile setup failed. Please try again.");
-          }
-          
+          if(profileErr) { await sb.auth.signOut(); throw new Error("Profile setup failed. Please try again."); }
           currentUser = data.user; await loadCurrentUserProfile(); switchScreen('screen-home');
         } else { 
           let loginEmail = e;
           if (!e.includes('@')) {
             const {data: pData} = await sb.from('profiles').select('email').eq('username', e).single();
-            if (pData && pData.email) { loginEmail = pData.email; } 
-            else { throw new Error("Username not found."); }
+            if (pData && pData.email) { loginEmail = pData.email; } else { throw new Error("Username not found."); }
           }
           const {data, error} = await sb.auth.signInWithPassword({email:loginEmail, password:p}); 
           if(error) throw error;
-          
           currentUser = data.user; 
           const valid = await loadCurrentUserProfile(); 
-          if(valid) switchScreen('screen-home');
-          else throw new Error("Profile corrupted. Please contact support.");
+          if(valid) switchScreen('screen-home'); else throw new Error("Profile corrupted. Please contact support.");
         }
-      } catch(err) { 
-          alert(err.message); 
-      } finally {
-          btn.innerHTML = originalText;
-      }
+      } catch(err) { alert(err.message); } finally { btn.innerHTML = originalText; }
     }
-    
     async function logOut() { await sb.auth.signOut(); currentUser = null; currentProfile = null; switchScreen('screen-auth'); }
 
     // ==========================================
@@ -582,33 +568,25 @@
     async function openCourseSelect() { 
       switchScreen('screen-course-select'); 
       document.getElementById('course-scroller').innerHTML = "<p style='text-align:center; padding:20px;'><i class='ph-bold ph-spinner ph-spin'></i> Loading database...</p>";
-      document.getElementById('global-course-results').innerHTML = "";
-      document.getElementById('db-course-search').value = "";
-      
       const { data } = await sb.from('courses').select('*').order('name', {ascending: true});
-      allDBCourses = data || [];
-      renderCourseList();
+      allDBCourses = data || []; renderCourseList();
     }
 
     function toggleFavorite(e, courseId) {
-      e.stopPropagation(); 
-      const favs = userFavCourses[currentUser.id];
+      e.stopPropagation(); const favs = userFavCourses[currentUser.id];
       if (favs.includes(courseId)) { userFavCourses[currentUser.id] = favs.filter(id => id !== courseId); } 
       else { favs.push(courseId); }
-      localStorage.setItem('autocaddy_favs', JSON.stringify(userFavCourses));
-      renderCourseList();
+      localStorage.setItem('autocaddy_favs', JSON.stringify(userFavCourses)); renderCourseList();
     }
 
     function renderCourseList() {
       const q = document.getElementById('db-course-search').value.toLowerCase();
       const favIds = userFavCourses[currentUser.id] || [];
       const filtered = allDBCourses.filter(c => c.name.toLowerCase().includes(q));
-      const favs = filtered.filter(c => favIds.includes(c.id));
-      const others = filtered.filter(c => !favIds.includes(c.id));
+      const favs = filtered.filter(c => favIds.includes(c.id)); const others = filtered.filter(c => !favIds.includes(c.id));
       const scroller = document.getElementById('course-scroller');
       
       if (filtered.length === 0) return scroller.innerHTML = "<div style='color:var(--text-muted); text-align:center; padding:20px; font-weight:600;'>No local courses found. Try Global Search.</div>";
-
       let html = '';
       if (favs.length > 0) {
         html += `<div style="font-family:'Syne'; color:var(--gold); margin-bottom:10px; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">Favorites</div>`;
@@ -616,18 +594,16 @@
         html += `<div style="height:1px; background:var(--border); margin:20px 0;"></div>`;
       }
       html += `<div style="font-family:'Syne'; color:var(--text-muted); margin-bottom:10px; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">All Courses</div>`;
-      html += others.map(c => buildCourseCard(c, false)).join('');
-      scroller.innerHTML = html;
+      html += others.map(c => buildCourseCard(c, false)).join(''); scroller.innerHTML = html;
     }
 
     function buildCourseCard(c, isFav) {
-      const starClass = isFav ? 'ph-fill ph-star' : 'ph-bold ph-star';
-      const starColor = isFav ? 'var(--gold)' : 'var(--text-muted)';
+      const starClass = isFav ? 'ph-fill ph-star' : 'ph-bold ph-star'; const starColor = isFav ? 'var(--gold)' : 'var(--text-muted)';
       const cStr = JSON.stringify(c).replace(/'/g, "&#39;");
       return `
         <div class="course-card" onclick='startRound(${cStr})'>
           <div style="display:flex; align-items:center;">
-            <i class="${starClass}" style="font-size:24px; cursor:pointer; margin-right:12px; color:${starColor};" onclick="toggleFavorite(event, ${c.id})"></i>
+            <i class="${starClass}" style="font-size:24px; margin-right:12px; color:${starColor};" onclick="toggleFavorite(event, ${c.id})"></i>
             <strong style="color:var(--text-primary); font-size:15px;">${c.name}</strong>
           </div>
           <i class="ph-bold ph-caret-right" style="color:var(--brand-primary); font-size:18px;"></i>
@@ -635,8 +611,7 @@
     }
 
     async function searchGlobalCourses() {
-      const q = document.getElementById('db-course-search').value; 
-      if(!q) return alert("Enter a course name in the search bar first!");
+      const q = document.getElementById('db-course-search').value; if(!q) return alert("Enter a course name in the search bar first!");
       const resContainer = document.getElementById('global-course-results');
       resContainer.innerHTML = "<p style='text-align:center;'><i class='ph-bold ph-spinner ph-spin'></i> Searching OpenStreetMap...</p>";
       try {
@@ -675,11 +650,8 @@
     }
 
     function startRound(courseObj) { 
-      activeCourse = courseObj;
-      currentSessionId = null; 
-      switchScreen('screen-game'); 
+      activeCourse = courseObj; currentSessionId = null; switchScreen('screen-game'); 
       fetchWindData(activeCourse.lat, activeCourse.lng);
-
       if(!map) {
         map = L.map('map-container',{zoomControl:false});
         L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 }).addTo(map);
@@ -689,21 +661,18 @@
       loadHole(1); 
     }
 
-    function jumpToHole(h) {
-      document.getElementById('hole-jumper-modal').style.display='none';
-      loadHole(h);
-    }
+    function jumpToHole(h) { document.getElementById('hole-jumper-modal').style.display='none'; loadHole(h); }
 
     async function loadHole(h) {
       currentHole = h; currentShots = []; markersLayer.clearLayers();
-      document.getElementById('hole-title').innerHTML = `Hole ${h} <i class="ph-bold ph-caret-down" style="font-size:14px; color:var(--text-muted);"></i>`;
+      document.getElementById('hole-title').innerHTML = `Hole ${h} <i class="ph-bold ph-caret-down" style="font-size:14px; color:var(--brand-accent);"></i>`;
       windowHoleBounds = null; windowAvgTee = null; windowAvgPutt = null;
       
-      const { data: commHoles } = await sb.from('holes').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', h);
-      let avgScoreStr = "--";
-      let yardageStr = "---";
+      const { data: commHoles } = await sb.from('holes').select('id, score, par').eq('course_id', activeCourse.id).eq('hole_number', h);
+      let avgScoreStr = "--"; let yardageStr = "---"; let parStr = "Par --";
       
       if (commHoles && commHoles.length > 0) {
+         if(commHoles[0].par) parStr = `Par ${commHoles[0].par}`;
          let sum = 0; commHoles.forEach(x => sum += x.score);
          avgScoreStr = (sum / commHoles.length).toFixed(1);
          
@@ -720,15 +689,14 @@
             }
          }
       }
-      document.getElementById('hole-details').textContent = `~${yardageStr} yds • Avg: ${avgScoreStr}`;
+      document.getElementById('hole-details').textContent = `${parStr} • ~${yardageStr} yds • Avg: ${avgScoreStr}`;
 
       if (currentSessionId) {
         const { data: savedHole } = await sb.from('holes').select('id').eq('session_id', currentSessionId).eq('hole_number', h).single();
         if (savedHole) {
-          const { data: savedShots } = await sb.from('shots').select('*').eq('hole_id', savedHole.id);
+          const { data: savedShots } = await sb.from('shots').select('*').eq('hole_id', savedHole.id).order('created_at', {ascending:true});
           if (savedShots && savedShots.length > 0) {
-            currentShots = savedShots;
-            markersLayer.clearLayers();
+            currentShots = savedShots; markersLayer.clearLayers();
             currentShots.forEach((s, index) => {
               const marker = L.marker([s.lat, s.lng], {icon: L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`}), draggable: true}).addTo(markersLayer);
               marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
@@ -760,19 +728,14 @@
       activeShotType = type; 
       document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active')); 
       btn.classList.add('active'); 
-      
       if (windowAvgTee && windowAvgPutt) {
-        if (type === 'Approach' || type === 'Penalty') {
-          map.flyToBounds(windowHoleBounds, {padding: [40, 40], duration: 1.2});
-        } else if (type === 'Tee') {
-          const midLat = (windowAvgTee.lat + windowAvgPutt.lat) / 2;
-          const midLng = (windowAvgTee.lng + windowAvgPutt.lng) / 2;
+        if (type === 'Approach' || type === 'Penalty') { map.flyToBounds(windowHoleBounds, {padding: [40, 40], duration: 1.2}); } 
+        else if (type === 'Tee') {
+          const midLat = (windowAvgTee.lat + windowAvgPutt.lat) / 2, midLng = (windowAvgTee.lng + windowAvgPutt.lng) / 2;
           map.flyToBounds(L.latLngBounds([windowAvgTee.lat, windowAvgTee.lng], [midLat, midLng]), {padding: [40, 40], duration: 1.2});
-        } else if (type === 'Chip') {
-          map.flyTo([windowAvgPutt.lat, windowAvgPutt.lng], 19, {duration: 1.2});
-        } else if (type === 'Putt') {
-          map.flyTo([windowAvgPutt.lat, windowAvgPutt.lng], 20, {duration: 1.2});
-        }
+        } 
+        else if (type === 'Chip') { map.flyTo([windowAvgPutt.lat, windowAvgPutt.lng], 19, {duration: 1.2}); } 
+        else if (type === 'Putt') { map.flyTo([windowAvgPutt.lat, windowAvgPutt.lng], 20, {duration: 1.2}); }
       }
     }
     
@@ -782,7 +745,6 @@
       if(activeShotType === 'Tee' && currentShots.some(s => s.type === 'Tee' || s.shot_type === 'Tee')) return alert("Only one Tee shot allowed per hole.");
 
       pendingPlot = { lat: e.latlng.lat, lng: e.latlng.lng, type: activeShotType };
-
       if(activeShotType === 'Tee') { confirmLie('Tee Box'); } 
       else if (activeShotType === 'Putt') { confirmLie('Green'); } 
       else if (activeShotType === 'Penalty') { confirmLie('Drop Zone'); } 
@@ -792,9 +754,7 @@
     function cancelLie() { document.getElementById('lie-modal').style.display = 'none'; pendingPlot = null; }
     
     function confirmLie(lie) {
-      pendingPlot.lie = lie; 
-      currentShots.push(pendingPlot);
-      markersLayer.clearLayers();
+      pendingPlot.lie = lie; currentShots.push(pendingPlot); markersLayer.clearLayers();
       currentShots.forEach((s, index) => {
         const marker = L.marker([s.lat, s.lng], {icon: L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`}), draggable: true}).addTo(markersLayer);
         marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
@@ -804,8 +764,7 @@
     
     function undoLastShot() {
       if(currentShots.length === 0) return;
-      currentShots.pop(); 
-      markersLayer.clearLayers();
+      currentShots.pop(); markersLayer.clearLayers();
       currentShots.forEach((s, index) => {
         const marker = L.marker([s.lat, s.lng], {icon: L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`}), draggable: true}).addTo(markersLayer);
         marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
@@ -813,16 +772,44 @@
     }
 
     // ==========================================
-    // SCORING ENGINE (V2 DB)
+    // SMART SCORECARD ENGINE
     // ==========================================
     function openScoreScreen() {
       switchScreen('screen-score');
+      
+      document.getElementById('sc-hole-title').innerText = `Hole ${currentHole}`;
+      document.getElementById('sc-hole-sub').innerText = document.getElementById('hole-details').innerText;
+      
       let calculatedStrokes = 0;
       currentShots.forEach(s => { calculatedStrokes += ((s.shot_type || s.type) === 'Penalty' ? 2 : 1); });
       document.getElementById('score-val').innerText = calculatedStrokes > 0 ? calculatedStrokes : 4;
-      document.getElementById('putts-val').innerText = currentShots.filter(s => (s.shot_type || s.type) === 'Putt').length || 2;
-      document.getElementById('btn-save-score').innerHTML = currentHole === 18 ? "<i class='ph-bold ph-flag-checkered'></i> FINISH ROUND" : "<i class='ph-bold ph-check'></i> SAVE HOLE";
+      
+      let putts = currentShots.filter(s => (s.shot_type || s.type) === 'Putt').length || 2;
+      document.getElementById('putts-val').innerText = putts;
+      
+      // Auto FIR/GIR Detection
+      let firStr = "N/A", girStr = "N/A";
+      const approachIndex = currentShots.findIndex(s => (s.shot_type || s.type) === 'Putt' || s.lie === 'Green');
+      
+      if (currentShots.length > 1) {
+         if (currentShots[1].lie === 'Fairway') firStr = "YES";
+         else if (currentShots[1].lie === 'Rough' || currentShots[1].lie === 'Sand' || currentShots[1].lie === 'Recovery/Tree') firStr = "NO";
+      }
+      
+      if (approachIndex !== -1) {
+         // GIR logic: Reached green with 2 or more strokes to spare (Assuming Par 4 for MVP)
+         // For dynamic par, we need to save Par to local state. Using basic approach index for now.
+         if (approachIndex <= 2) girStr = "YES"; else girStr = "NO";
+      }
+      
+      document.getElementById('sc-fir-val').innerText = firStr;
+      document.getElementById('sc-fir-val').style.color = firStr === 'YES' ? 'var(--success)' : (firStr === 'NO' ? 'var(--danger)' : 'var(--text-muted)');
+      document.getElementById('sc-gir-val').innerText = girStr;
+      document.getElementById('sc-gir-val').style.color = girStr === 'YES' ? 'var(--success)' : (girStr === 'NO' ? 'var(--danger)' : 'var(--text-muted)');
+
+      document.getElementById('btn-save-score').innerHTML = currentHole === 18 ? "<i class='ph-bold ph-flag-checkered'></i> FINISH ROUND" : "<i class='ph-bold ph-check-circle'></i> CONFIRM SCORE";
     }
+    
     function adjustValue(id, dir) { const el=document.getElementById(id); el.innerText = Math.max(0, parseInt(el.innerText)+dir); }
 
     async function saveScoreToDB() {
@@ -830,15 +817,13 @@
       const score = parseInt(document.getElementById('score-val').innerText);
       const putts = parseInt(document.getElementById('putts-val').innerText);
       
-      const btn = document.getElementById('btn-save-score');
-      const originalText = btn.innerHTML;
+      const btn = document.getElementById('btn-save-score'); const originalText = btn.innerHTML;
       btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> SAVING...';
 
       try {
         if (!currentSessionId) {
             const { data: newSession, error: sErr } = await sb.from('sessions').insert({ user_id: currentUser.id, course_id: activeCourse.id }).select().single();
-            if(sErr) throw sErr;
-            currentSessionId = newSession.id;
+            if(sErr) throw sErr; currentSessionId = newSession.id;
         }
 
         await sb.from('holes').delete().eq('session_id', currentSessionId).eq('hole_number', currentHole);
@@ -850,16 +835,12 @@
           await sb.from('shots').insert(currentShots.map(s => ({ hole_id: savedHole.id, session_id: currentSessionId, user_id: currentUser.id, course_id: activeCourse.id, hole_number: currentHole, shot_type: (s.shot_type || s.type), lie: s.lie, lat: s.lat, lng: s.lng })));
         }
         
-        if(currentHole === 18) { generateSummary(currentSessionId); } 
+        if(currentHole === 18) { openRoundScorecard(currentSessionId, 'screen-home'); } 
         else { loadHole(currentHole + 1); switchScreen('screen-game'); }
-      } catch(e) { 
-        alert("Error: " + e.message); 
-      } finally {
-        btn.innerHTML = originalText;
-      }
+      } catch(e) { alert("Error: " + e.message); } finally { btn.innerHTML = originalText; }
     }
 
-    async function finishRoundEarly() { if(confirm("End round here and view summary?")) generateSummary(currentSessionId); }
+    async function finishRoundEarly() { if(confirm("End round here and view summary?")) openRoundScorecard(currentSessionId, 'screen-home'); }
 
     async function confirmQuit() {
       if(!confirm("Are you sure you want to quit? This purges all data for this incomplete round.")) return;
@@ -868,27 +849,45 @@
     }
 
     // ==========================================
-    // V2 ANALYTICS DASHBOARD
+    // SOCIAL SCORECARD LANDING (V3)
     // ==========================================
-    async function generateSummary(sessionId) {
-      if(!sessionId) { alert("No holes played yet!"); return switchScreen('screen-home'); }
+    async function openRoundScorecard(sessionId, backScreen) {
+      if(!sessionId) return;
+      reviewOriginScreen = backScreen || 'screen-home';
+      switchScreen('screen-round-review');
+      document.getElementById('rr-total-score').innerText = "--";
+      document.getElementById('rr-course-name').innerText = "Loading...";
       
-      switchScreen('screen-summary');
-      document.getElementById('sum-course-name').innerText = activeCourse ? activeCourse.name : "Round Summary";
-
+      const { data: session } = await sb.from('sessions').select(`id, course_id, courses(name), user_id`).eq('id', sessionId).single();
       const { data: sessionHoles } = await sb.from('holes').select('*').eq('session_id', sessionId).order('hole_number', {ascending:true});
+      const { data: sessionShots } = await sb.from('shots').select('*').eq('session_id', sessionId);
       
-      let totalScore = 0, totalPutts = 0;
-      sessionHoles.forEach(hole => { totalScore += hole.score; totalPutts += hole.putts; });
+      document.getElementById('rr-course-name').innerText = session.courses.name;
+      
+      let totalScore = 0, totalPutts = 0, scramblingOpps = 0, scrambles = 0;
+      sessionHoles.forEach(hole => { 
+        totalScore += hole.score; totalPutts += hole.putts; 
+        const hShots = sessionShots.filter(s => s.hole_id === hole.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+        const approachIndex = hShots.findIndex(s => s.shot_type === 'Putt' || s.lie === 'Green');
+        if (approachIndex > 2) { // Missed GIR approx
+            scramblingOpps++;
+            if (hole.score <= 4) scrambles++; // Made Par or better
+        }
+      });
 
-      document.getElementById('sum-total-score').innerText = totalScore;
-      document.getElementById('sum-relation-par').innerText = `${sessionHoles.length} Holes Played`;
-      document.getElementById('sum-putts').innerText = totalPutts;
-      document.getElementById('sum-sg').innerText = sessionHoles.length;
+      document.getElementById('rr-total-score').innerText = totalScore;
+      document.getElementById('rr-relation').innerText = `Holes Played: ${sessionHoles.length}`;
+      document.getElementById('rr-putts').innerText = totalPutts;
+      document.getElementById('rr-scramble').innerText = scramblingOpps > 0 ? Math.round((scrambles/scramblingOpps)*100)+"%" : "N/A";
+      
+      document.getElementById('rr-watch-btn').onclick = () => loadRecapMap(sessionId, session.courses.name, "Shot Tracker");
+      document.getElementById('rr-delete-btn').style.display = (session.user_id === currentUser.id) ? 'flex' : 'none';
     }
+    
+    function closeRoundReview() { switchScreen(reviewOriginScreen); }
 
     async function deleteCurrentSession() {
-      if(!confirm("Are you SURE? This will permanently delete this round and all GPS plotted shots from the database.")) return;
+      if(!confirm("Are you SURE? This will permanently delete this round and all GPS plotted shots.")) return;
       try {
         await sb.from('sessions').delete().eq('id', currentSessionId);
         currentSessionId = null; switchScreen('screen-home');
@@ -896,35 +895,25 @@
     }
 
     // ==========================================
-    // STRAVA-STYLE SOCIAL FEED (V2)
+    // SOCIAL FEED
     // ==========================================
     async function openSocialFeed() {
       switchScreen('screen-social'); 
       document.getElementById('friends-list-container').innerHTML = "<div style='text-align:center; padding:40px;'><i class='ph-bold ph-spinner ph-spin' style='font-size:32px; color:var(--brand-primary);'></i></div>";
-      document.getElementById('friend-search').value = ""; document.getElementById('friend-search-results').innerHTML = "";
       
       const {data: follows} = await sb.from('friends').select('followed_id').eq('follower_id', currentUser.id);
-      const friendIds = follows ? follows.map(f => f.followed_id) : [];
-      friendIds.push(currentUser.id); // Include my own rounds
+      const friendIds = follows ? follows.map(f => f.followed_id) : []; friendIds.push(currentUser.id); 
 
-      const {data: feedSessions} = await sb.from('sessions')
-        .select(`id, created_at, user_id, profiles(username), courses(name), holes(score, putts), hypes(id, user_id)`)
-        .in('user_id', friendIds)
-        .order('created_at', {ascending: false})
-        .limit(20);
+      const {data: feedSessions} = await sb.from('sessions').select(`id, created_at, user_id, profiles(username), courses(name), holes(score, putts), hypes(id, user_id)`).in('user_id', friendIds).order('created_at', {ascending: false}).limit(20);
       
       if(!feedSessions || !feedSessions.length) return document.getElementById('friends-list-container').innerHTML = "<div style='text-align:center; padding: 40px 20px;'><h3 style='margin:0 0 5px 0; color:var(--text-primary); font-family:Syne;'>The Feed is Quiet</h3><p style='color:var(--text-muted); font-size:14px;'>Find friends to populate your feed.</p></div>";
 
       const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
-      
       let html = '';
       feedSessions.forEach(s => {
         let totalScore = 0; let totalPutts = 0;
         s.holes.forEach(h => { totalScore += h.score; totalPutts += h.putts; });
-        
-        const isLive = new Date(s.created_at) > fiveHoursAgo;
-        const badgeHtml = isLive ? `<div class="live-badge" style="margin-top:6px; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-record"></i> LIVE Hole ${s.holes.length}</div>` : '';
-        
+        const badgeHtml = (new Date(s.created_at) > fiveHoursAgo) ? `<div class="live-badge" style="margin-top:6px; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-record"></i> LIVE Hole ${s.holes.length}</div>` : '';
         const myHype = s.hypes.find(h => h.user_id === currentUser.id);
         const hypeBtnClass = myHype ? 'hype-btn hyped' : 'hype-btn';
         
@@ -939,16 +928,14 @@
               </div>
             </div>
           </div>
-          
           <div class="feed-stats">
             <div class="feed-stat-item"><div class="feed-stat-val">${totalScore || '--'}</div><div class="feed-stat-label">Strokes</div></div>
             <div class="feed-stat-item"><div class="feed-stat-val">${s.holes.length}</div><div class="feed-stat-label">Holes</div></div>
             <div class="feed-stat-item"><div class="feed-stat-val">${totalPutts || '--'}</div><div class="feed-stat-label">Putts</div></div>
           </div>
-          
           <div class="feed-actions">
             <button id="hype-btn-${s.id}" class="${hypeBtnClass}" onclick="toggleHype('${s.id}')"><i class="${myHype ? 'ph-fill' : 'ph-bold'} ph-hand-fist" style="font-size:16px;"></i> Hype (${s.hypes.length})</button>
-            <button class="watch-btn" onclick="loadRecapMap('${s.id}', '${s.courses.name.replace(/'/g, "\\'")}', '${s.profiles.username}\\n${s.courses.name.replace(/'/g, "\\'")}')"><i class="ph-fill ph-play-circle" style="font-size:18px;"></i> WATCH</button>
+            <button class="action-btn" style="flex:2; padding:12px; font-size:12px;" onclick="openRoundScorecard('${s.id}', 'screen-social')"><i class="ph-bold ph-chart-bar" style="font-size:16px;"></i> SCORECARD</button>
           </div>
         </div>`;
       });
@@ -959,11 +946,9 @@
         const btn = document.getElementById(`hype-btn-${sessionId}`);
         const isHyped = btn.classList.contains('hyped');
         const iconClass = !isHyped ? 'ph-fill' : 'ph-bold';
-        
         btn.classList.toggle('hyped');
         const currentCount = parseInt(btn.innerText.match(/\d+/)[0]);
         btn.innerHTML = `<i class="${iconClass} ph-hand-fist" style="font-size:16px;"></i> Hype (${isHyped ? currentCount - 1 : currentCount + 1})`;
-
         if (isHyped) { await sb.from('hypes').delete().eq('session_id', sessionId).eq('user_id', currentUser.id); } 
         else { await sb.from('hypes').insert({ session_id: sessionId, user_id: currentUser.id }); }
     }
@@ -971,14 +956,11 @@
     async function searchFriends() {
       const q = document.getElementById('friend-search').value; if(!q) return;
       document.getElementById('friend-search-results').innerHTML = "<div style='color:var(--text-muted); font-size:12px; font-weight:600; text-align:center;'><i class='ph-bold ph-spinner ph-spin'></i> Searching...</div>";
-      
       const {data} = await sb.from('profiles').select('*').or(`username.ilike.%${q}%,email.ilike.%${q}%`).neq('id', currentUser.id).limit(10);
       const res = document.getElementById('friend-search-results');
       if(!data || !data.length) return res.innerHTML = "<div style='color:var(--danger); font-size:12px; font-weight:600; text-align:center;'>No players found.</div>";
-      
       const {data: follows} = await sb.from('friends').select('followed_id').eq('follower_id', currentUser.id);
       const followingIds = follows ? follows.map(f => f.followed_id) : [];
-
       res.innerHTML = data.map(p => `
         <div style="display:flex; justify-content:space-between; align-items:center; padding:15px; background:var(--surface); border:1px solid var(--border); margin-bottom:8px; border-radius:16px; box-shadow:var(--shadow-sm);">
           <div><strong style="display:block; color:var(--text-primary); font-size:15px;">${p.username}</strong><span style="font-size:11px; color:var(--text-muted);">${p.email || ''}</span></div>
@@ -987,8 +969,11 @@
     }
 
     async function followUser(id) { await sb.from('friends').insert({follower_id: currentUser.id, followed_id: id}); openSocialFeed(); }
+    
+    // ==========================================
+    // USER PROFILES
+    // ==========================================
     function openMyProfile() { openProfile(currentUser.id, currentProfile ? currentProfile.username : 'Me'); }
-
     function switchProfileTab(tab) {
       document.getElementById('tab-btn-history').classList.toggle('active', tab === 'history');
       document.getElementById('tab-btn-accolades').classList.toggle('active', tab === 'accolades');
@@ -1000,15 +985,13 @@
       activeProfileUserId = userId; activeProfileLiveSessionId = null; activeProfileLiveCourseName = null;
       document.getElementById('prof-username').innerText = username;
       document.getElementById('prof-live-btn').style.display = 'none'; 
-      switchProfileTab('history');
-      document.getElementById('profile-modal').style.display = 'flex';
+      switchProfileTab('history'); document.getElementById('profile-modal').style.display = 'flex';
       document.getElementById('profile-history-container').innerHTML = "<div style='text-align:center;'><i class='ph-bold ph-spinner ph-spin' style='font-size:24px; color:var(--brand-primary);'></i></div>";
 
       const { data: userSessions } = await sb.from('sessions').select(`id, created_at, course_id, courses(name), holes(score, putts)`).eq('user_id', userId).order('created_at', {ascending: false});
       
       if(!userSessions || userSessions.length === 0) { 
-        document.getElementById('prof-busta-cap').innerText = "N/A"; 
-        document.getElementById('prof-avg-score').innerText = "0"; 
+        document.getElementById('prof-busta-cap').innerText = "N/A"; document.getElementById('prof-avg-score').innerText = "0"; 
         document.getElementById('profile-history-container').innerHTML = "<p style='text-align:center; color:var(--text-muted); font-weight:600;'>No rounds logged.</p>";
         return; 
       }
@@ -1018,10 +1001,7 @@
       const courseCounts = {};
       userSessions.forEach(s => {
         if (!courseCounts[s.course_id]) courseCounts[s.course_id] = { name: s.courses.name, rounds: 0, totalScore: 0 };
-        if (s.holes.length > 0) {
-           courseCounts[s.course_id].rounds++;
-           courseCounts[s.course_id].totalScore += s.holes.reduce((sum, h)=>sum+h.score, 0);
-        }
+        if (s.holes.length > 0) { courseCounts[s.course_id].rounds++; courseCounts[s.course_id].totalScore += s.holes.reduce((sum, h)=>sum+h.score, 0); }
       });
       
       let homeCourseId = Object.keys(courseCounts).sort((a,b) => courseCounts[b].rounds - courseCounts[a].rounds)[0];
@@ -1045,59 +1025,48 @@
 
       const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000); 
       const latestSession = userSessions[0];
-      
       if(new Date(latestSession.created_at) > fiveHoursAgo) {
-         activeProfileLiveSessionId = latestSession.id;
-         activeProfileLiveCourseName = latestSession.courses.name;
+         activeProfileLiveSessionId = latestSession.id; activeProfileLiveCourseName = latestSession.courses.name;
          document.getElementById('prof-live-btn').style.display = 'flex';
       }
 
-      const top10 = userSessions.slice(0, 10);
-      document.getElementById('profile-history-container').innerHTML = top10.map(s => {
+      document.getElementById('profile-history-container').innerHTML = userSessions.slice(0, 10).map(s => {
         let tSc = 0; s.holes.forEach(h=>tSc+=h.score);
         return `
-        <div class="course-card" onclick='document.getElementById("profile-modal").style.display="none"; loadRecapMap("${s.id}", "${s.courses.name.replace(/'/g, "\\'")}", "${username}\\n${s.courses.name.replace(/'/g, "\\'")}")'>
+        <div class="course-card" onclick='document.getElementById("profile-modal").style.display="none"; openRoundScorecard("${s.id}", "screen-social")'>
           <div>
             <strong style="display:block; color:var(--text-primary); font-size:15px;">${s.courses.name}</strong>
             <span style="font-size:12px; color:var(--text-muted);">${new Date(s.created_at).toLocaleDateString()} • ${s.holes.length} Holes</span>
           </div>
           <div style="text-align:right;">
              <span style="display:block; font-family:'Syne'; font-size:24px; font-weight:800; color:var(--brand-primary);">${tSc}</span>
-             <span style="color:var(--gold); font-family:'Syne'; font-size:10px; font-weight:800; letter-spacing:1px;">WATCH <i class="ph-fill ph-play-circle"></i></span>
+             <span style="color:var(--brand-accent); font-family:'Syne'; font-size:10px; font-weight:800; letter-spacing:1px;">REVIEW <i class="ph-bold ph-arrow-right"></i></span>
           </div>
         </div>`;
       }).join('');
     }
 
-    function jumpToLiveMap() { 
-      document.getElementById('profile-modal').style.display = 'none'; 
-      loadRecapMap(activeProfileLiveSessionId, activeProfileLiveCourseName, `${document.getElementById('prof-username').innerText} - LIVE`); 
-    }
+    function jumpToLiveMap() { document.getElementById('profile-modal').style.display = 'none'; loadRecapMap(activeProfileLiveSessionId, activeProfileLiveCourseName, "LIVE FEED"); }
 
-    // ==========================================
-    // RECAP LIST (HISTORY)
-    // ==========================================
     async function loadRecapListForUser(userId, title) {
       if(!userId) return;
-      switchScreen('screen-recap-list');
-      document.getElementById('recap-list-title').innerText = title || "Round History";
-      const container = document.getElementById('recap-list-container');
-      container.innerHTML = "<div style='text-align:center; padding:40px;'><i class='ph-bold ph-spinner ph-spin' style='font-size:32px; color:var(--brand-primary);'></i></div>";
+      switchScreen('screen-recap-list'); document.getElementById('recap-list-title').innerText = title || "Round History";
+      document.getElementById('recap-list-container').innerHTML = "<div style='text-align:center; padding:40px;'><i class='ph-bold ph-spinner ph-spin' style='font-size:32px; color:var(--brand-primary);'></i></div>";
       
       const { data: userSessions } = await sb.from('sessions').select(`id, created_at, courses(name), holes(score)`).eq('user_id', userId).order('created_at', {ascending: false});
-      if(!userSessions || userSessions.length === 0) return container.innerHTML = "<p style='text-align:center; font-weight:600; color:var(--text-muted);'>No rounds recorded yet.</p>";
+      if(!userSessions || userSessions.length === 0) return document.getElementById('recap-list-container').innerHTML = "<p style='text-align:center; font-weight:600; color:var(--text-muted);'>No rounds recorded yet.</p>";
 
-      container.innerHTML = userSessions.map(s => {
+      document.getElementById('recap-list-container').innerHTML = userSessions.map(s => {
         let tSc = 0; s.holes.forEach(h=>tSc+=h.score);
         return `
-        <div class="course-card" onclick='loadRecapMap("${s.id}", "${s.courses.name.replace(/'/g, "\\'")}", "My Round\\n${s.courses.name.replace(/'/g, "\\'")}")'>
+        <div class="course-card" onclick='openRoundScorecard("${s.id}", "screen-recap-list")'>
           <div>
             <strong style="display:block; color:var(--text-primary); font-size:15px;">${s.courses.name}</strong>
             <span style="font-size:12px; color:var(--text-muted);">${new Date(s.created_at).toLocaleDateString()} • ${s.holes.length} Holes</span>
           </div>
           <div style="text-align:right;">
              <span style="display:block; font-family:'Syne'; font-size:24px; font-weight:800; color:var(--brand-primary);">${tSc}</span>
-             <span style="color:var(--gold); font-family:'Syne'; font-size:10px; font-weight:800; letter-spacing:1px;">WATCH <i class="ph-fill ph-play-circle"></i></span>
+             <span style="color:var(--brand-accent); font-family:'Syne'; font-size:10px; font-weight:800; letter-spacing:1px;">REVIEW <i class="ph-bold ph-arrow-right"></i></span>
           </div>
         </div>`;
       }).join('');
@@ -1119,13 +1088,11 @@
       }
       
       clearRecapMap();
-      
       const { data: holes } = await sb.from('holes').select('*').eq('session_id', sessionId).order('hole_number', {ascending:true});
       const { data: shots } = await sb.from('shots').select('*').eq('session_id', sessionId).order('created_at', {ascending:true});
       
       recapHoleData = {};
       holes.forEach(h => { recapHoleData[h.hole_number] = { details: h, shots: shots ? shots.filter(s => s.hole_id === h.id) : [] }; });
-      
       if (holes.length > 0) activeCourse = { id: holes[0].course_id };
       
       currentRecapHole = Object.keys(recapHoleData).sort((a,b)=>a-b)[0];
@@ -1167,9 +1134,7 @@
           movieTimeout = setTimeout(() => { changeRecapHole(1); setTimeout(playMovieMode, 500); }, 1500);
           return;
       }
-      
       clearRecapMap();
-      
       const latlngs = data.shots.map(s => [s.lat, s.lng]);
       recapMap.fitBounds(L.polyline(latlngs).getBounds(), {padding: [60, 60]});
 
@@ -1179,20 +1144,14 @@
             movieTimeout = setTimeout(() => {
                 const availableHoles = Object.keys(recapHoleData).map(Number).sort((a,b)=>a-b);
                 const currIdx = availableHoles.indexOf(Number(currentRecapHole));
-                if (currIdx + 1 < availableHoles.length) {
-                    changeRecapHole(1);
-                    movieTimeout = setTimeout(playMovieMode, 500); 
-                } else {
-                    drawRecapHole(currentRecapHole); 
-                }
+                if (currIdx + 1 < availableHoles.length) { changeRecapHole(1); movieTimeout = setTimeout(playMovieMode, 500); } 
+                else { drawRecapHole(currentRecapHole); }
             }, 2500);
             return; 
         }
-        
         const s = data.shots[currentShotIndex];
         const icon = L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`, html: `<div style="color:var(--text-primary); font-family:'DM Mono'; font-size:10px; position:absolute; top:-18px; left:-6px; font-weight:800; background:rgba(255,255,255,0.9); border-radius:6px; padding:2px 6px; box-shadow:var(--shadow-sm);">${currentShotIndex+1}</div>`});
         L.marker([s.lat, s.lng], {icon}).addTo(recapMarkersLayer);
-
         if (currentShotIndex > 0) {
           const prevS = data.shots[currentShotIndex - 1];
           L.polyline([[prevS.lat, prevS.lng], [s.lat, s.lng]], {color: 'var(--brand-primary)', weight: 4, dashArray: '6, 12'}).addTo(recapLinesLayer);
@@ -1206,24 +1165,17 @@
       const availableHoles = Object.keys(recapHoleData).map(Number).sort((a,b)=>a-b);
       const currIdx = availableHoles.indexOf(Number(currentRecapHole));
       const nextIdx = currIdx + dir;
-      if(nextIdx >= 0 && nextIdx < availableHoles.length) { 
-        currentRecapHole = availableHoles[nextIdx]; 
-        drawRecapHole(currentRecapHole); 
-      }
+      if(nextIdx >= 0 && nextIdx < availableHoles.length) { currentRecapHole = availableHoles[nextIdx]; drawRecapHole(currentRecapHole); }
     }
     
-    function closeRecapMap() {
-        clearRecapMap(); 
-        if(activeProfileLiveSessionId) switchScreen('screen-social'); 
-        else switchScreen('screen-home');
-    }
+    function closeRecapMap() { clearRecapMap(); switchScreen('screen-round-review'); }
 
     // ==========================================
-    // STHO SPATIAL ENGINE (DATA LAYERS)
+    // STHO & BLUEPRINT VECTOR (CAD DATA ENGINE)
     // ==========================================
     function setOverlay(type, btnElement) {
       activeOverlayType = type;
-      const menu = btnElement.closest('.layer-menu');
+      const menu = btnElement.closest('.integrated-layers') || btnElement.closest('.layer-menu');
       menu.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
       btnElement.classList.add('active');
       const isRecap = document.getElementById('screen-recap-map').style.display === 'flex';
@@ -1238,29 +1190,58 @@
       if(!targetMap) return;
       
       if(!overlayLayer) overlayLayer = L.layerGroup().addTo(targetMap);
-      overlayLayer.clearLayers();
+      if(!vectorLayer) vectorLayer = L.layerGroup().addTo(targetMap);
+      overlayLayer.clearLayers(); vectorLayer.clearLayers();
+
+      if (activeOverlayType === 'none') return;
 
       try {
-        if (activeOverlayType === 'history_personal') {
-          const { data } = await sb.from('shots').select('lat, lng').eq('course_id', activeCourse.id).eq('hole_number', holeNum).eq('user_id', targetUserId);
-          if(data) data.forEach(s => L.circle([s.lat, s.lng], { radius: 3, color: 'var(--brand-primary)', fillColor: 'var(--brand-primary)', fillOpacity: 0.5, weight: 0 }).addTo(overlayLayer));
-        } 
+        if (activeOverlayType === 'blueprint_vector') {
+           // The "DECADE" Killer: Predict dispersion cone based on community data
+           const { data: commShots } = await sb.from('shots').select('lat, lng, shot_type').eq('course_id', activeCourse.id).eq('hole_number', holeNum);
+           if(commShots && commShots.length > 0) {
+               const tees = commShots.filter(s => s.shot_type === 'Tee');
+               const putts = commShots.filter(s => s.shot_type === 'Putt');
+               if(tees.length > 0 && putts.length > 0) {
+                   const avgTee = { lat: tees.reduce((s,t)=>s+t.lat,0)/tees.length, lng: tees.reduce((s,t)=>s+t.lng,0)/tees.length };
+                   const avgPutt = { lat: putts.reduce((s,t)=>s+t.lat,0)/putts.length, lng: putts.reduce((s,t)=>s+t.lng,0)/putts.length };
+                   drawDispersionCone(avgTee.lat, avgTee.lng, avgPutt.lat, avgPutt.lng, targetMap);
+               }
+           }
+        }
         else if (activeOverlayType === 'stho_personal') {
           const { data: holes } = await sb.from('holes').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', holeNum).eq('user_id', targetUserId);
-          await processAndDrawSTHOGrid(holes, 'var(--brand-primary)'); 
+          await processAndDrawSTHOGrid(holes, 'var(--brand-accent)', targetMap); 
         } 
         else if (activeOverlayType === 'stho_community') {
           const { data: holes } = await sb.from('holes').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', holeNum);
-          await processAndDrawSTHOGrid(holes, 'var(--text-primary)'); 
+          await processAndDrawSTHOGrid(holes, 'var(--brand-primary)', targetMap); 
         }
       } catch(e) { console.log("Overlay error", e); }
     }
+    
+    function drawDispersionCone(tLat, tLng, pLat, pLng, targetMap) {
+        // Calculate bearing from Tee to Green
+        const bearing = calculateBearing(tLat, tLng, pLat, pLng);
+        // Draw Center Target Line (250 yds = ~228 meters)
+        const targetDist = 228; 
+        const centerPoint = destinationPoint(tLat, tLng, targetDist, bearing);
+        L.polyline([[tLat, tLng], [centerPoint.lat, centerPoint.lng]], {color: 'var(--brand-primary)', weight: 2, dashArray: '5, 5'}).addTo(vectorLayer);
+        
+        // Calculate 15 degree dispersion cone
+        const leftPoint = destinationPoint(tLat, tLng, targetDist, bearing - 15);
+        const rightPoint = destinationPoint(tLat, tLng, targetDist, bearing + 15);
+        
+        // Draw Blueprint Cone
+        L.polygon([ [tLat, tLng], [leftPoint.lat, leftPoint.lng], [rightPoint.lat, rightPoint.lng] ], {
+            color: 'var(--brand-accent)', fillColor: 'var(--brand-accent)', fillOpacity: 0.15, weight: 1, dashArray: '4, 4'
+        }).addTo(vectorLayer);
+    }
 
-    async function processAndDrawSTHOGrid(holesArray, colorCode) {
+    async function processAndDrawSTHOGrid(holesArray, colorCode, targetMap) {
         if(!holesArray || holesArray.length === 0) return;
         const holeScores = {}; holesArray.forEach(h => holeScores[h.id] = h.score);
         const holeIds = Object.keys(holeScores);
-        
         const { data: shots } = await sb.from('shots').select('lat, lng, hole_id, created_at').in('hole_id', holeIds).order('created_at', {ascending: true});
         if(!shots) return;
 
@@ -1269,8 +1250,7 @@
 
         const grid = {};
         Object.keys(shotsByHole).forEach(hId => {
-            const holeShots = shotsByHole[hId];
-            const totalScore = holeScores[hId];
+            const holeShots = shotsByHole[hId]; const totalScore = holeScores[hId];
             holeShots.forEach((shot, index) => {
                 const stho = totalScore - index;
                 const gridLat = (Math.round(shot.lat * 10000) / 10000).toFixed(4);
@@ -1283,7 +1263,7 @@
 
         Object.values(grid).forEach(cell => {
             const avgSTHO = (cell.sum / cell.count).toFixed(2);
-            const icon = L.divIcon({ className: 'stho-decimal-icon', html: `<div style="color:${colorCode}; font-family:'DM Mono', monospace; font-weight:800; font-size:13px; text-shadow: 1px 1px 0px #fff, -1px -1px 0px #fff, 1px -1px 0px #fff, -1px 1px 0px #fff, 0px 2px 4px rgba(0,0,0,0.3); text-align:center; transform: translate(-50%, -50%);">${avgSTHO}</div>`});
+            const icon = L.divIcon({ className: 'stho-cad-icon', html: avgSTHO });
             L.marker([cell.lat, cell.lng], {icon, interactive: false}).addTo(overlayLayer);
         });
     }
