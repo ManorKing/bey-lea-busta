@@ -3,1270 +3,1302 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>AutoCaddy Pro</title>
+<title>AutoCaddy | Spatial Golf Analytics</title>
 
 <link rel="manifest" href="manifest.json">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <link rel="apple-touch-icon" href="icon-192.png">
 
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;800&family=Syne:wght@700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/@phosphor-icons/web"></script>
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <style>
-  /* ==========================================
-     AUTOCADDY PRO V3: CAD & BLUEPRINT AESTHETIC
-     ========================================== */
-  :root { 
-    --bg-main: #F1F5F9; 
+  :root {
+    /* Architectural Blueprint Palette */
+    --paper: #F8FAFC;         /* Crisp drafting paper */
+    --blueprint: #0F172A;     /* Deep slate/navy architecture ink */
+    --blueprint-light: #1E293B; 
+    --brass: #D4AF37;         /* Precision compass brass */
+    --line-faint: rgba(15, 23, 42, 0.08); /* Faint grid lines */
+    --accent-red: #991B1B;
+    --accent-green: #166534;
     --surface: #FFFFFF;
-    --text-primary: #0F172A; 
-    --text-muted: #64748B; 
-    --brand-primary: #0F172A; /* Slate 900 */
-    --brand-accent: #2563EB; /* Blueprint Blue */
-    --gold: #D97706;
-    --danger: #DC2626; 
-    --success: #059669; 
-    --border: #E2E8F0;
-    --shadow-sm: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    --shadow-lg: 0 20px 40px -5px rgba(0, 0, 0, 0.1);
-    --glass-bg: rgba(255, 255, 255, 0.90);
-    
-    /* Blueprint Grid Pattern */
-    --blueprint-grid: linear-gradient(rgba(37, 99, 235, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(37, 99, 235, 0.05) 1px, transparent 1px);
+    --shadow-cad: 0 8px 30px rgba(15,23,42,0.08);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  
+  body { 
+    font-family: 'DM Sans', sans-serif; 
+    background-color: var(--paper); 
+    background-image: 
+      linear-gradient(var(--line-faint) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-faint) 1px, transparent 1px);
+    background-size: 20px 20px;
+    color: var(--blueprint); 
+    height: 100vh; 
+    overflow: hidden; 
+    display: flex; 
+    flex-direction: column; 
   }
   
-  body { margin:0; padding:0; font-family:'DM Sans', sans-serif; background:var(--bg-main); background-image:var(--blueprint-grid); background-size: 20px 20px; color:var(--text-primary); display:flex; flex-direction:column; height:100vh; overflow:hidden; -webkit-font-smoothing: antialiased; }
-  button { cursor:pointer; -webkit-tap-highlight-color: transparent; outline: none; }
-  
-  /* Modern Inputs & Buttons */
-  .auth-input { width:100%; padding:16px; background:var(--surface); border:1px solid var(--border); border-radius:12px; font-size:15px; font-family:'DM Mono'; color:var(--brand-primary); margin-bottom:16px; box-sizing:border-box; transition:0.2s; font-weight:500; }
-  .auth-input:focus { border-color:var(--brand-accent); box-shadow:0 0 0 4px rgba(37,99,235,0.1); }
-  
-  .action-btn { width:100%; padding:16px; background:var(--brand-primary); color:#FFFFFF; font-family:'Syne', sans-serif; font-weight:800; font-size:14px; letter-spacing:1px; text-transform:uppercase; border:none; border-radius:12px; transition:0.2s; box-shadow: 0 10px 20px rgba(15,23,42,0.15); display:flex; justify-content:center; align-items:center; gap:8px; }
-  .action-btn:active { transform: scale(0.98); }
-  .action-btn-outline { background:transparent; color:var(--brand-primary); border:2px solid var(--brand-primary); box-shadow:none; }
-  
-  /* Glassmorphic Headers */
-  .header-bar { padding:20px; display:flex; justify-content:space-between; align-items:center; background:var(--surface); z-index:1000; border-bottom:1px solid var(--border); }
-  .header-title { font-family:'Syne', sans-serif; font-size:24px; font-weight:800; color:var(--brand-primary); margin:0; }
-  .nav-btn-subtle { background:transparent; color:var(--text-muted); border:1px solid var(--border); border-radius:8px; padding:8px 16px; font-weight:600; font-size:13px; font-family:'DM Mono'; text-transform:uppercase; display:flex; align-items:center; gap:6px; transition:0.2s; }
-  
-  /* Screens */
-  #screen-auth, #screen-home, #screen-course-select, #screen-game, #screen-score, #screen-recap-list, #screen-recap-map, #screen-social, #screen-summary, #screen-round-review { display:none; flex-direction:column; height:100%; position:relative; }
-  
-  /* Auth Screen */
-  #screen-auth { align-items:center; justify-content:center; padding:20px; background: radial-gradient(circle at top right, #DBEAFE, var(--bg-main)); }
-  .auth-card { background:var(--surface); padding:40px 24px; border-radius:16px; box-shadow:var(--shadow-lg); width:100%; max-width:340px; border:1px solid var(--border); }
-  .auth-tabs { display:flex; margin-bottom:24px; background:#F8FAFC; border-radius:8px; padding:4px; border:1px solid var(--border); }
-  .auth-tab { background:transparent; color:var(--text-muted); border:none; padding:12px; font-family:'DM Mono'; font-weight:700; flex:1; border-radius:6px; transition:0.2s; font-size:12px; text-transform:uppercase; }
-  .auth-tab.active { background:var(--surface); color:var(--brand-primary); box-shadow:var(--shadow-sm); }
-  
-  /* Home Dashboard */
-  .home-header { padding:30px 20px 20px; background:var(--surface); border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
-  .dashboard-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; padding:20px; }
-  .dash-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:24px 15px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:12px; box-shadow:var(--shadow-sm); transition:0.2s; cursor:pointer; }
-  .dash-icon { font-size:32px; color:var(--brand-accent); }
-  .dash-title { font-family:'DM Mono'; font-weight:800; font-size:13px; color:var(--brand-primary); text-transform:uppercase; letter-spacing:0.5px; text-align:center; }
+  h1, h2, h3 { font-family: 'Playfair Display', serif; font-weight: 800; }
+  .mono { font-family: 'DM Mono', monospace; }
 
-  /* Map & Floating Game UI */
+  /* --- ZESTY LOGIN SCREEN --- */
+  #screen-auth { display: flex; flex-direction: column; justify-content: center; align-items: center; height: 100vh; background: var(--paper); padding: 20px; z-index: 9999; position: absolute; top:0; left:0; right:0; background-image: radial-gradient(circle at 50% 50%, transparent 20%, rgba(212,175,55,0.05) 100%), linear-gradient(var(--line-faint) 1px, transparent 1px), linear-gradient(90deg, var(--line-faint) 1px, transparent 1px); background-size: 100% 100%, 20px 20px, 20px 20px; }
+  
+  .compass-logo { width: 140px; height: 140px; margin-bottom: 20px; animation: float 6s ease-in-out infinite; }
+  .compass-logo svg { width: 100%; height: 100%; }
+  .compass-leg { stroke: var(--blueprint); stroke-width: 4; stroke-linecap: round; }
+  .compass-joint { fill: var(--brass); }
+  .compass-arc { stroke: var(--brass); stroke-width: 2; fill: none; stroke-dasharray: 4 4; animation: spin 20s linear infinite; transform-origin: center; }
+  
+  .login-title { font-size: 42px; color: var(--blueprint); letter-spacing: -1px; margin-bottom: 5px; }
+  .login-subtitle { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--brass); letter-spacing: 3px; text-transform: uppercase; margin-bottom: 40px; font-weight: 800; }
+  
+  .auth-card { background: var(--surface); padding: 30px; border-radius: 16px; border: 1px solid var(--line-faint); box-shadow: var(--shadow-cad); width: 100%; max-width: 340px; position: relative; }
+  .auth-card::before { content:''; position:absolute; top:-5px; left:-5px; right:-5px; bottom:-5px; border: 1px solid var(--brass); opacity: 0.3; pointer-events:none; }
+  
+  .auth-tabs { display:flex; margin-bottom:20px; background:var(--paper); border-radius:8px; padding:4px; border: 1px solid var(--line-faint); }
+  .auth-tab { background:transparent; color:var(--blueprint-light); border:none; padding:12px; font-family:'DM Mono'; font-weight:800; flex:1; border-radius:6px; transition:0.2s; font-size:11px; text-transform:uppercase; letter-spacing:1px; }
+  .auth-tab.active { background:var(--surface); color:var(--blueprint); box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+
+  .input-group { width: 100%; margin-bottom: 15px; }
+  .input-group input { width: 100%; padding: 16px; border: 1px solid var(--line-faint); border-radius: 8px; background: var(--paper); font-family: 'DM Mono', monospace; font-size: 14px; outline: none; transition: 0.3s; color: var(--blueprint); }
+  .input-group input:focus { border-color: var(--brass); box-shadow: 0 0 0 3px rgba(212,175,55,0.1); }
+  
+  .btn-primary { width: 100%; padding: 18px; background: var(--blueprint); color: #fff; border: none; border-radius: 8px; font-family: 'DM Mono'; font-weight: 800; font-size: 13px; cursor: pointer; transition: all 0.2s; text-transform: uppercase; letter-spacing: 2px; display: flex; justify-content: center; align-items: center; gap: 8px; }
+  .btn-primary:active { transform: scale(0.98); background: var(--brass); color: var(--blueprint); }
+
+  /* --- APP STRUCTURE & CAD UI --- */
+  .screen { display: none; flex: 1; overflow-y: auto; padding-bottom: 90px; flex-direction: column; position: relative; height: 100%; }
+  .header { display: flex; justify-content: space-between; align-items: center; padding: 20px; border-bottom: 1px solid var(--blueprint); background: rgba(248, 250, 252, 0.95); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 100; }
+  .header h2 { font-size: 24px; color: var(--blueprint); margin:0; letter-spacing:-0.5px; }
+  .nav-btn-subtle { background:transparent; color:var(--blueprint); border:1px solid var(--blueprint); border-radius:6px; padding:8px 12px; font-weight:800; font-size:11px; font-family:'DM Mono'; text-transform:uppercase; display:flex; align-items:center; gap:6px; transition:0.2s; letter-spacing:1px; }
+
+  /* Map Containers */
   #map-container, #recap-map-container { flex-grow:1; background:#E5E3DF; width:100%; position:absolute; top:0; left:0; right:0; bottom:0; z-index:0; }
   
-  .floating-header { position:absolute; top:15px; left:15px; right:15px; z-index:1000; background:var(--glass-bg); backdrop-filter:blur(12px); border-radius:12px; padding:15px; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-lg); border:1px solid var(--border); }
+  /* Floating HUDs */
+  .floating-header { position:absolute; top:15px; left:15px; right:15px; z-index:1000; background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); border-radius:12px; padding:15px; display:flex; justify-content:space-between; align-items:center; box-shadow:var(--shadow-cad); border:1px solid var(--blueprint); border-left: 4px solid var(--brass); }
+  .floating-command { position:absolute; bottom:90px; left:15px; right:15px; z-index:1000; background:rgba(255,255,255,0.95); backdrop-filter:blur(10px); border-radius:12px; padding:15px; box-shadow:var(--shadow-cad); border:1px solid var(--blueprint); display:flex; flex-direction:column; gap:12px; border-left: 4px solid var(--brass); }
   
-  .floating-command { position:absolute; bottom:15px; left:15px; right:15px; z-index:1000; background:var(--glass-bg); backdrop-filter:blur(12px); border-radius:16px; padding:15px; box-shadow:var(--shadow-lg); border:1px solid var(--border); display:flex; flex-direction:column; gap:12px; }
-  
-  /* Integrated Layers Menu (Moved to Command Center) */
-  .integrated-layers { display:flex; overflow-x:auto; gap:8px; padding-bottom:8px; border-bottom:1px dashed var(--border); scrollbar-width: none; }
-  .integrated-layers::-webkit-scrollbar { display: none; }
-  .layer-btn { background:#F1F5F9; border:1px solid var(--border); color:var(--text-muted); font-size:11px; font-weight:700; font-family:'DM Mono'; padding:8px 12px; border-radius:8px; white-space:nowrap; transition:0.2s; display:flex; align-items:center; gap:4px; text-transform:uppercase;}
-  .layer-btn.active { background:var(--brand-accent); color:#FFFFFF; border-color:var(--brand-accent); }
+  /* Sub-tabs / Layers */
+  .sub-tabs { display: flex; padding-bottom: 10px; gap: 8px; border-bottom: 1px dashed var(--line-faint); margin-bottom: 5px; overflow-x: auto; scrollbar-width: none; }
+  .sub-tab { padding: 8px 12px; font-size: 10px; font-weight: 800; font-family:'DM Mono'; text-transform: uppercase; border-radius: 4px; background: var(--paper); color: var(--blueprint-light); cursor: pointer; white-space: nowrap; border: 1px solid var(--line-faint); letter-spacing: 1px; }
+  .sub-tab.active { background: var(--blueprint); color: #fff; border-color: var(--blueprint); }
 
   .shot-selector { display:flex; gap:6px; } 
-  .shot-btn { flex:1; padding:12px 0; background:#F8FAFC; color:var(--text-muted); border:1px solid var(--border); border-radius:8px; font-family:'DM Mono'; font-weight:700; font-size:11px; transition:0.2s; text-transform:uppercase;}
-  .shot-btn.active { background:var(--brand-primary); color:#FFFFFF; border-color:var(--brand-primary); }
-  
-  .wind-badge { display:flex; align-items:center; gap:6px; background:rgba(15,23,42,0.05); color:var(--brand-primary); padding:6px 12px; border-radius:8px; font-size:12px; font-family:'DM Mono'; font-weight:800; border:1px solid var(--border); }
-  
-  /* Map Pins & CAD Styling */
+  .shot-btn { flex:1; padding:12px 0; background:var(--paper); color:var(--blueprint); border:1px solid var(--line-faint); border-radius:6px; font-family:'DM Mono'; font-weight:800; font-size:11px; transition:0.2s; text-transform:uppercase;}
+  .shot-btn.active { background:var(--brass); color:var(--blueprint); border-color:var(--brass); }
+
+  /* Map Pins & Drafting Vectors */
   .leaflet-div-icon { background:transparent; border:none; }
-  .shot-pin { width:14px; height:14px; border:2px solid white; border-radius:50%; box-shadow:0 3px 6px rgba(0,0,0,0.5); }
-  .pin-Tee { background-color:var(--brand-primary); } .pin-Approach { background-color:var(--brand-accent); } .pin-Chip { background-color:var(--gold); } .pin-Putt { background-color:var(--success); }
-  .pin-Penalty { background-color:var(--danger); border-color:#FFFFFF; } 
-  .stho-cad-icon { background:rgba(255,255,255,0.9); border:1px dashed var(--brand-accent); border-radius:50%; display:flex; align-items:center; justify-content:center; font-family:'DM Mono'; font-weight:800; font-size:11px; color:var(--brand-primary); box-shadow:var(--shadow-sm); pointer-events: none; }
+  .shot-pin { width:12px; height:12px; border:2px solid var(--blueprint); border-radius:50%; box-shadow:0 2px 4px rgba(0,0,0,0.3); }
+  .pin-Tee { background-color:var(--surface); } .pin-Approach { background-color:var(--blueprint); } .pin-Chip { background-color:var(--brass); } .pin-Putt { background-color:var(--accent-green); }
+  .pin-Penalty { background-color:var(--accent-red); border-color:#FFFFFF; } 
+  .stho-cad-icon { background:rgba(255,255,255,0.9); border:1px solid var(--blueprint); display:flex; align-items:center; justify-content:center; font-family:'DM Mono'; font-weight:800; font-size:10px; color:var(--blueprint); box-shadow:0 2px 4px rgba(0,0,0,0.2); }
+
+  /* Bottom Nav */
+  .nav-bar { position: fixed; bottom: 0; width: 100%; background: rgba(255, 255, 255, 0.98); border-top: 1px solid var(--blueprint); display: flex; justify-content: space-around; padding: 12px 0 25px 0; z-index: 2000; box-shadow: 0 -10px 30px rgba(15,23,42,0.05); }
+  .nav-item { display: flex; flex-direction: column; align-items: center; color: var(--blueprint-light); font-size: 10px; font-family:'DM Mono'; text-transform:uppercase; gap: 4px; flex:1; letter-spacing: 1px; font-weight: 800; }
+  .nav-item.active { color: var(--brass); }
+  .nav-item i { font-size: 24px; }
+
+  /* CAD Scorecards & Dashboards */
+  .cad-card { background: var(--surface); border: 1px solid var(--blueprint); border-radius: 8px; padding: 20px; margin: 15px 20px; box-shadow: 4px 4px 0px rgba(15,23,42,0.1); position: relative; }
+  .cad-card::before { content:''; position:absolute; top:2px; left:2px; right:2px; bottom:2px; border: 1px dashed var(--line-faint); pointer-events:none; }
+  
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 15px; }
+  .stat-box { background: var(--paper); padding: 15px; border-radius: 4px; text-align: center; border: 1px solid var(--line-faint); }
+  .stat-value { font-family: 'DM Mono', monospace; font-size: 28px; font-weight: 800; color: var(--blueprint); margin-bottom:4px; }
+  .stat-label { font-size: 9px; text-transform: uppercase; letter-spacing: 2px; color: var(--text-sub); font-weight: 800; }
+
+  /* Smart Live Scorecard Specifics */
+  .score-row { display:flex; justify-content:space-between; align-items:center; padding:15px 0; border-bottom:1px dashed var(--line-faint); }
+  .score-row:last-child { border-bottom:none; }
+  .number-adjuster { display:flex; align-items:center; gap:15px; } 
+  .adj-btn { width:32px; height:32px; border-radius:4px; border:1px solid var(--blueprint); background:var(--surface); color:var(--blueprint); font-size:16px; font-weight:bold; display:flex; align-items:center; justify-content:center; }
+
+  /* Social Feed Specifics */
+  .feed-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; }
+  .feed-avatar { width:40px; height:40px; border-radius:4px; background:var(--blueprint); color:var(--brass); display:flex; align-items:center; justify-content:center; font-family:'Playfair Display'; font-weight:800; font-size:18px; margin-right:12px; border: 1px solid var(--brass); }
+  .feed-title { font-size:15px; color:var(--blueprint); font-family: 'Playfair Display'; font-weight:800; }
+  .feed-actions { display:flex; gap:10px; margin-top: 15px; }
+  .hype-btn { background:var(--paper); color:var(--blueprint); padding:10px; border-radius:4px; font-family:'DM Mono'; font-weight:800; font-size:10px; border:1px solid var(--blueprint); display:flex; align-items:center; justify-content:center; gap:6px; text-transform:uppercase; flex:1; transition:0.2s; letter-spacing: 1px;}
+  .hype-btn.hyped { background:var(--brass); color:var(--blueprint); border-color:var(--brass); }
+
+  /* Search & Inputs */
+  .search-row { display:flex; gap:10px; padding: 0 20px; margin-top:20px; }
+  .search-row input { flex:1; padding:14px; border:1px solid var(--blueprint); border-radius:6px; font-family:'DM Mono'; font-size:12px; outline:none; background: var(--surface); color: var(--blueprint); font-weight: 800; text-transform: uppercase;}
 
   /* Modals */
-  .bottom-modal { display:none; position:absolute; bottom:0; left:0; right:0; background:var(--surface); padding:24px; border-top-left-radius:24px; border-top-right-radius:24px; z-index:2000; box-shadow:0 -10px 40px rgba(0,0,0,0.15); animation: slideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+  .bottom-modal { display:none; position:absolute; bottom:0; left:0; right:0; background:var(--surface); padding:24px; border-top-left-radius:16px; border-top-right-radius:16px; z-index:3000; box-shadow:0 -10px 40px rgba(0,0,0,0.15); border-top: 4px solid var(--blueprint); }
   .lie-grid, .hole-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(80px, 1fr)); gap:10px; margin-top:15px; } 
-  .lie-btn, .hole-btn { padding:16px; background:#F8FAFC; border:1px solid var(--border); color:var(--brand-primary); border-radius:12px; font-family:'DM Mono'; font-weight:700; text-align:center; transition:0.2s; text-transform:uppercase; font-size:12px;}
-  
-  /* Smart Scorecard UI */
-  .scorecard-card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:20px; box-shadow:var(--shadow-sm); margin-bottom:15px; }
-  .score-row { display:flex; justify-content:space-between; align-items:center; padding:15px 0; border-bottom:1px dashed var(--border); }
-  .score-row:last-child { border-bottom:none; }
-  .score-label { font-family:'DM Mono'; font-weight:800; font-size:14px; color:var(--brand-primary); text-transform:uppercase; }
-  .number-adjuster { display:flex; align-items:center; gap:15px; } 
-  .adj-btn { width:36px; height:36px; border-radius:8px; border:1px solid var(--border); background:#F8FAFC; color:var(--brand-primary); font-size:18px; font-weight:bold; display:flex; align-items:center; justify-content:center; }
-  .num-display { font-size:28px; font-weight:800; width:40px; text-align:center; font-family:'Syne'; color:var(--brand-primary); }
-  
-  /* Social Feed */
-  .feed-card { background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:20px; margin-bottom:16px; box-shadow:var(--shadow-sm); }
-  .feed-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
-  .feed-avatar { width:44px; height:44px; border-radius:12px; background:var(--brand-primary); color:white; display:flex; align-items:center; justify-content:center; font-family:'Syne'; font-weight:800; font-size:18px; margin-right:12px; }
-  .feed-title { font-size:15px; color:var(--brand-primary); font-weight:600; line-height:1.3; }
-  .feed-stats { display:flex; gap:12px; background:#F8FAFC; padding:16px; border-radius:12px; margin-bottom:16px; border:1px dashed var(--border); }
-  .feed-stat-item { flex:1; text-align:center; }
-  .feed-stat-val { font-family:'DM Mono'; font-size:22px; color:var(--brand-accent); font-weight:800; }
-  .feed-stat-label { font-size:10px; font-family:'DM Mono'; color:var(--text-muted); text-transform:uppercase; font-weight:700; margin-top:4px; }
-  .hype-btn { background:#F8FAFC; color:var(--brand-primary); padding:10px 16px; border-radius:8px; font-family:'DM Mono'; font-weight:700; font-size:12px; border:1px solid var(--border); display:flex; align-items:center; gap:6px; text-transform:uppercase; }
-  .hype-btn.hyped { background:#EFF6FF; color:var(--brand-accent); border-color:var(--brand-accent); }
+  .lie-btn, .hole-btn { padding:14px; background:var(--paper); border:1px solid var(--line-faint); color:var(--blueprint); border-radius:4px; font-family:'DM Mono'; font-weight:800; text-align:center; transition:0.2s; text-transform:uppercase; font-size:11px; letter-spacing: 1px;}
 
-  @keyframes slideUp { from { transform: translateY(100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+  @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } }
   @keyframes spin { 100% { transform: rotate(360deg); } }
 </style>
 </head>
 <body>
 
-  <div id="screen-auth">
-    <div class="auth-card">
-      <div style="text-align:center; margin-bottom:30px;">
-        <i class="ph-bold ph-compass" style="font-size:48px; color:var(--brand-accent); margin-bottom:10px;"></i>
-        <h1 style="font-family:'Syne'; color:var(--brand-primary); font-size:32px; font-weight:800; margin:0;">AutoCaddy Pro</h1>
-        <p style="color:var(--text-muted); margin-top:5px; font-size:12px; font-family:'DM Mono'; text-transform:uppercase; letter-spacing:1px;">Spatial Golf Analytics</p>
-      </div>
-      
-      <div class="auth-tabs">
-        <button class="auth-tab active" onclick="switchAuthTab('login')">LOGIN</button>
-        <button class="auth-tab" onclick="switchAuthTab('signup')">CREATE ACCOUNT</button>
-      </div>
-      
-      <input type="text" id="field-username" class="auth-input" placeholder="Username" style="display:none;">
-      <input type="text" id="field-email" class="auth-input" placeholder="Email or Username">
-      <input type="password" id="field-pass" class="auth-input" placeholder="Password">
-      
-      <button id="auth-submit" class="action-btn" style="margin-top:10px;" onclick="handleAuth()">
-        <i class="ph-bold ph-sign-in"></i> LOGIN
+<div id="screen-auth">
+  <div class="compass-logo">
+    <svg viewBox="0 0 100 100">
+      <circle cx="50" cy="50" r="45" class="compass-arc" />
+      <circle cx="50" cy="50" r="35" class="compass-arc" style="animation-direction: reverse; animation-duration: 15s;" />
+      <line x1="50" y1="20" x2="25" y2="80" class="compass-leg" />
+      <line x1="50" y1="20" x2="75" y2="80" class="compass-leg" />
+      <line x1="35" y1="60" x2="65" y2="60" class="compass-leg" />
+      <circle cx="50" cy="20" r="5" class="compass-joint" />
+      <polygon points="45,15 50,0 55,15" fill="var(--brass)" />
+    </svg>
+  </div>
+  <h1 class="login-title">AutoCaddy</h1>
+  <div class="login-subtitle">Spatial Golf Analytics</div>
+  
+  <div class="auth-card">
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Authenticate</button>
+      <button class="auth-tab" onclick="switchAuthTab('signup')">Initialize</button>
+    </div>
+    <div class="input-group">
+      <input type="text" id="field-username" placeholder="ARCHITECT ALIAS" style="display:none;">
+    </div>
+    <div class="input-group">
+      <input type="text" id="field-email" placeholder="EMAIL / ALIAS">
+    </div>
+    <div class="input-group">
+      <input type="password" id="field-pass" placeholder="SECURITY KEY">
+    </div>
+    <button id="auth-submit" class="btn-primary" onclick="handleAuth()">Access System</button>
+  </div>
+</div>
+
+<div id="screen-course-select" class="screen">
+  <div class="header">
+    <h2>Play Golf</h2>
+    <div class="auth-tabs" style="margin:0; width:auto; border-radius:4px; padding:2px;">
+       <button class="auth-tab active" style="padding:6px 12px; font-size:10px;" id="mode-track-btn" onclick="setMode('track')">LIVE TRACK</button>
+       <button class="auth-tab" style="padding:6px 12px; font-size:10px;" id="mode-plan-btn" onclick="setMode('plan')">BLUEPRINT STUDY</button>
+    </div>
+  </div>
+  
+  <div style="padding: 20px 20px 0;">
+    <h3 style="font-size:16px; color:var(--blueprint); margin-bottom:5px;" id="mode-title-text">Select Deployment Zone</h3>
+    <p style="font-family:'DM Mono'; font-size:10px; color:var(--text-sub); text-transform:uppercase; letter-spacing:1px;" id="mode-desc-text">Initiate live spatial tracking protocols.</p>
+  </div>
+
+  <div class="search-row" style="margin-top:15px;">
+    <input type="text" id="db-course-search" placeholder="QUERY DATABASE..." onkeyup="renderCourseList()">
+    <button class="btn-primary" style="width:auto; padding:0 20px; border-radius:6px;" onclick="searchGlobalCourses()"><i class="ph-bold ph-globe"></i></button>
+  </div>
+  <div id="course-scroller" style="padding: 20px;"></div>
+  <div id="global-course-results" style="padding: 0 20px;"></div>
+</div>
+
+<div id="screen-game" class="screen" style="padding-bottom:0;">
+  <div id="map-container"></div>
+  
+  <div class="floating-header">
+    <div style="cursor:pointer;" onclick="document.getElementById('hole-jumper-modal').style.display='block'">
+      <h2 id="hole-title" style="margin:0; font-size:24px; color:var(--blueprint); display:flex; align-items:center; gap:6px;">
+        Hole 1 <i class="ph-bold ph-caret-down" style="font-size:14px; color:var(--brass);"></i>
+      </h2>
+      <div id="hole-details" style="font-size:11px; font-weight:800; font-family:'DM Mono'; color:var(--text-sub); margin-top:4px; text-transform:uppercase; letter-spacing:1px;">Par -- • ~--- YDS</div>
+    </div>
+    <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
+      <button class="nav-btn-subtle" style="color:var(--accent-red); border-color:var(--accent-red);" onclick="confirmQuit()">
+        <i class="ph-bold ph-power"></i> Abort
       </button>
     </div>
   </div>
-
-  <div id="screen-home">
-    <div class="home-header">
-      <div>
-        <span style="color:var(--text-muted); font-size:11px; font-family:'DM Mono'; font-weight:700; text-transform:uppercase; letter-spacing:1px;">System Active</span><br>
-        <strong id="home-user-email" style="color:var(--brand-primary); font-family:'Syne'; font-size:22px; font-weight:800;">--</strong>
-      </div>
-      <button onclick="logOut()" class="nav-btn-subtle" style="color:var(--danger); border-color:var(--danger);">
-        <i class="ph-bold ph-power"></i>
-      </button>
-    </div>
-    
-    <div style="flex-grow:1; display:flex; align-items:center;">
-      <div class="dashboard-grid" style="width:100%;">
-        <div class="dash-card" onclick="openCourseSelect()">
-          <i class="ph-bold ph-crosshair dash-icon"></i>
-          <span class="dash-title">Deploy Tracker</span>
-        </div>
-        <div class="dash-card" onclick="openSocialFeed()">
-          <i class="ph-bold ph-users-three dash-icon"></i>
-          <span class="dash-title">Clubhouse Feed</span>
-        </div>
-        <div class="dash-card" onclick="openMyProfile()">
-          <i class="ph-bold ph-chart-line-up dash-icon"></i>
-          <span class="dash-title">Performance</span>
-        </div>
-        <div class="dash-card" onclick="loadRecapListForUser(currentUser?.id, 'My Archives')">
-          <i class="ph-bold ph-database dash-icon"></i>
-          <span class="dash-title">Data Archives</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div id="screen-social">
-    <div class="header-bar">
-      <h2 class="header-title">Clubhouse</h2>
-      <button class="nav-btn-subtle" onclick="switchScreen('screen-home')"><i class="ph-bold ph-house"></i> Home</button>
-    </div>
-    <div style="padding:20px; overflow-y:auto; flex-grow:1;">
-      <div class="search-row" style="margin-bottom:20px;">
-        <input type="text" id="friend-search" class="auth-input" style="margin:0; flex-grow:1;" placeholder="Query Database...">
-        <button class="action-btn" style="width:auto; padding:0 20px; border-radius:12px;" onclick="searchFriends()"><i class="ph-bold ph-magnifying-glass"></i></button>
-      </div>
-      <div id="friend-search-results" style="margin-bottom:20px;"></div>
-      <div id="friends-list-container"></div>
-    </div>
-  </div>
-
-  <div id="profile-modal" class="bottom-modal" style="height:90vh; overflow-y:auto; flex-direction:column; padding:0;">
-    <div style="padding:24px 24px 0;">
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-        <h2 id="prof-username" style="margin:0; font-family:'Syne'; font-weight:800; color:var(--brand-primary); font-size:28px;">Username</h2>
-        <button onclick="document.getElementById('profile-modal').style.display='none'" style="background:transparent; color:var(--text-muted); border:none; font-size:24px;"><i class="ph-bold ph-x"></i></button>
-      </div>
-      <button id="prof-live-btn" class="action-btn" style="background:var(--danger); margin-bottom:20px; display:none;" onclick="jumpToLiveMap()">
-        <i class="ph-fill ph-record" style="animation: pulse 1.5s infinite;"></i> INTERCEPT LIVE FEED
-      </button>
-    </div>
-    
-    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; padding:0 24px;">
-      <div class="scorecard-card" style="text-align:center; padding:15px; margin:0;"><div class="score-label">BUSTA CAP</div><div style="font-family:'DM Mono'; font-size:28px; font-weight:800; color:var(--brand-accent);" id="prof-busta-cap">--</div></div>
-      <div class="scorecard-card" style="text-align:center; padding:15px; margin:0;"><div class="score-label">TOTAL SHOTS</div><div style="font-family:'DM Mono'; font-size:28px; font-weight:800; color:var(--brand-primary);" id="prof-avg-score">--</div></div>
+  
+  <div class="floating-command" id="tracker-hud">
+    <div class="sub-tabs" id="game-layer-menu">
+      <div class="sub-tab active" onclick="setOverlay('none', this)">Plot Matrix</div>
+      <div class="sub-tab" onclick="setOverlay('stho_personal', this)">My STHO Grid</div>
+      <div class="sub-tab" onclick="setOverlay('stho_community', this)">Global STHO</div>
     </div>
 
-    <div style="padding:20px 24px;">
-      <div class="auth-tabs" style="margin:0;">
-        <button class="auth-tab active" id="tab-btn-history" onclick="switchProfileTab('history')">ARCHIVES</button>
-        <button class="auth-tab" id="tab-btn-accolades" onclick="switchProfileTab('accolades')">PERFORMANCE</button>
-      </div>
-    </div>
-
-    <div id="profile-history-tab" style="display:block; flex-grow:1; padding:0 24px 24px; overflow-y:auto;">
-       <div id="profile-history-container"></div>
-    </div>
-    
-    <div id="profile-accolades-tab" style="display:none; flex-grow:1; padding:0 24px 24px;">
-       <div class="scorecard-card" style="text-align:center;">
-         <div class="score-label" style="margin-bottom:8px;">Lowest Recorded Score</div>
-         <div style="font-size:42px; font-family:'DM Mono'; color:var(--success); font-weight:800;" id="acc-low-score">--</div>
-       </div>
-       <div class="scorecard-card" style="text-align:center;">
-         <div class="score-label" style="margin-bottom:8px;">Highest Scrambling %</div>
-         <div style="font-size:42px; font-family:'DM Mono'; color:var(--gold); font-weight:800;" id="acc-low-putts">--</div>
-       </div>
-    </div>
-  </div>
-
-  <div id="screen-course-select">
-    <div class="header-bar">
-      <h2 class="header-title">Select Target</h2>
-      <button class="nav-btn-subtle" onclick="switchScreen('screen-home')"><i class="ph-bold ph-arrow-left"></i> Back</button>
-    </div>
-    <div style="padding:20px; display:flex; flex-direction:column; flex-grow:1; height:100%; overflow:hidden;">
-      <div class="search-row" style="margin-bottom:15px;">
-        <input type="text" id="db-course-search" class="auth-input" style="margin:0; flex-grow:1;" placeholder="Query Database..." onkeyup="renderCourseList()">
-        <button class="action-btn" style="width:auto; padding:0 20px; border-radius:12px; background:var(--brand-primary);" onclick="searchGlobalCourses()">
-          <i class="ph-bold ph-globe"></i>
-        </button>
-      </div>
-      <div id="course-scroller" style="overflow-y:auto; flex-grow:1; padding-bottom:20px;"></div>
-      <div id="global-course-results" style="margin-top:10px; flex-shrink:0;"></div>
-    </div>
-  </div>
-
-  <div id="screen-game">
-    <div id="map-container"></div>
-    
-    <div class="floating-header">
-      <div style="cursor:pointer;" onclick="document.getElementById('hole-jumper-modal').style.display='block'">
-        <h2 id="hole-title" style="margin:0; font-family:'Syne'; font-size:24px; font-weight:800; color:var(--brand-primary); display:flex; align-items:center; gap:6px;">
-          Hole 1 <i class="ph-bold ph-caret-down" style="font-size:14px; color:var(--brand-accent);"></i>
-        </h2>
-        <div id="hole-details" style="font-size:12px; font-weight:700; font-family:'DM Mono'; color:var(--text-muted); margin-top:4px;">Par -- • ~--- yds • Avg: --</div>
-      </div>
-      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:8px;">
-        <button class="nav-btn-subtle" style="background:var(--success); color:white; border:none;" onclick="finishRoundEarly()">
-          <i class="ph-bold ph-flag-checkered"></i> Finish
-        </button>
-        <div id="wind-display" class="wind-badge"><i class="ph-bold ph-wind"></i> -- mph</div>
-      </div>
-    </div>
-    
-    <div class="floating-command">
-      <div class="integrated-layers" id="game-layer-menu">
-        <button class="layer-btn active" onclick="setOverlay('none', this)"><i class="ph-bold ph-prohibit"></i> Clean Map</button>
-        <button class="layer-btn" onclick="setOverlay('blueprint_vector', this)"><i class="ph-bold ph-compass"></i> Vector CAD</button>
-        <button class="layer-btn" onclick="setOverlay('stho_personal', this)"><i class="ph-bold ph-target"></i> My STHO</button>
-        <button class="layer-btn" onclick="setOverlay('stho_community', this)"><i class="ph-bold ph-users"></i> Global STHO</button>
-      </div>
-
-      <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
-         <span style="font-size:11px; font-weight:800; font-family:'DM Mono'; color:var(--text-muted); text-transform:uppercase;">Plot Tracker</span>
-         <button onclick="undoLastShot()" style="background:transparent; border:none; color:var(--danger); font-size:12px; font-family:'DM Mono'; font-weight:800; display:flex; align-items:center; gap:4px; text-transform:uppercase;">
-           <i class="ph-bold ph-arrow-u-up-left"></i> Undo
-         </button>
-      </div>
-      <div class="shot-selector" id="shot-selector">
-        <button class="shot-btn" onclick="setShotType('Tee', this)">TEE</button>
-        <button class="shot-btn" onclick="setShotType('Approach', this)">APP</button>
-        <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button>
-        <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
-        <button class="shot-btn" onclick="setShotType('Penalty', this)" style="color:var(--danger); border-color:rgba(220,38,38,0.2);">DROP</button>
-      </div>
-      <button id="save-hole-btn" class="action-btn" onclick="openScoreScreen()">
-        REVIEW SCORECARD <i class="ph-bold ph-arrow-right"></i>
-      </button>
-    </div>
-
-    <div id="hole-jumper-modal" class="bottom-modal">
-      <h3 style="margin:0 0 15px; font-family:'Syne'; font-weight:800; color:var(--brand-primary); text-align:center;">Select Vector</h3>
-      <div class="hole-grid" id="hole-grid-container"></div>
-      <button onclick="document.getElementById('hole-jumper-modal').style.display='none'" class="action-btn action-btn-outline" style="margin-top:20px;">Cancel</button>
-    </div>
-
-    <div id="lie-modal" class="bottom-modal">
-      <h3 style="margin:0 0 15px; font-family:'Syne'; font-weight:800; color:var(--brand-primary); text-align:center;">Select Topography</h3>
-      <div class="lie-grid">
-        <button class="lie-btn" onclick="confirmLie('Fairway')" style="border-color:var(--success); color:var(--success);">Fairway</button> 
-        <button class="lie-btn" onclick="confirmLie('Rough')" style="border-color:var(--gold); color:var(--gold);">Rough</button>
-        <button class="lie-btn" onclick="confirmLie('Sand')">Sand</button> 
-        <button class="lie-btn" onclick="confirmLie('Fringe')">Fringe</button>
-        <button class="lie-btn" onclick="confirmLie('Recovery/Tree')">Recovery</button> 
-        <button class="lie-btn" onclick="confirmLie('Mogul')">Mogul</button>
-      </div>
-      <button onclick="cancelLie()" class="action-btn" style="margin-top:20px; background:var(--danger);">Abort Plot</button>
-    </div>
-  </div>
-
-  <div id="screen-score">
-    <div class="header-bar">
-      <h2 class="header-title">Scorecard</h2>
-      <button class="nav-btn-subtle" onclick="switchScreen('screen-game')"><i class="ph-bold ph-arrow-left"></i> Edit Plots</button>
-    </div>
-    <div style="padding:20px; flex-grow:1; display:flex; flex-direction:column; align-items:center; justify-content:center;">
-      
-      <div class="scorecard-card" style="width:100%; max-width:400px;">
-         <div style="text-align:center; margin-bottom:20px; border-bottom:1px dashed var(--border); padding-bottom:15px;">
-            <div style="font-family:'Syne'; font-weight:800; font-size:24px; color:var(--brand-primary);" id="sc-hole-title">Hole 1</div>
-            <div style="font-family:'DM Mono'; font-weight:700; font-size:12px; color:var(--text-muted);" id="sc-hole-sub">Par 4 • 412 Yds</div>
-         </div>
-         
-         <div class="score-row">
-            <div class="score-label">Total Strokes</div>
-            <div class="number-adjuster">
-              <button class="adj-btn" onclick="adjustValue('score-val',-1)"><i class="ph-bold ph-minus"></i></button>
-              <div class="num-display" id="score-val">4</div>
-              <button class="adj-btn" onclick="adjustValue('score-val',1)"><i class="ph-bold ph-plus"></i></button>
-            </div>
-         </div>
-         <div class="score-row">
-            <div class="score-label">Putts Taken</div>
-            <div class="number-adjuster">
-              <button class="adj-btn" onclick="adjustValue('putts-val',-1)"><i class="ph-bold ph-minus"></i></button>
-              <div class="num-display" id="putts-val">2</div>
-              <button class="adj-btn" onclick="adjustValue('putts-val',1)"><i class="ph-bold ph-plus"></i></button>
-            </div>
-         </div>
-         <div class="score-row" style="background:#F8FAFC; padding:15px; border-radius:8px; margin-top:10px;">
-            <div class="score-label">Fairway Hit (FIR)</div>
-            <div style="font-family:'DM Mono'; font-weight:800; font-size:18px;" id="sc-fir-val">YES</div>
-         </div>
-         <div class="score-row" style="background:#F8FAFC; padding:15px; border-radius:8px; margin-top:10px;">
-            <div class="score-label">Green Hit (GIR)</div>
-            <div style="font-family:'DM Mono'; font-weight:800; font-size:18px;" id="sc-gir-val">YES</div>
-         </div>
-      </div>
-      
-      <button class="action-btn" id="btn-save-score" style="background:var(--success); max-width:400px;" onclick="saveScoreToDB()">
-        <i class="ph-bold ph-check-circle"></i> CONFIRM SCORE
-      </button>
-    </div>
-  </div>
-
-  <div id="screen-round-review">
-    <div class="header-bar">
-      <h2 class="header-title">Session Data</h2>
-      <button class="nav-btn-subtle" onclick="closeRoundReview()"><i class="ph-bold ph-x"></i></button>
-    </div>
-    
-    <div style="padding:20px; flex-grow:1; display:flex; flex-direction:column; justify-content:center;">
-       <div class="scorecard-card" style="text-align:center;">
-         <div style="font-family:'DM Mono'; font-weight:800; font-size:12px; color:var(--text-muted); text-transform:uppercase; letter-spacing:1px;" id="rr-course-name">Course Name</div>
-         <div style="font-family:'Syne'; font-weight:800; font-size:72px; color:var(--brand-primary); margin:10px 0;" id="rr-total-score">--</div>
-         <div style="font-family:'DM Mono'; font-weight:800; font-size:14px; color:var(--brand-accent);" id="rr-relation">Holes Played: --</div>
-       </div>
-       
-       <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:20px;">
-         <div class="scorecard-card" style="text-align:center; padding:15px; margin:0;"><div class="score-label">Putts</div><div style="font-family:'DM Mono'; font-size:24px; font-weight:800; color:var(--brand-primary);" id="rr-putts">--</div></div>
-         <div class="scorecard-card" style="text-align:center; padding:15px; margin:0;"><div class="score-label">Scrambling</div><div style="font-family:'DM Mono'; font-size:24px; font-weight:800; color:var(--gold);" id="rr-scramble">--</div></div>
-       </div>
-       
-       <button class="action-btn" id="rr-watch-btn" style="background:var(--brand-accent);">
-         <i class="ph-fill ph-play-circle" style="font-size:20px;"></i> INITIALIZE SHOT TRACKER
-       </button>
-       
-       <button id="rr-delete-btn" class="action-btn action-btn-outline" style="margin-top:15px; color:var(--danger); border-color:var(--danger); display:none;" onclick="deleteCurrentSession()">
-         <i class="ph-bold ph-trash"></i> DELETE SESSION
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:4px;">
+       <span style="font-size:10px; font-weight:800; font-family:'DM Mono'; color:var(--text-sub); text-transform:uppercase; letter-spacing:2px;">Vector Plotter</span>
+       <button onclick="undoLastShot()" style="background:transparent; border:none; color:var(--accent-red); font-size:10px; font-family:'DM Mono'; font-weight:800; display:flex; align-items:center; gap:4px; text-transform:uppercase; letter-spacing:1px;">
+         <i class="ph-bold ph-arrow-u-up-left"></i> Undo
        </button>
     </div>
+    <div class="shot-selector" id="shot-selector">
+      <button class="shot-btn" onclick="setShotType('Tee', this)">TEE</button>
+      <button class="shot-btn" onclick="setShotType('Approach', this)">APP</button>
+      <button class="shot-btn" onclick="setShotType('Chip', this)">CHIP</button>
+      <button class="shot-btn" onclick="setShotType('Putt', this)">PUTT</button>
+      <button class="shot-btn" onclick="setShotType('Penalty', this)" style="color:var(--accent-red); border-color:var(--line-faint);">DROP</button>
+    </div>
+    <button id="save-hole-btn" class="btn-primary" style="max-width:100%; margin-top:5px; background:var(--brass); color:var(--blueprint);" onclick="openScoreScreen()">
+      GENERATE SCORECARD <i class="ph-bold ph-arrow-right"></i>
+    </button>
+  </div>
+  
+  <div class="floating-command" id="planner-hud" style="display:none;">
+     <div style="font-family:'DM Mono'; font-size:10px; font-weight:800; color:var(--text-sub); text-transform:uppercase; letter-spacing:2px; margin-bottom:10px;">Dispersion Architect</div>
+     <button class="btn-primary" style="max-width:100%; background:var(--blueprint);" onclick="renderBlueprintCone()">
+       <i class="ph-bold ph-compass"></i> RENDER BLUEPRINT
+     </button>
+     <div style="font-family:'DM Mono'; font-size:9px; color:var(--text-sub); margin-top:10px; line-height:1.4;">
+       *Rendering mathematically constructs your personal DECADE-style dispersion cone based on historical Tee to Approach spatial deviations.
+     </div>
   </div>
 
-  <div id="screen-recap-map">
-    <div id="recap-map-container"></div>
-    
-    <div class="floating-header">
-      <div>
-        <h2 id="recap-map-title" style="margin:0; font-family:'Syne'; font-size:20px; font-weight:800; color:var(--brand-primary);">Round Recap</h2>
-        <div id="recap-map-sub" style="font-size:11px; font-weight:700; font-family:'DM Mono'; color:var(--text-muted); margin-top:2px;"></div>
-      </div>
-      <button class="nav-btn-subtle" onclick="closeRecapMap()"><i class="ph-bold ph-x"></i></button>
-    </div>
-    
-    <div class="floating-command" style="gap:12px;">
-      <div class="integrated-layers" id="recap-layer-menu">
-        <button class="layer-btn active" onclick="setOverlay('none', this)"><i class="ph-bold ph-prohibit"></i> Clean Map</button>
-        <button class="layer-btn" onclick="setOverlay('blueprint_vector', this)"><i class="ph-bold ph-compass"></i> Vector CAD</button>
-        <button class="layer-btn" onclick="setOverlay('stho_personal', this)"><i class="ph-bold ph-target"></i> STHO Target</button>
-      </div>
-
-      <div style="display:flex; justify-content:space-between; align-items:center; background:#F8FAFC; padding:12px; border-radius:12px; border:1px solid var(--border);">
-        <div style="text-align:center; flex:1;">
-          <div style="font-size:10px; font-weight:800; font-family:'DM Mono'; color:var(--text-muted); text-transform:uppercase;">Score</div>
-          <div id="recap-stat-score" style="font-family:'Syne'; font-size:24px; font-weight:800; color:var(--brand-primary);">--</div>
-        </div>
-        <div style="width:1px; background:var(--border); height:30px;"></div>
-        <div style="text-align:center; flex:1;">
-          <div style="font-size:10px; font-weight:800; font-family:'DM Mono'; color:var(--text-muted); text-transform:uppercase;">Putts</div>
-          <div id="recap-stat-putts" style="font-family:'Syne'; font-size:24px; font-weight:800; color:var(--brand-primary);">--</div>
-        </div>
-      </div>
-      
-      <button class="action-btn" onclick="playMovieMode()">
-        <i class="ph-fill ph-play-circle" style="font-size:20px;"></i> PLAY SEQUENCE
-      </button>
-
-      <div style="display:flex; justify-content:space-between; align-items:center; padding-top:4px;">
-        <button class="nav-btn-subtle" onclick="changeRecapHole(-1)"><i class="ph-bold ph-caret-left"></i> Prev</button>
-        <div id="recap-hole-indicator" style="font-family:'DM Mono'; font-weight:800; color:var(--brand-primary); font-size:14px; text-transform:uppercase;">Hole 1</div>
-        <button class="nav-btn-subtle" onclick="changeRecapHole(1)">Next <i class="ph-bold ph-caret-right"></i></button>
-      </div>
-    </div>
+  <div id="hole-jumper-modal" class="bottom-modal">
+    <h3 style="text-align:center; color:var(--blueprint); font-size:20px;">Select Node</h3>
+    <div class="hole-grid" id="hole-grid-container"></div>
+    <button onclick="document.getElementById('hole-jumper-modal').style.display='none'" class="btn-primary" style="margin-top:20px; background:var(--paper); color:var(--blueprint); max-width:100%; border:1px solid var(--blueprint);">CANCEL</button>
   </div>
 
-  <script>
-    // ==========================================
-    // INITIALIZATION & SUPABASE CONFIG
-    // ==========================================
-    const SUPABASE_URL = 'https://nawebecmrjoyuapwhuaq.supabase.co';
-    const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5hd2ViZWNtcmpveXVhcHdodWFxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1MjY2NjEsImV4cCI6MjA5MDEwMjY2MX0.bKOoBYFDTEw0QYvFmoSuOjcqRioN44OkqgpLfX42sG0';
-    let sb = null; try { if(typeof supabase !== 'undefined') sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e){}
+  <div id="lie-modal" class="bottom-modal">
+    <h3 style="text-align:center; color:var(--blueprint); font-size:20px;">Assign Topography</h3>
+    <div class="lie-grid">
+      <button class="lie-btn" onclick="confirmLie('Fairway')" style="border-bottom:3px solid var(--accent-green);">Fairway</button> 
+      <button class="lie-btn" onclick="confirmLie('Rough')" style="border-bottom:3px solid var(--brass);">Rough</button>
+      <button class="lie-btn" onclick="confirmLie('Sand')" style="border-bottom:3px solid #D2B48C;">Sand</button> 
+      <button class="lie-btn" onclick="confirmLie('Fringe')" style="border-bottom:3px solid var(--blueprint-light);">Fringe</button>
+      <button class="lie-btn" onclick="confirmLie('Recovery/Tree')" style="border-bottom:3px solid var(--blueprint);">Recovery</button> 
+      <button class="lie-btn" onclick="confirmLie('Mogul')" style="border-bottom:3px solid var(--text-sub);">Mogul</button>
+    </div>
+    <button onclick="cancelLie()" class="btn-primary" style="margin-top:20px; background:var(--accent-red); max-width:100%;">ABORT VECTOR</button>
+  </div>
+</div>
 
-    // ==========================================
-    // GEOSPATIAL MATH & DISPERSION ENGINE
-    // ==========================================
-    function calcDistMeters(lat1, lon1, lat2, lon2) {
-      const R = 6371e3; const p1 = lat1 * Math.PI/180, p2 = lat2 * Math.PI/180;
-      const dp = (lat2-lat1) * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
-      const a = Math.sin(dp/2)*Math.sin(dp/2) + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)*Math.sin(dl/2);
-      return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    }
-
-    function calculateBearing(lat1, lon1, lat2, lon2) {
-      const p1 = lat1 * Math.PI/180, p2 = lat2 * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
-      const y = Math.sin(dl) * Math.cos(p2);
-      const x = Math.cos(p1)*Math.sin(p2) - Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
-      return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
-    }
-
-    // Calculates a new coordinate given a starting point, distance (meters), and bearing
-    function destinationPoint(lat, lng, distance, bearing) {
-      const R = 6371e3; const brng = bearing * Math.PI / 180;
-      const lat1 = lat * Math.PI / 180, lon1 = lng * Math.PI / 180;
-      const lat2 = Math.asin(Math.sin(lat1) * Math.cos(distance/R) + Math.cos(lat1) * Math.sin(distance/R) * Math.cos(brng));
-      const lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(distance/R) * Math.cos(lat1), Math.cos(distance/R) - Math.sin(lat1) * Math.sin(lat2));
-      return { lat: lat2 * 180 / Math.PI, lng: lon2 * 180 / Math.PI };
-    }
-
-    // Global State Variables
-    let currentUser = null, currentProfile = null, authMode = 'login';
-    let map = null, markersLayer = null;
-    let activeCourse = null, currentHole = 1, currentShots = [], activeShotType = null, pendingPlot = null;
-    let currentWindString = "-- mph", currentSessionId = null; 
-    let windowHoleBounds = null, windowAvgTee = null, windowAvgPutt = null;
-    let allDBCourses = [], userFavCourses = {}; 
-    let activeOverlayType = 'none', overlayLayer = null, vectorLayer = null;
-    let activeProfileUserId = null, activeProfileLiveSessionId = null, activeProfileLiveCourseName = null;
-    let recapMap = null, recapLinesLayer = null, recapMarkersLayer = null;
-    let recapHoleData = {}, currentRecapHole = 1, movieTimeout = null;
-    let activeReviewSessionId = null, reviewOriginScreen = 'screen-home';
-
-    window.onload = async () => {
-      if(!sb) return;
-      const { data } = await sb.auth.getSession();
-      if (data?.session) { 
-          currentUser = data.session.user; 
-          const valid = await loadCurrentUserProfile(); 
-          if(valid) switchScreen('screen-home'); 
-          else { await sb.auth.signOut(); currentUser = null; switchScreen('screen-auth'); }
-      } else switchScreen('screen-auth');
-      
-      const grid = document.getElementById('hole-grid-container');
-      for(let i=1; i<=18; i++) { grid.innerHTML += `<button class="hole-btn" onclick="jumpToHole(${i})">${i}</button>`; }
-    };
-
-    // ==========================================
-    // BULLETPROOF AUTHENTICATION ENGINE
-    // ==========================================
-    async function loadCurrentUserProfile() {
-      try {
-        const {data, error} = await sb.from('profiles').select('username, email').eq('id', currentUser.id).single();
-        if(error || !data) return false;
-        currentProfile = data;
-        document.getElementById('home-user-email').textContent = data.username;
-        try { userFavCourses = JSON.parse(localStorage.getItem('autocaddy_favs') || '{}'); } catch(e) { userFavCourses = {}; }
-        if (!userFavCourses[currentUser.id]) userFavCourses[currentUser.id] = [];
-        return true;
-      } catch(e) { return false; }
-    }
-
-    function switchScreen(id) {
-      ['screen-auth','screen-home','screen-course-select','screen-game','screen-score','screen-recap-list','screen-recap-map','screen-social','screen-round-review'].forEach(s => {
-        const el = document.getElementById(s); if(el) el.style.display = 'none';
-      });
-      document.getElementById(id).style.display = 'flex';
-      if(id === 'screen-game' && map) setTimeout(()=>map.invalidateSize(), 100);
-      if(id === 'screen-recap-map' && recapMap) setTimeout(()=>recapMap.invalidateSize(), 100);
-    }
-
-    function switchAuthTab(mode) { 
-      authMode = mode; 
-      document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active', i===(mode==='login'?0:1))); 
-      document.getElementById('auth-submit').innerHTML = mode==='signup'? '<i class="ph-bold ph-user-plus"></i> CREATE ACCOUNT' : '<i class="ph-bold ph-sign-in"></i> LOGIN'; 
-      document.getElementById('field-username').style.display = mode==='signup'?'block':'none';
-      document.getElementById('field-email').placeholder = mode==='signup'?'Email Address':'Email or Username';
-    }
-
-    async function handleAuth() {
-      const e = document.getElementById('field-email').value, p = document.getElementById('field-pass').value, u = document.getElementById('field-username').value;
-      const btn = document.getElementById('auth-submit'); const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="ph-bold ph-spinner" style="animation: spin 1s linear infinite;"></i> Loading...';
-      
-      try {
-        if(authMode==='signup') { 
-          if(!u) throw new Error("Username required!");
-          const { data: existingUser } = await sb.from('profiles').select('username').eq('username', u).single();
-          if (existingUser) throw new Error("Username already taken. Please choose another.");
-          const {data, error} = await sb.auth.signUp({email:e, password:p}); 
-          if(error) throw error;
-          const {error: profileErr} = await sb.from('profiles').insert({id: data.user.id, username: u, email: e});
-          if(profileErr) { await sb.auth.signOut(); throw new Error("Profile setup failed. Please try again."); }
-          currentUser = data.user; await loadCurrentUserProfile(); switchScreen('screen-home');
-        } else { 
-          let loginEmail = e;
-          if (!e.includes('@')) {
-            const {data: pData} = await sb.from('profiles').select('email').eq('username', e).single();
-            if (pData && pData.email) { loginEmail = pData.email; } else { throw new Error("Username not found."); }
-          }
-          const {data, error} = await sb.auth.signInWithPassword({email:loginEmail, password:p}); 
-          if(error) throw error;
-          currentUser = data.user; 
-          const valid = await loadCurrentUserProfile(); 
-          if(valid) switchScreen('screen-home'); else throw new Error("Profile corrupted. Please contact support.");
-        }
-      } catch(err) { alert(err.message); } finally { btn.innerHTML = originalText; }
-    }
-    async function logOut() { await sb.auth.signOut(); currentUser = null; currentProfile = null; switchScreen('screen-auth'); }
-
-    // ==========================================
-    // COURSE SELECTION
-    // ==========================================
-    async function openCourseSelect() { 
-      switchScreen('screen-course-select'); 
-      document.getElementById('course-scroller').innerHTML = "<p style='text-align:center; padding:20px;'><i class='ph-bold ph-spinner ph-spin'></i> Loading database...</p>";
-      const { data } = await sb.from('courses').select('*').order('name', {ascending: true});
-      allDBCourses = data || []; renderCourseList();
-    }
-
-    function toggleFavorite(e, courseId) {
-      e.stopPropagation(); const favs = userFavCourses[currentUser.id];
-      if (favs.includes(courseId)) { userFavCourses[currentUser.id] = favs.filter(id => id !== courseId); } 
-      else { favs.push(courseId); }
-      localStorage.setItem('autocaddy_favs', JSON.stringify(userFavCourses)); renderCourseList();
-    }
-
-    function renderCourseList() {
-      const q = document.getElementById('db-course-search').value.toLowerCase();
-      const favIds = userFavCourses[currentUser.id] || [];
-      const filtered = allDBCourses.filter(c => c.name.toLowerCase().includes(q));
-      const favs = filtered.filter(c => favIds.includes(c.id)); const others = filtered.filter(c => !favIds.includes(c.id));
-      const scroller = document.getElementById('course-scroller');
-      
-      if (filtered.length === 0) return scroller.innerHTML = "<div style='color:var(--text-muted); text-align:center; padding:20px; font-weight:600;'>No local courses found. Try Global Search.</div>";
-      let html = '';
-      if (favs.length > 0) {
-        html += `<div style="font-family:'Syne'; color:var(--gold); margin-bottom:10px; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">Favorites</div>`;
-        html += favs.map(c => buildCourseCard(c, true)).join('');
-        html += `<div style="height:1px; background:var(--border); margin:20px 0;"></div>`;
-      }
-      html += `<div style="font-family:'Syne'; color:var(--text-muted); margin-bottom:10px; font-size:12px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">All Courses</div>`;
-      html += others.map(c => buildCourseCard(c, false)).join(''); scroller.innerHTML = html;
-    }
-
-    function buildCourseCard(c, isFav) {
-      const starClass = isFav ? 'ph-fill ph-star' : 'ph-bold ph-star'; const starColor = isFav ? 'var(--gold)' : 'var(--text-muted)';
-      const cStr = JSON.stringify(c).replace(/'/g, "&#39;");
-      return `
-        <div class="course-card" onclick='startRound(${cStr})'>
-          <div style="display:flex; align-items:center;">
-            <i class="${starClass}" style="font-size:24px; margin-right:12px; color:${starColor};" onclick="toggleFavorite(event, ${c.id})"></i>
-            <strong style="color:var(--text-primary); font-size:15px;">${c.name}</strong>
+<div id="screen-score" class="screen">
+  <div class="header">
+    <h2>Scorecard Audit</h2>
+    <button class="nav-btn-subtle" onclick="switchScreen('screen-game')"><i class="ph-bold ph-arrow-left"></i> Edit Plots</button>
+  </div>
+  <div style="padding:20px; display:flex; flex-direction:column; align-items:center;">
+    
+    <div class="cad-card" style="width:100%; max-width:400px; margin:0 0 20px 0;">
+       <div style="text-align:center; margin-bottom:20px; border-bottom:1px dashed var(--line-faint); padding-bottom:15px;">
+          <div style="font-family:'Playfair Display'; font-weight:800; font-size:32px; color:var(--blueprint);" id="sc-hole-title">Hole 1</div>
+          <div style="font-family:'DM Mono'; font-weight:800; font-size:12px; color:var(--text-sub); text-transform:uppercase; letter-spacing:1px;" id="sc-hole-sub">--</div>
+       </div>
+       
+       <div class="score-row">
+          <div class="stat-label" style="font-size:12px; color:var(--blueprint);">Total Strokes</div>
+          <div class="number-adjuster">
+            <button class="adj-btn" onclick="adjustValue('score-val',-1)"><i class="ph-bold ph-minus"></i></button>
+            <div class="num-display" id="score-val">4</div>
+            <button class="adj-btn" onclick="adjustValue('score-val',1)"><i class="ph-bold ph-plus"></i></button>
           </div>
-          <i class="ph-bold ph-caret-right" style="color:var(--brand-primary); font-size:18px;"></i>
-        </div>`;
-    }
-
-    async function searchGlobalCourses() {
-      const q = document.getElementById('db-course-search').value; if(!q) return alert("Enter a course name in the search bar first!");
-      const resContainer = document.getElementById('global-course-results');
-      resContainer.innerHTML = "<p style='text-align:center;'><i class='ph-bold ph-spinner ph-spin'></i> Searching OpenStreetMap...</p>";
-      try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q + ' golf course')}&format=json&limit=5`);
-        const data = await response.json();
-        if(!data || !data.length) return resContainer.innerHTML = "<div style='color:var(--danger); font-size:13px; font-weight:600; text-align:center;'>No global results found. Try broader terms.</div>";
-        resContainer.innerHTML = `<div style="font-family:'Syne'; color:var(--brand-primary); margin-top:20px; margin-bottom:10px; font-size:12px; font-weight:800; text-transform:uppercase; letter-spacing:1px;">Global Results</div>` + 
-          data.map(loc => `
-          <div class="course-card" onclick="addCourseToDB('${loc.display_name.split(',')[0].replace(/'/g, "\\'")}', ${loc.lat}, ${loc.lon})">
-            <div><strong style="display:block; font-size:15px;">${loc.display_name.split(',')[0]}</strong><span style="font-size:11px; color:var(--text-muted);">${loc.display_name}</span></div>
-            <button class="nav-btn-subtle" style="color:var(--success); border-color:var(--success);"><i class="ph-bold ph-plus"></i> ADD</button>
-          </div>`).join('');
-      } catch (e) { resContainer.innerHTML = "Search failed."; }
-    }
-
-    async function addCourseToDB(name, lat, lng) {
-      try {
-        const { data: existing } = await sb.from('courses').select('*').ilike('name', `%${name.split(' ')[0]}%`).limit(1);
-        if (existing && existing.length > 0) { startRound(existing[0]); return; }
-        const { data, error } = await sb.from('courses').insert([{ name, lat, lng }]).select().single();
-        if(error) throw error; startRound(data);
-      } catch (e) { alert("Error adding course: " + e.message); }
-    }
-
-    // ==========================================
-    // CORE ENGINE: THE GAME SCREEN
-    // ==========================================
-    async function fetchWindData(lat, lng) {
-      try {
-        const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current_weather=true`);
-        const data = await res.json();
-        const rotation = (data.current_weather.winddirection + 180) % 360;
-        currentWindString = `${data.current_weather.windspeed} mph`;
-        document.getElementById('wind-display').innerHTML = `<i class="ph-bold ph-arrow-up" style="display:inline-block; transform: rotate(${rotation}deg); transition: transform 0.3s;"></i> ${currentWindString}`;
-      } catch (e) { document.getElementById('wind-display').innerHTML = `<i class="ph-bold ph-wind"></i> -- mph`; }
-    }
-
-    function startRound(courseObj) { 
-      activeCourse = courseObj; currentSessionId = null; switchScreen('screen-game'); 
-      fetchWindData(activeCourse.lat, activeCourse.lng);
-      if(!map) {
-        map = L.map('map-container',{zoomControl:false});
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 }).addTo(map);
-        markersLayer = L.layerGroup().addTo(map);
-        map.on('click', handleMapTap);
-      }
-      loadHole(1); 
-    }
-
-    function jumpToHole(h) { document.getElementById('hole-jumper-modal').style.display='none'; loadHole(h); }
-
-    async function loadHole(h) {
-      currentHole = h; currentShots = []; markersLayer.clearLayers();
-      document.getElementById('hole-title').innerHTML = `Hole ${h} <i class="ph-bold ph-caret-down" style="font-size:14px; color:var(--brand-accent);"></i>`;
-      windowHoleBounds = null; windowAvgTee = null; windowAvgPutt = null;
-      
-      const { data: commHoles } = await sb.from('holes').select('id, score, par').eq('course_id', activeCourse.id).eq('hole_number', h);
-      let avgScoreStr = "--"; let yardageStr = "---"; let parStr = "Par --";
-      
-      if (commHoles && commHoles.length > 0) {
-         if(commHoles[0].par) parStr = `Par ${commHoles[0].par}`;
-         let sum = 0; commHoles.forEach(x => sum += x.score);
-         avgScoreStr = (sum / commHoles.length).toFixed(1);
-         
-         const { data: commShots } = await sb.from('shots').select('lat, lng, shot_type').eq('course_id', activeCourse.id).eq('hole_number', h);
-         if (commShots && commShots.length > 0) {
-            windowHoleBounds = L.latLngBounds(commShots.map(s => [s.lat, s.lng]));
-            const tees = commShots.filter(s => s.shot_type === 'Tee');
-            const putts = commShots.filter(s => s.shot_type === 'Putt');
-            if (tees.length > 0) { windowAvgTee = { lat: tees.reduce((sum, s)=>sum+s.lat, 0)/tees.length, lng: tees.reduce((sum, s)=>sum+s.lng, 0)/tees.length }; }
-            if (putts.length > 0) { windowAvgPutt = { lat: putts.reduce((sum, s)=>sum+s.lat, 0)/putts.length, lng: putts.reduce((sum, s)=>sum+s.lng, 0)/putts.length }; }
-            if (windowAvgTee && windowAvgPutt) {
-               const meters = calcDistMeters(windowAvgTee.lat, windowAvgTee.lng, windowAvgPutt.lat, windowAvgPutt.lng);
-               yardageStr = Math.round(meters * 1.09361); 
-            }
-         }
-      }
-      document.getElementById('hole-details').textContent = `${parStr} • ~${yardageStr} yds • Avg: ${avgScoreStr}`;
-
-      if (currentSessionId) {
-        const { data: savedHole } = await sb.from('holes').select('id').eq('session_id', currentSessionId).eq('hole_number', h).single();
-        if (savedHole) {
-          const { data: savedShots } = await sb.from('shots').select('*').eq('hole_id', savedHole.id).order('created_at', {ascending:true});
-          if (savedShots && savedShots.length > 0) {
-            currentShots = savedShots; markersLayer.clearLayers();
-            currentShots.forEach((s, index) => {
-              const marker = L.marker([s.lat, s.lng], {icon: L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`}), draggable: true}).addTo(markersLayer);
-              marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
-            });
-            const activeBtn = document.querySelector('#game-layer-menu .layer-btn.active');
-            if(activeBtn) setOverlay(activeOverlayType, activeBtn);
-            return;
-          }
-        }
-      }
-
-      if (windowHoleBounds) { map.fitBounds(windowHoleBounds, { padding: [40, 40], maxZoom: 19 }); }
-      else if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-          (position) => { 
-            const uLat = position.coords.latitude, uLng = position.coords.longitude;
-            const dist = map.distance([uLat, uLng], [activeCourse.lat, activeCourse.lng]);
-            map.setView(dist > 3000 ? [activeCourse.lat, activeCourse.lng] : [uLat, uLng], dist > 3000 ? 17 : 19);
-          },
-          () => map.setView([activeCourse.lat, activeCourse.lng], 17), { enableHighAccuracy: true }
-        );
-      } else { map.setView([activeCourse.lat, activeCourse.lng], 17); }
-      
-      const activeBtn = document.querySelector('#game-layer-menu .layer-btn.active');
-      if(activeBtn) setOverlay(activeOverlayType, activeBtn);
-    }
-
-    function setShotType(type, btn) { 
-      activeShotType = type; 
-      document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active')); 
-      btn.classList.add('active'); 
-      if (windowAvgTee && windowAvgPutt) {
-        if (type === 'Approach' || type === 'Penalty') { map.flyToBounds(windowHoleBounds, {padding: [40, 40], duration: 1.2}); } 
-        else if (type === 'Tee') {
-          const midLat = (windowAvgTee.lat + windowAvgPutt.lat) / 2, midLng = (windowAvgTee.lng + windowAvgPutt.lng) / 2;
-          map.flyToBounds(L.latLngBounds([windowAvgTee.lat, windowAvgTee.lng], [midLat, midLng]), {padding: [40, 40], duration: 1.2});
-        } 
-        else if (type === 'Chip') { map.flyTo([windowAvgPutt.lat, windowAvgPutt.lng], 19, {duration: 1.2}); } 
-        else if (type === 'Putt') { map.flyTo([windowAvgPutt.lat, windowAvgPutt.lng], 20, {duration: 1.2}); }
-      }
-    }
-    
-    function handleMapTap(e) {
-      if(!activeShotType) return alert("Select a shot type first.");
-      if(currentShots.length === 0 && activeShotType !== 'Tee' && activeShotType !== 'Penalty') return alert("First plot must be a TEE shot.");
-      if(activeShotType === 'Tee' && currentShots.some(s => s.type === 'Tee' || s.shot_type === 'Tee')) return alert("Only one Tee shot allowed per hole.");
-
-      pendingPlot = { lat: e.latlng.lat, lng: e.latlng.lng, type: activeShotType };
-      if(activeShotType === 'Tee') { confirmLie('Tee Box'); } 
-      else if (activeShotType === 'Putt') { confirmLie('Green'); } 
-      else if (activeShotType === 'Penalty') { confirmLie('Drop Zone'); } 
-      else { document.getElementById('lie-modal').style.display = 'block'; }
-    }
-    
-    function cancelLie() { document.getElementById('lie-modal').style.display = 'none'; pendingPlot = null; }
-    
-    function confirmLie(lie) {
-      pendingPlot.lie = lie; currentShots.push(pendingPlot); markersLayer.clearLayers();
-      currentShots.forEach((s, index) => {
-        const marker = L.marker([s.lat, s.lng], {icon: L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`}), draggable: true}).addTo(markersLayer);
-        marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
-      });
-      document.getElementById('lie-modal').style.display = 'none'; pendingPlot = null;
-    }
-    
-    function undoLastShot() {
-      if(currentShots.length === 0) return;
-      currentShots.pop(); markersLayer.clearLayers();
-      currentShots.forEach((s, index) => {
-        const marker = L.marker([s.lat, s.lng], {icon: L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`}), draggable: true}).addTo(markersLayer);
-        marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
-      });
-    }
-
-    // ==========================================
-    // SMART SCORECARD ENGINE
-    // ==========================================
-    function openScoreScreen() {
-      switchScreen('screen-score');
-      
-      document.getElementById('sc-hole-title').innerText = `Hole ${currentHole}`;
-      document.getElementById('sc-hole-sub').innerText = document.getElementById('hole-details').innerText;
-      
-      let calculatedStrokes = 0;
-      currentShots.forEach(s => { calculatedStrokes += ((s.shot_type || s.type) === 'Penalty' ? 2 : 1); });
-      document.getElementById('score-val').innerText = calculatedStrokes > 0 ? calculatedStrokes : 4;
-      
-      let putts = currentShots.filter(s => (s.shot_type || s.type) === 'Putt').length || 2;
-      document.getElementById('putts-val').innerText = putts;
-      
-      // Auto FIR/GIR Detection
-      let firStr = "N/A", girStr = "N/A";
-      const approachIndex = currentShots.findIndex(s => (s.shot_type || s.type) === 'Putt' || s.lie === 'Green');
-      
-      if (currentShots.length > 1) {
-         if (currentShots[1].lie === 'Fairway') firStr = "YES";
-         else if (currentShots[1].lie === 'Rough' || currentShots[1].lie === 'Sand' || currentShots[1].lie === 'Recovery/Tree') firStr = "NO";
-      }
-      
-      if (approachIndex !== -1) {
-         // GIR logic: Reached green with 2 or more strokes to spare (Assuming Par 4 for MVP)
-         // For dynamic par, we need to save Par to local state. Using basic approach index for now.
-         if (approachIndex <= 2) girStr = "YES"; else girStr = "NO";
-      }
-      
-      document.getElementById('sc-fir-val').innerText = firStr;
-      document.getElementById('sc-fir-val').style.color = firStr === 'YES' ? 'var(--success)' : (firStr === 'NO' ? 'var(--danger)' : 'var(--text-muted)');
-      document.getElementById('sc-gir-val').innerText = girStr;
-      document.getElementById('sc-gir-val').style.color = girStr === 'YES' ? 'var(--success)' : (girStr === 'NO' ? 'var(--danger)' : 'var(--text-muted)');
-
-      document.getElementById('btn-save-score').innerHTML = currentHole === 18 ? "<i class='ph-bold ph-flag-checkered'></i> FINISH ROUND" : "<i class='ph-bold ph-check-circle'></i> CONFIRM SCORE";
-    }
-    
-    function adjustValue(id, dir) { const el=document.getElementById(id); el.innerText = Math.max(0, parseInt(el.innerText)+dir); }
-
-    async function saveScoreToDB() {
-      if (!currentUser || !currentUser.id) return alert("Session error: Missing User ID. Please login again.");
-      const score = parseInt(document.getElementById('score-val').innerText);
-      const putts = parseInt(document.getElementById('putts-val').innerText);
-      
-      const btn = document.getElementById('btn-save-score'); const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="ph-bold ph-spinner ph-spin"></i> SAVING...';
-
-      try {
-        if (!currentSessionId) {
-            const { data: newSession, error: sErr } = await sb.from('sessions').insert({ user_id: currentUser.id, course_id: activeCourse.id }).select().single();
-            if(sErr) throw sErr; currentSessionId = newSession.id;
-        }
-
-        await sb.from('holes').delete().eq('session_id', currentSessionId).eq('hole_number', currentHole);
-        
-        const { data: savedHole, error: hErr } = await sb.from('holes').insert({ session_id: currentSessionId, user_id: currentUser.id, course_id: activeCourse.id, hole_number: currentHole, score: score, putts: putts }).select().single();
-        if(hErr) throw hErr;
-        
-        if(currentShots.length > 0) {
-          await sb.from('shots').insert(currentShots.map(s => ({ hole_id: savedHole.id, session_id: currentSessionId, user_id: currentUser.id, course_id: activeCourse.id, hole_number: currentHole, shot_type: (s.shot_type || s.type), lie: s.lie, lat: s.lat, lng: s.lng })));
-        }
-        
-        if(currentHole === 18) { openRoundScorecard(currentSessionId, 'screen-home'); } 
-        else { loadHole(currentHole + 1); switchScreen('screen-game'); }
-      } catch(e) { alert("Error: " + e.message); } finally { btn.innerHTML = originalText; }
-    }
-
-    async function finishRoundEarly() { if(confirm("End round here and view summary?")) openRoundScorecard(currentSessionId, 'screen-home'); }
-
-    async function confirmQuit() {
-      if(!confirm("Are you sure you want to quit? This purges all data for this incomplete round.")) return;
-      if(currentSessionId) { await sb.from('sessions').delete().eq('id', currentSessionId); }
-      currentSessionId = null; activeCourse = null; switchScreen('screen-home');
-    }
-
-    // ==========================================
-    // SOCIAL SCORECARD LANDING (V3)
-    // ==========================================
-    async function openRoundScorecard(sessionId, backScreen) {
-      if(!sessionId) return;
-      reviewOriginScreen = backScreen || 'screen-home';
-      switchScreen('screen-round-review');
-      document.getElementById('rr-total-score').innerText = "--";
-      document.getElementById('rr-course-name').innerText = "Loading...";
-      
-      const { data: session } = await sb.from('sessions').select(`id, course_id, courses(name), user_id`).eq('id', sessionId).single();
-      const { data: sessionHoles } = await sb.from('holes').select('*').eq('session_id', sessionId).order('hole_number', {ascending:true});
-      const { data: sessionShots } = await sb.from('shots').select('*').eq('session_id', sessionId);
-      
-      document.getElementById('rr-course-name').innerText = session.courses.name;
-      
-      let totalScore = 0, totalPutts = 0, scramblingOpps = 0, scrambles = 0;
-      sessionHoles.forEach(hole => { 
-        totalScore += hole.score; totalPutts += hole.putts; 
-        const hShots = sessionShots.filter(s => s.hole_id === hole.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
-        const approachIndex = hShots.findIndex(s => s.shot_type === 'Putt' || s.lie === 'Green');
-        if (approachIndex > 2) { // Missed GIR approx
-            scramblingOpps++;
-            if (hole.score <= 4) scrambles++; // Made Par or better
-        }
-      });
-
-      document.getElementById('rr-total-score').innerText = totalScore;
-      document.getElementById('rr-relation').innerText = `Holes Played: ${sessionHoles.length}`;
-      document.getElementById('rr-putts').innerText = totalPutts;
-      document.getElementById('rr-scramble').innerText = scramblingOpps > 0 ? Math.round((scrambles/scramblingOpps)*100)+"%" : "N/A";
-      
-      document.getElementById('rr-watch-btn').onclick = () => loadRecapMap(sessionId, session.courses.name, "Shot Tracker");
-      document.getElementById('rr-delete-btn').style.display = (session.user_id === currentUser.id) ? 'flex' : 'none';
-    }
-    
-    function closeRoundReview() { switchScreen(reviewOriginScreen); }
-
-    async function deleteCurrentSession() {
-      if(!confirm("Are you SURE? This will permanently delete this round and all GPS plotted shots.")) return;
-      try {
-        await sb.from('sessions').delete().eq('id', currentSessionId);
-        currentSessionId = null; switchScreen('screen-home');
-      } catch (e) { alert("Delete failed: " + e.message); }
-    }
-
-    // ==========================================
-    // SOCIAL FEED
-    // ==========================================
-    async function openSocialFeed() {
-      switchScreen('screen-social'); 
-      document.getElementById('friends-list-container').innerHTML = "<div style='text-align:center; padding:40px;'><i class='ph-bold ph-spinner ph-spin' style='font-size:32px; color:var(--brand-primary);'></i></div>";
-      
-      const {data: follows} = await sb.from('friends').select('followed_id').eq('follower_id', currentUser.id);
-      const friendIds = follows ? follows.map(f => f.followed_id) : []; friendIds.push(currentUser.id); 
-
-      const {data: feedSessions} = await sb.from('sessions').select(`id, created_at, user_id, profiles(username), courses(name), holes(score, putts), hypes(id, user_id)`).in('user_id', friendIds).order('created_at', {ascending: false}).limit(20);
-      
-      if(!feedSessions || !feedSessions.length) return document.getElementById('friends-list-container').innerHTML = "<div style='text-align:center; padding: 40px 20px;'><h3 style='margin:0 0 5px 0; color:var(--text-primary); font-family:Syne;'>The Feed is Quiet</h3><p style='color:var(--text-muted); font-size:14px;'>Find friends to populate your feed.</p></div>";
-
-      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
-      let html = '';
-      feedSessions.forEach(s => {
-        let totalScore = 0; let totalPutts = 0;
-        s.holes.forEach(h => { totalScore += h.score; totalPutts += h.putts; });
-        const badgeHtml = (new Date(s.created_at) > fiveHoursAgo) ? `<div class="live-badge" style="margin-top:6px; display:inline-flex; align-items:center; gap:4px;"><i class="ph-fill ph-record"></i> LIVE Hole ${s.holes.length}</div>` : '';
-        const myHype = s.hypes.find(h => h.user_id === currentUser.id);
-        const hypeBtnClass = myHype ? 'hype-btn hyped' : 'hype-btn';
-        
-        html += `
-        <div class="feed-card">
-          <div class="feed-header" style="cursor:pointer;" onclick="openProfile('${s.user_id}', '${s.profiles.username}')">
-            <div style="display:flex; align-items:center;">
-              <div class="feed-avatar">${s.profiles.username.charAt(0).toUpperCase()}</div>
-              <div>
-                <div class="feed-title"><strong>${s.profiles.username}</strong> played <strong>${s.courses.name}</strong></div>
-                <div class="feed-time">${new Date(s.created_at).toLocaleDateString()} ${badgeHtml}</div>
-              </div>
-            </div>
+       </div>
+       <div class="score-row" style="border-bottom:none;">
+          <div class="stat-label" style="font-size:12px; color:var(--blueprint);">Putts Taken</div>
+          <div class="number-adjuster">
+            <button class="adj-btn" onclick="adjustValue('putts-val',-1)"><i class="ph-bold ph-minus"></i></button>
+            <div class="num-display" id="putts-val">2</div>
+            <button class="adj-btn" onclick="adjustValue('putts-val',1)"><i class="ph-bold ph-plus"></i></button>
           </div>
-          <div class="feed-stats">
-            <div class="feed-stat-item"><div class="feed-stat-val">${totalScore || '--'}</div><div class="feed-stat-label">Strokes</div></div>
-            <div class="feed-stat-item"><div class="feed-stat-val">${s.holes.length}</div><div class="feed-stat-label">Holes</div></div>
-            <div class="feed-stat-item"><div class="feed-stat-val">${totalPutts || '--'}</div><div class="feed-stat-label">Putts</div></div>
-          </div>
-          <div class="feed-actions">
-            <button id="hype-btn-${s.id}" class="${hypeBtnClass}" onclick="toggleHype('${s.id}')"><i class="${myHype ? 'ph-fill' : 'ph-bold'} ph-hand-fist" style="font-size:16px;"></i> Hype (${s.hypes.length})</button>
-            <button class="action-btn" style="flex:2; padding:12px; font-size:12px;" onclick="openRoundScorecard('${s.id}', 'screen-social')"><i class="ph-bold ph-chart-bar" style="font-size:16px;"></i> SCORECARD</button>
-          </div>
-        </div>`;
-      });
-      document.getElementById('friends-list-container').innerHTML = html;
-    }
+       </div>
+       
+       <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px; border-top:1px dashed var(--line-faint); padding-top:20px;">
+           <div style="text-align:center;">
+              <div class="stat-label">Fairway (FIR)</div>
+              <div style="font-family:'DM Mono'; font-weight:800; font-size:24px; margin-top:5px;" id="sc-fir-val">YES</div>
+           </div>
+           <div style="text-align:center;">
+              <div class="stat-label">Green (GIR)</div>
+              <div style="font-family:'DM Mono'; font-weight:800; font-size:24px; margin-top:5px;" id="sc-gir-val">YES</div>
+           </div>
+       </div>
+    </div>
+    
+    <button class="btn-primary" id="btn-save-score" style="max-width:400px; background:var(--accent-green);" onclick="saveScoreToDB()">
+      <i class="ph-bold ph-check-circle"></i> CONFIRM & LOG
+    </button>
+  </div>
+</div>
 
-    async function toggleHype(sessionId) {
-        const btn = document.getElementById(`hype-btn-${sessionId}`);
-        const isHyped = btn.classList.contains('hyped');
-        const iconClass = !isHyped ? 'ph-fill' : 'ph-bold';
-        btn.classList.toggle('hyped');
-        const currentCount = parseInt(btn.innerText.match(/\d+/)[0]);
-        btn.innerHTML = `<i class="${iconClass} ph-hand-fist" style="font-size:16px;"></i> Hype (${isHyped ? currentCount - 1 : currentCount + 1})`;
-        if (isHyped) { await sb.from('hypes').delete().eq('session_id', sessionId).eq('user_id', currentUser.id); } 
-        else { await sb.from('hypes').insert({ session_id: sessionId, user_id: currentUser.id }); }
-    }
+<div id="screen-clubhouse" class="screen">
+  <div class="header">
+    <h2>Clubhouse</h2>
+    <i class="ph-bold ph-users-three" style="font-size:24px; color:var(--blueprint);"></i>
+  </div>
+  <div class="search-row">
+    <input type="text" id="friend-search" placeholder="QUERY ARCHITECTS...">
+    <button class="btn-primary" style="width:auto; padding:14px 20px;" onclick="searchFriends()"><i class="ph-bold ph-magnifying-glass"></i></button>
+  </div>
+  <div id="friend-search-results" style="padding: 0 20px; margin-top: 10px;"></div>
+  <div id="friends-list-container" style="padding: 20px;"></div>
+</div>
 
-    async function searchFriends() {
-      const q = document.getElementById('friend-search').value; if(!q) return;
-      document.getElementById('friend-search-results').innerHTML = "<div style='color:var(--text-muted); font-size:12px; font-weight:600; text-align:center;'><i class='ph-bold ph-spinner ph-spin'></i> Searching...</div>";
-      const {data} = await sb.from('profiles').select('*').or(`username.ilike.%${q}%,email.ilike.%${q}%`).neq('id', currentUser.id).limit(10);
-      const res = document.getElementById('friend-search-results');
-      if(!data || !data.length) return res.innerHTML = "<div style='color:var(--danger); font-size:12px; font-weight:600; text-align:center;'>No players found.</div>";
-      const {data: follows} = await sb.from('friends').select('followed_id').eq('follower_id', currentUser.id);
-      const followingIds = follows ? follows.map(f => f.followed_id) : [];
-      res.innerHTML = data.map(p => `
-        <div style="display:flex; justify-content:space-between; align-items:center; padding:15px; background:var(--surface); border:1px solid var(--border); margin-bottom:8px; border-radius:16px; box-shadow:var(--shadow-sm);">
-          <div><strong style="display:block; color:var(--text-primary); font-size:15px;">${p.username}</strong><span style="font-size:11px; color:var(--text-muted);">${p.email || ''}</span></div>
-          ${followingIds.includes(p.id) ? `<span style="font-size:13px; color:var(--success); font-weight:700;"><i class="ph-bold ph-check"></i> Following</span>` : `<button class="nav-btn-subtle" style="color:var(--brand-accent); border-color:var(--brand-accent);" onclick="followUser('${p.id}')"><i class="ph-bold ph-user-plus"></i> Follow</button>`}
+<div id="screen-round-review" class="screen">
+  <div class="header">
+    <h2>Session Audit</h2>
+    <button class="nav-btn-subtle" onclick="closeRoundReview()"><i class="ph-bold ph-x"></i></button>
+  </div>
+  
+  <div style="padding:20px; flex-grow:1; display:flex; flex-direction:column;">
+     <div class="cad-card" style="text-align:center; margin:0 0 20px 0;">
+       <div class="stat-label" style="font-size:12px;" id="rr-course-name">Course Name</div>
+       <div style="font-family:'Syne'; font-weight:800; font-size:72px; color:var(--blueprint); margin:10px 0; letter-spacing:-2px;" id="rr-total-score">--</div>
+       <div class="stat-label" style="color:var(--brass);" id="rr-relation">Holes Played: --</div>
+     </div>
+     
+     <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; margin-bottom:20px;">
+       <div class="cad-card" style="text-align:center; padding:15px; margin:0;"><div class="stat-label">Total Putts</div><div class="stat-value" id="rr-putts">--</div></div>
+       <div class="cad-card" style="text-align:center; padding:15px; margin:0;"><div class="stat-label">Scrambling</div><div class="stat-value" id="rr-scramble">--</div></div>
+     </div>
+     
+     <button class="btn-primary" id="rr-watch-btn" style="max-width:100%; background:var(--blueprint);">
+       <i class="ph-bold ph-film-strip" style="font-size:20px;"></i> INITIALIZE SHOT TRACKER
+     </button>
+     
+     <button id="rr-delete-btn" class="btn-primary" style="margin-top:15px; background:var(--paper); color:var(--accent-red); border:1px solid var(--accent-red); max-width:100%; display:none;" onclick="deleteCurrentSession()">
+       <i class="ph-bold ph-trash"></i> PURGE SESSION
+     </button>
+  </div>
+</div>
+
+<div id="screen-performance" class="screen">
+  <div class="header">
+    <h2>Performance</h2>
+    <i class="ph-bold ph-chart-polar" style="font-size:24px; color:var(--blueprint);"></i>
+  </div>
+  
+  <div class="cad-card" style="background:var(--blueprint); color:white; text-align:center; border:none;">
+      <div class="stat-label" style="color:rgba(255,255,255,0.7);" id="perf-username">Loading...</div>
+      <div style="font-size:54px; font-family:'Syne'; font-weight:800; color:var(--brass); margin:10px 0; letter-spacing:-2px;" id="perf-busta">--</div>
+      <div class="stat-label" style="color:var(--surface);">BUSTA CAP</div>
+  </div>
+
+  <div class="cad-card" style="margin-top:0;">
+    <h3 style="font-size:18px; margin-bottom:15px; color:var(--blueprint); border-bottom:1px solid var(--line-faint); padding-bottom:10px;">Macro Analytics</h3>
+    <div class="stat-grid" id="perf-stats-grid" style="margin-top:0;">
+       <p style="text-align:center; width:100%; grid-column: 1 / -1; font-family:'DM Mono'; font-size:12px; color:var(--text-sub);">Processing Spatial Data...</p>
+    </div>
+  </div>
+  
+  <div class="cad-card" style="margin-top:0;">
+     <h3 style="font-size:18px; margin-bottom:15px; color:var(--blueprint); border-bottom:1px solid var(--line-faint); padding-bottom:10px;">Micro Dispersion</h3>
+     <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px; text-align:center;">
+        <div class="stat-box" style="background:transparent;"><div class="stat-value" style="color:var(--accent-red);" id="perf-miss-left">--</div><div class="stat-label">Miss Left</div></div>
+        <div class="stat-box" style="background:transparent;"><div class="stat-value" style="color:var(--accent-red);" id="perf-miss-right">--</div><div class="stat-label">Miss Right</div></div>
+        <div class="stat-box" style="background:transparent;"><div class="stat-value" style="color:var(--blueprint-light);" id="perf-miss-short">--</div><div class="stat-label">Miss Short</div></div>
+        <div class="stat-box" style="background:transparent;"><div class="stat-value" style="color:var(--blueprint-light);" id="perf-miss-long">--</div><div class="stat-label">Miss Long</div></div>
+     </div>
+  </div>
+</div>
+
+<div id="screen-archive" class="screen">
+  <div class="header">
+    <h2 id="archive-title">Past Rounds</h2>
+    <i class="ph-bold ph-books" style="font-size:24px; color:var(--blueprint);"></i>
+  </div>
+  <div id="archive-list-container" style="padding: 20px;"></div>
+</div>
+
+<div id="screen-recap-map" class="screen" style="padding-bottom:0;">
+  <div id="recap-map-container"></div>
+  <div class="floating-header">
+    <div>
+      <h2 id="recap-map-title" style="margin:0; font-size:20px; color:var(--blueprint);">Round Recap</h2>
+      <div id="recap-map-sub" style="font-size:11px; font-weight:800; font-family:'DM Mono'; color:var(--text-sub); margin-top:2px; text-transform:uppercase; letter-spacing:1px;"></div>
+    </div>
+    <button class="nav-btn-subtle" onclick="closeRecapMap()"><i class="ph-bold ph-x"></i></button>
+  </div>
+  
+  <div class="floating-command" style="bottom:15px; gap:12px;">
+    <div class="sub-tabs" id="recap-layer-menu">
+      <div class="sub-tab active" onclick="setOverlay('none', this)">Tracker Map</div>
+      <div class="sub-tab" onclick="setOverlay('stho_personal', this)">My STHO</div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--paper); padding:15px; border-radius:8px; border:1px solid var(--line-faint);">
+      <div style="text-align:center; flex:1;">
+        <div class="stat-label">Score</div>
+        <div id="recap-stat-score" class="stat-value" style="margin:0;">--</div>
+      </div>
+      <div style="width:1px; background:var(--line-faint); height:30px;"></div>
+      <div style="text-align:center; flex:1;">
+        <div class="stat-label">Putts</div>
+        <div id="recap-stat-putts" class="stat-value" style="margin:0;">--</div>
+      </div>
+    </div>
+    
+    <button class="btn-primary" style="max-width:100%; background:var(--brass); color:var(--blueprint);" onclick="playMovieMode()">
+      <i class="ph-bold ph-play-circle" style="font-size:20px;"></i> INITIATE PLAYBACK
+    </button>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; padding-top:4px;">
+      <button class="nav-btn-subtle" style="border:none;" onclick="changeRecapHole(-1)"><i class="ph-bold ph-caret-left"></i> Prev</button>
+      <div id="recap-hole-indicator" style="font-family:'DM Mono'; font-weight:800; color:var(--blueprint); font-size:14px; text-transform:uppercase;">Hole 1</div>
+      <button class="nav-btn-subtle" style="border:none;" onclick="changeRecapHole(1)">Next <i class="ph-bold ph-caret-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<div class="nav-bar" id="main-nav" style="display:none;">
+  <div class="nav-item" id="nav-home" onclick="openCourseSelect(); setActiveNav(this);">
+    <i class="ph-bold ph-flag-pennant"></i><span>Play Golf</span>
+  </div>
+  <div class="nav-item" id="nav-clubhouse" onclick="openSocialFeed(); setActiveNav(this);">
+    <i class="ph-bold ph-users-three"></i><span>Clubhouse</span>
+  </div>
+  <div class="nav-item" id="nav-performance" onclick="openPerformance(currentUser.id); setActiveNav(this);">
+    <i class="ph-bold ph-chart-polar"></i><span>Performance</span>
+  </div>
+  <div class="nav-item" id="nav-archive" onclick="loadRecapListForUser(currentUser.id, 'Past Rounds'); setActiveNav(this);">
+    <i class="ph-bold ph-books"></i><span>Past Rounds</span>
+  </div>
+</div>
+
+<script>
+  // ==========================================
+  // INITIALIZATION & SUPABASE CONFIG
+  // ==========================================
+  // MUST ADD KEYS TO WORK
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL'; 
+  const SUPABASE_ANON = 'YOUR_SUPABASE_ANON_KEY'; 
+  let sb = null; try { if(typeof supabase !== 'undefined') sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON); } catch(e){}
+
+  // ==========================================
+  // GEOSPATIAL MATH ENGINE
+  // ==========================================
+  function calcDistMeters(lat1, lon1, lat2, lon2) {
+    const R = 6371e3; const p1 = lat1 * Math.PI/180, p2 = lat2 * Math.PI/180;
+    const dp = (lat2-lat1) * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
+    const a = Math.sin(dp/2)*Math.sin(dp/2) + Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)*Math.sin(dl/2);
+    return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+  function calculateBearing(lat1, lon1, lat2, lon2) {
+    const p1 = lat1 * Math.PI/180, p2 = lat2 * Math.PI/180, dl = (lon2-lon1) * Math.PI/180;
+    const y = Math.sin(dl) * Math.cos(p2);
+    const x = Math.cos(p1)*Math.sin(p2) - Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
+    return (Math.atan2(y, x) * 180 / Math.PI + 360) % 360;
+  }
+  function destinationPoint(lat, lng, distMeters, bearingDeg) {
+    const R = 6371e3; const brng = bearingDeg * Math.PI / 180;
+    const lat1 = lat * Math.PI / 180, lon1 = lng * Math.PI / 180;
+    const lat2 = Math.asin(Math.sin(lat1) * Math.cos(distMeters/R) + Math.cos(lat1) * Math.sin(distMeters/R) * Math.cos(brng));
+    const lon2 = lon1 + Math.atan2(Math.sin(brng) * Math.sin(distMeters/R) * Math.cos(lat1), Math.cos(distMeters/R) - Math.sin(lat1) * Math.sin(lat2));
+    return { lat: lat2 * 180 / Math.PI, lng: lon2 * 180 / Math.PI };
+  }
+
+  // Global State
+  let currentUser = null, currentProfile = null, authMode = 'login', activeAppMode = 'track';
+  let map = null, markersLayer = null, vectorLayer = null, overlayLayer = null;
+  let activeCourse = null, currentHole = 1, currentShots = [], activeShotType = null, pendingPlot = null;
+  let currentSessionId = null, windowHoleBounds = null, windowAvgTee = null, windowAvgPutt = null;
+  let allDBCourses = [], userFavCourses = {}; 
+  let activeOverlayType = 'none';
+  let activeProfileUserId = null;
+  let recapMap = null, recapLinesLayer = null, recapMarkersLayer = null;
+  let recapHoleData = {}, currentRecapHole = 1, movieTimeout = null;
+  let reviewOriginScreen = 'screen-clubhouse';
+
+  window.onload = async () => {
+    if(!sb || SUPABASE_URL === 'YOUR_SUPABASE_URL') { document.getElementById('screen-auth').style.display = 'flex'; return; }
+    const { data } = await sb.auth.getSession();
+    if (data?.session) { 
+        currentUser = data.session.user; 
+        const valid = await loadCurrentUserProfile(); 
+        if(valid) { document.getElementById('main-nav').style.display = 'flex'; openCourseSelect(); }
+        else { await sb.auth.signOut(); currentUser = null; document.getElementById('screen-auth').style.display = 'flex'; }
+    } else document.getElementById('screen-auth').style.display = 'flex';
+    
+    const grid = document.getElementById('hole-grid-container');
+    for(let i=1; i<=18; i++) { grid.innerHTML += `<button class="hole-btn" onclick="jumpToHole(${i})">${i}</button>`; }
+  };
+
+  // ==========================================
+  // AUTHENTICATION
+  // ==========================================
+  async function loadCurrentUserProfile() {
+    try {
+      const {data, error} = await sb.from('profiles').select('username, email').eq('id', currentUser.id).single();
+      if(error || !data) return false;
+      currentProfile = data;
+      try { userFavCourses = JSON.parse(localStorage.getItem('autocaddy_favs') || '{}'); } catch(e) { userFavCourses = {}; }
+      if (!userFavCourses[currentUser.id]) userFavCourses[currentUser.id] = [];
+      return true;
+    } catch(e) { return false; }
+  }
+
+  function switchScreen(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-auth').style.display = 'none';
+    const target = document.getElementById(id);
+    if(target) target.classList.add('active');
+    if(id === 'screen-game' && map) setTimeout(()=>map.invalidateSize(), 100);
+    if(id === 'screen-recap-map' && recapMap) setTimeout(()=>recapMap.invalidateSize(), 100);
+  }
+  
+  function setActiveNav(el) {
+      document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+      el.classList.add('active');
+  }
+
+  function switchAuthTab(mode) { 
+    authMode = mode; 
+    document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active', i===(mode==='login'?0:1))); 
+    document.getElementById('auth-submit').innerText = mode==='signup'? 'INITIALIZE' : 'ACCESS SYSTEM'; 
+    document.getElementById('field-username').style.display = mode==='signup'?'block':'none';
+    document.getElementById('field-email').placeholder = mode==='signup'?'EMAIL ADDRESS':'EMAIL OR ALIAS';
+  }
+
+  async function handleAuth() {
+    if (!sb || SUPABASE_URL === 'YOUR_SUPABASE_URL') return alert("System Error: Insert Supabase Keys into Code.");
+    const e = document.getElementById('field-email').value, p = document.getElementById('field-pass').value, u = document.getElementById('field-username').value;
+    const btn = document.getElementById('auth-submit'); const originalText = btn.innerHTML;
+    btn.innerHTML = 'PROCESSING...';
+    try {
+      if(authMode==='signup') { 
+        if(!u) throw new Error("Alias required.");
+        const { data: existingUser } = await sb.from('profiles').select('username').eq('username', u).single();
+        if (existingUser) throw new Error("Alias taken.");
+        const {data, error} = await sb.auth.signUp({email:e, password:p}); 
+        if(error) throw error;
+        const {error: profileErr} = await sb.from('profiles').insert({id: data.user.id, username: u, email: e});
+        if(profileErr) { await sb.auth.signOut(); throw new Error("Profile creation failed."); }
+        currentUser = data.user; await loadCurrentUserProfile(); 
+        document.getElementById('main-nav').style.display = 'flex'; openCourseSelect();
+      } else { 
+        let loginEmail = e;
+        if (!e.includes('@')) {
+          const {data: pData} = await sb.from('profiles').select('email').eq('username', e).single();
+          if (pData && pData.email) { loginEmail = pData.email; } else { throw new Error("Alias not found."); }
+        }
+        const {data, error} = await sb.auth.signInWithPassword({email:loginEmail, password:p}); 
+        if(error) throw error;
+        currentUser = data.user; 
+        const valid = await loadCurrentUserProfile(); 
+        if(valid) { document.getElementById('main-nav').style.display = 'flex'; setActiveNav(document.getElementById('nav-home')); openCourseSelect(); }
+        else throw new Error("Profile corrupted.");
+      }
+    } catch(err) { alert(err.message); } finally { btn.innerHTML = originalText; }
+  }
+
+  // ==========================================
+  // PLAY GOLF HOME / COURSE SELECTOR
+  // ==========================================
+  function setMode(mode) {
+      activeAppMode = mode;
+      document.getElementById('mode-track-btn').classList.toggle('active', mode === 'track');
+      document.getElementById('mode-plan-btn').classList.toggle('active', mode === 'plan');
+      document.getElementById('mode-title-text').innerText = mode === 'track' ? "Select Deployment Zone" : "Select Study Zone";
+      document.getElementById('mode-desc-text').innerText = mode === 'track' ? "Initiate live spatial tracking protocols." : "Analyze historical dispersion vectors.";
+  }
+
+  async function openCourseSelect() { 
+    switchScreen('screen-course-select'); 
+    document.getElementById('course-scroller').innerHTML = "<p style='text-align:center; padding:20px; font-family:DM Mono; font-size:12px;'>Loading Database...</p>";
+    const { data } = await sb.from('courses').select('*').order('name', {ascending: true});
+    allDBCourses = data || []; renderCourseList();
+  }
+
+  function toggleFavorite(e, courseId) {
+    e.stopPropagation(); const favs = userFavCourses[currentUser.id];
+    if (favs.includes(courseId)) { userFavCourses[currentUser.id] = favs.filter(id => id !== courseId); } 
+    else { favs.push(courseId); }
+    localStorage.setItem('autocaddy_favs', JSON.stringify(userFavCourses)); renderCourseList();
+  }
+
+  function renderCourseList() {
+    const q = document.getElementById('db-course-search').value.toLowerCase();
+    const favIds = userFavCourses[currentUser.id] || [];
+    const filtered = allDBCourses.filter(c => c.name.toLowerCase().includes(q));
+    const favs = filtered.filter(c => favIds.includes(c.id)); const others = filtered.filter(c => !favIds.includes(c.id));
+    const scroller = document.getElementById('course-scroller');
+    
+    if (filtered.length === 0) return scroller.innerHTML = "<div style='color:var(--text-sub); text-align:center; padding:20px; font-weight:600;'>No local courses found. Try Global Search.</div>";
+    let html = '';
+    if (favs.length > 0) {
+      html += `<div class="stat-label" style="color:var(--brass); margin-bottom:10px;">Favorites</div>`;
+      html += favs.map(c => buildCourseCard(c, true)).join('');
+    }
+    html += `<div class="stat-label" style="margin:15px 0 10px;">All Courses</div>`;
+    html += others.map(c => buildCourseCard(c, false)).join(''); scroller.innerHTML = html;
+  }
+
+  function buildCourseCard(c, isFav) {
+    const starClass = isFav ? 'ph-fill ph-star' : 'ph-bold ph-star'; const starColor = isFav ? 'var(--brass)' : 'var(--text-sub)';
+    const cStr = JSON.stringify(c).replace(/'/g, "&#39;");
+    return `
+      <div class="cad-card" style="padding:15px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick='startRound(${cStr})'>
+        <div style="display:flex; align-items:center;">
+          <i class="${starClass}" style="font-size:24px; margin-right:12px; color:${starColor};" onclick="toggleFavorite(event, ${c.id})"></i>
+          <strong style="font-size:15px; color:var(--blueprint);">${c.name}</strong>
+        </div>
+        <i class="ph-bold ph-caret-right" style="color:var(--blueprint); font-size:18px;"></i>
+      </div>`;
+  }
+
+  async function searchGlobalCourses() {
+    const q = document.getElementById('db-course-search').value; if(!q) return alert("Enter course query.");
+    const resContainer = document.getElementById('global-course-results');
+    resContainer.innerHTML = "<p style='text-align:center; font-family:DM Mono; font-size:12px;'>Searching Satellite Data...</p>";
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q + ' golf course')}&format=json&limit=5`);
+      const data = await response.json();
+      if(!data || !data.length) return resContainer.innerHTML = "<div style='color:var(--accent-red); font-size:12px; font-weight:600; text-align:center;'>No global results found.</div>";
+      resContainer.innerHTML = `<div class="stat-label" style="color:var(--blueprint); margin-top:20px; margin-bottom:10px;">Global Results</div>` + 
+        data.map(loc => `
+        <div class="cad-card" style="padding:15px; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick="addCourseToDB('${loc.display_name.split(',')[0].replace(/'/g, "\\'")}', ${loc.lat}, ${loc.lon})">
+          <div><strong style="display:block; font-size:15px;">${loc.display_name.split(',')[0]}</strong><span style="font-size:11px; color:var(--text-sub);">${loc.display_name}</span></div>
+          <i class="ph-bold ph-plus-circle" style="color:var(--brass); font-size:24px;"></i>
         </div>`).join('');
-    }
+    } catch (e) { resContainer.innerHTML = "Search failed."; }
+  }
 
-    async function followUser(id) { await sb.from('friends').insert({follower_id: currentUser.id, followed_id: id}); openSocialFeed(); }
+  async function addCourseToDB(name, lat, lng) {
+    try {
+      const { data: existing } = await sb.from('courses').select('*').ilike('name', `%${name.split(' ')[0]}%`).limit(1);
+      if (existing && existing.length > 0) { startRound(existing[0]); return; }
+      const { data, error } = await sb.from('courses').insert([{ name, lat, lng }]).select().single();
+      if(error) throw error; startRound(data);
+    } catch (e) { alert("Error adding course: " + e.message); }
+  }
+
+  // ==========================================
+  // CORE ENGINE: THE MAP
+  // ==========================================
+  function startRound(courseObj) { 
+    activeCourse = courseObj; currentSessionId = null; switchScreen('screen-game'); 
     
-    // ==========================================
-    // USER PROFILES
-    // ==========================================
-    function openMyProfile() { openProfile(currentUser.id, currentProfile ? currentProfile.username : 'Me'); }
-    function switchProfileTab(tab) {
-      document.getElementById('tab-btn-history').classList.toggle('active', tab === 'history');
-      document.getElementById('tab-btn-accolades').classList.toggle('active', tab === 'accolades');
-      document.getElementById('profile-history-tab').style.display = tab === 'history' ? 'block' : 'none';
-      document.getElementById('profile-accolades-tab').style.display = tab === 'accolades' ? 'block' : 'none';
+    // Toggle UI based on mode
+    document.getElementById('tracker-hud').style.display = activeAppMode === 'track' ? 'flex' : 'none';
+    document.getElementById('planner-hud').style.display = activeAppMode === 'plan' ? 'flex' : 'none';
+
+    if(!map) {
+      map = L.map('map-container',{zoomControl:false});
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 }).addTo(map);
+      markersLayer = L.layerGroup().addTo(map);
+      vectorLayer = L.layerGroup().addTo(map);
+      overlayLayer = L.layerGroup().addTo(map);
+      map.on('click', handleMapTap);
+    }
+    loadHole(1); 
+  }
+
+  function jumpToHole(h) { document.getElementById('hole-jumper-modal').style.display='none'; loadHole(h); }
+
+  async function loadHole(h) {
+    currentHole = h; currentShots = []; markersLayer.clearLayers(); vectorLayer.clearLayers(); overlayLayer.clearLayers();
+    document.getElementById('hole-title').innerHTML = `Hole ${h} <i class="ph-bold ph-caret-down" style="font-size:14px; color:var(--brass);"></i>`;
+    windowHoleBounds = null; windowAvgTee = null; windowAvgPutt = null;
+    
+    const { data: commHoles } = await sb.from('holes').select('id, score, par').eq('course_id', activeCourse.id).eq('hole_number', h);
+    let avgScoreStr = "--"; let yardageStr = "---"; let parStr = "Par --";
+    
+    if (commHoles && commHoles.length > 0) {
+       if(commHoles[0].par) parStr = `Par ${commHoles[0].par}`;
+       let sum = 0; commHoles.forEach(x => sum += x.score);
+       avgScoreStr = (sum / commHoles.length).toFixed(1);
+       
+       // Calculate course bounds to minimize scrolling
+       const { data: commShots } = await sb.from('shots').select('lat, lng, shot_type').eq('course_id', activeCourse.id).eq('hole_number', h);
+       if (commShots && commShots.length > 0) {
+          windowHoleBounds = L.latLngBounds(commShots.map(s => [s.lat, s.lng]));
+          const tees = commShots.filter(s => s.shot_type === 'Tee');
+          const putts = commShots.filter(s => s.shot_type === 'Putt');
+          if (tees.length > 0) { windowAvgTee = { lat: tees.reduce((sum, s)=>sum+s.lat, 0)/tees.length, lng: tees.reduce((sum, s)=>sum+s.lng, 0)/tees.length }; }
+          if (putts.length > 0) { windowAvgPutt = { lat: putts.reduce((sum, s)=>sum+s.lat, 0)/putts.length, lng: putts.reduce((sum, s)=>sum+s.lng, 0)/putts.length }; }
+          if (windowAvgTee && windowAvgPutt) {
+             const meters = calcDistMeters(windowAvgTee.lat, windowAvgTee.lng, windowAvgPutt.lat, windowAvgPutt.lng);
+             yardageStr = Math.round(meters * 1.09361); 
+          }
+       }
+    }
+    document.getElementById('hole-details').textContent = `${parStr} • ~${yardageStr} YDS • Avg: ${avgScoreStr}`;
+
+    // Load active session state if any
+    if (currentSessionId && activeAppMode === 'track') {
+      const { data: savedHole } = await sb.from('holes').select('id').eq('session_id', currentSessionId).eq('hole_number', h).single();
+      if (savedHole) {
+        const { data: savedShots } = await sb.from('shots').select('*').eq('hole_id', savedHole.id).order('created_at', {ascending:true});
+        if (savedShots && savedShots.length > 0) {
+          currentShots = savedShots;
+          currentShots.forEach((s, index) => {
+            const icon = L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`});
+            const marker = L.marker([s.lat, s.lng], {icon, draggable: true}).addTo(markersLayer);
+            marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
+          });
+        }
+      }
     }
 
-    async function openProfile(userId, username) {
-      activeProfileUserId = userId; activeProfileLiveSessionId = null; activeProfileLiveCourseName = null;
-      document.getElementById('prof-username').innerText = username;
-      document.getElementById('prof-live-btn').style.display = 'none'; 
-      switchProfileTab('history'); document.getElementById('profile-modal').style.display = 'flex';
-      document.getElementById('profile-history-container').innerHTML = "<div style='text-align:center;'><i class='ph-bold ph-spinner ph-spin' style='font-size:24px; color:var(--brand-primary);'></i></div>";
+    // Auto Map Scaling
+    if (windowHoleBounds) { map.fitBounds(windowHoleBounds, { padding: [40, 40], maxZoom: 19 }); }
+    else if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => { map.setView([pos.coords.latitude, pos.coords.longitude], 18); },
+        () => map.setView([activeCourse.lat, activeCourse.lng], 17), { enableHighAccuracy: true }
+      );
+    } else { map.setView([activeCourse.lat, activeCourse.lng], 17); }
 
-      const { data: userSessions } = await sb.from('sessions').select(`id, created_at, course_id, courses(name), holes(score, putts)`).eq('user_id', userId).order('created_at', {ascending: false});
-      
-      if(!userSessions || userSessions.length === 0) { 
-        document.getElementById('prof-busta-cap').innerText = "N/A"; document.getElementById('prof-avg-score').innerText = "0"; 
-        document.getElementById('profile-history-container').innerHTML = "<p style='text-align:center; color:var(--text-muted); font-weight:600;'>No rounds logged.</p>";
-        return; 
+    // If in plan mode, auto render blueprint
+    if(activeAppMode === 'plan') renderBlueprintCone();
+  }
+
+  function setShotType(type, btn) { 
+    if(activeAppMode === 'plan') return;
+    activeShotType = type; 
+    document.querySelectorAll('.shot-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); 
+    
+    // Dynamic CAD Flyover Camera
+    if (windowAvgTee && windowAvgPutt) {
+      if (type === 'Approach' || type === 'Penalty') { map.flyToBounds(windowHoleBounds, {padding: [40, 40], duration: 1.2}); } 
+      else if (type === 'Tee') {
+        const midLat = (windowAvgTee.lat + windowAvgPutt.lat) / 2, midLng = (windowAvgTee.lng + windowAvgPutt.lng) / 2;
+        map.flyToBounds(L.latLngBounds([windowAvgTee.lat, windowAvgTee.lng], [midLat, midLng]), {padding: [40, 40], duration: 1.2});
+      } 
+      else if (type === 'Chip' || type === 'Putt') { map.flyTo([windowAvgPutt.lat, windowAvgPutt.lng], 20, {duration: 1.2}); }
+    }
+  }
+  
+  function handleMapTap(e) {
+    if(activeAppMode === 'plan') return;
+    if(!activeShotType) return alert("Select a vector type first.");
+    if(currentShots.length === 0 && activeShotType !== 'Tee' && activeShotType !== 'Penalty') return alert("First plot must be TEE.");
+    if(activeShotType === 'Tee' && currentShots.some(s => s.type === 'Tee' || s.shot_type === 'Tee')) return alert("Only one TEE shot allowed per hole.");
+
+    pendingPlot = { lat: e.latlng.lat, lng: e.latlng.lng, type: activeShotType };
+    if(activeShotType === 'Tee') { confirmLie('Tee Box'); } 
+    else if (activeShotType === 'Putt') { confirmLie('Green'); } 
+    else if (activeShotType === 'Penalty') { confirmLie('Drop Zone'); } 
+    else { document.getElementById('lie-modal').style.display = 'block'; }
+  }
+  
+  function cancelLie() { document.getElementById('lie-modal').style.display = 'none'; pendingPlot = null; }
+  
+  function confirmLie(lie) {
+    pendingPlot.lie = lie; currentShots.push(pendingPlot); markersLayer.clearLayers();
+    currentShots.forEach((s, index) => {
+      const marker = L.marker([s.lat, s.lng], {icon: L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`}), draggable: true}).addTo(markersLayer);
+      marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
+    });
+    document.getElementById('lie-modal').style.display = 'none'; pendingPlot = null;
+  }
+  
+  function undoLastShot() {
+    if(currentShots.length === 0) return;
+    currentShots.pop(); markersLayer.clearLayers();
+    currentShots.forEach((s, index) => {
+      const marker = L.marker([s.lat, s.lng], {icon: L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`}), draggable: true}).addTo(markersLayer);
+      marker.on('dragend', function(ev) { currentShots[index].lat = ev.target.getLatLng().lat; currentShots[index].lng = ev.target.getLatLng().lng; });
+    });
+  }
+
+  // ==========================================
+  // BLUEPRINT DISPERSION CONE (DECADE KILLER)
+  // ==========================================
+  async function renderBlueprintCone() {
+    vectorLayer.clearLayers();
+    
+    // 1. Fetch Historic Approaches for this User on this Hole
+    const { data: histShots } = await sb.from('shots').select('lat, lng, shot_type').eq('course_id', activeCourse.id).eq('hole_number', currentHole).eq('user_id', currentUser.id);
+    
+    let avgTee = windowAvgTee;
+    let avgPutt = windowAvgPutt;
+
+    // If no community averages, we cannot draw the vector
+    if (!avgTee || !avgPutt) {
+        alert("Insufficient spatial data to render Blueprint for this hole.");
+        return;
+    }
+
+    const tLat = avgTee.lat, tLng = avgTee.lng;
+    const pLat = avgPutt.lat, pLng = avgPutt.lng;
+    const centerBearing = calculateBearing(tLat, tLng, pLat, pLng);
+    const targetDist = calcDistMeters(tLat, tLng, pLat, pLng); 
+
+    // Default Dispersion (15 degrees)
+    let devLeft = 15;
+    let devRight = 15;
+    let avgCarryMeters = 230; // ~250 yds
+
+    // Personal Dispersion Logic (If user has data)
+    if(histShots && histShots.length > 0) {
+       const approaches = histShots.filter(s => s.shot_type === 'Approach');
+       if(approaches.length > 2) {
+           let maxL = 0, maxR = 0;
+           approaches.forEach(app => {
+               const b = calculateBearing(tLat, tLng, app.lat, app.lng);
+               let diff = b - centerBearing;
+               if (diff > 180) diff -= 360; if (diff < -180) diff += 360;
+               if (diff < 0 && Math.abs(diff) > maxL) maxL = Math.abs(diff);
+               if (diff > 0 && diff > maxR) maxR = diff;
+           });
+           // Use actual historic deviation limits for cone bounds
+           if(maxL > 5) devLeft = maxL;
+           if(maxR > 5) devRight = maxR;
+       }
+    }
+
+    const centerPoint = destinationPoint(tLat, tLng, targetDist, centerBearing);
+    
+    // Center Axis
+    L.polyline([[tLat, tLng], [centerPoint.lat, centerPoint.lng]], {color: 'var(--brass)', weight: 2, dashArray: '5, 5'}).addTo(vectorLayer);
+    
+    // Dispersion Polygon
+    const leftPoint = destinationPoint(tLat, tLng, targetDist, centerBearing - devLeft);
+    const rightPoint = destinationPoint(tLat, tLng, targetDist, centerBearing + devRight);
+    L.polygon([ [tLat, tLng], [leftPoint.lat, leftPoint.lng], [rightPoint.lat, rightPoint.lng] ], {
+        color: 'var(--blueprint)', fillColor: 'var(--blueprint)', fillOpacity: 0.15, weight: 1, dashArray: '4, 4'
+    }).addTo(vectorLayer);
+
+    // Carry Arcs (150, 200, 250 yds)
+    [150, 200, 250].forEach(yds => {
+        const mtrs = yds / 1.09361;
+        if (mtrs < targetDist) {
+            const arcC = destinationPoint(tLat, tLng, mtrs, centerBearing);
+            const arcL = destinationPoint(tLat, tLng, mtrs, centerBearing - devLeft);
+            const arcR = destinationPoint(tLat, tLng, mtrs, centerBearing + devRight);
+            L.polyline([[arcL.lat, arcL.lng], [arcC.lat, arcC.lng], [arcR.lat, arcR.lng]], {color: '#fff', weight: 2, opacity:0.8}).addTo(vectorLayer);
+            const icon = L.divIcon({className: 'stho-cad-icon', html: `<span style="background:var(--blueprint); color:#fff; padding:2px 4px; border-radius:2px; font-size:9px;">${yds}Y</span>`});
+            L.marker([arcL.lat, arcL.lng], {icon, interactive:false}).addTo(vectorLayer);
+        }
+    });
+
+    map.fitBounds(L.polygon([ [tLat, tLng], [leftPoint.lat, leftPoint.lng], [rightPoint.lat, rightPoint.lng] ]).getBounds(), {padding: [40, 40]});
+  }
+
+  // ==========================================
+  // SCORECARD & DB SYNC
+  // ==========================================
+  function openScoreScreen() {
+    switchScreen('screen-score');
+    document.getElementById('sc-hole-title').innerText = `Hole ${currentHole}`;
+    document.getElementById('sc-hole-sub').innerText = document.getElementById('hole-details').innerText;
+    
+    let calculatedStrokes = 0;
+    currentShots.forEach(s => { calculatedStrokes += ((s.shot_type || s.type) === 'Penalty' ? 2 : 1); });
+    document.getElementById('score-val').innerText = calculatedStrokes > 0 ? calculatedStrokes : 4;
+    
+    let putts = currentShots.filter(s => (s.shot_type || s.type) === 'Putt').length || 2;
+    document.getElementById('putts-val').innerText = putts;
+    
+    let firStr = "N/A", girStr = "N/A";
+    const approachIndex = currentShots.findIndex(s => (s.shot_type || s.type) === 'Putt' || s.lie === 'Green');
+    
+    if (currentShots.length > 1) {
+       if (currentShots[1].lie === 'Fairway') firStr = "YES";
+       else if (currentShots[1].lie === 'Rough' || currentShots[1].lie === 'Sand' || currentShots[1].lie === 'Recovery/Tree') firStr = "NO";
+    }
+    if (approachIndex !== -1) { if (approachIndex <= 2) girStr = "YES"; else girStr = "NO"; }
+    
+    document.getElementById('sc-fir-val').innerText = firStr;
+    document.getElementById('sc-fir-val').style.color = firStr === 'YES' ? 'var(--accent-green)' : (firStr === 'NO' ? 'var(--accent-red)' : 'var(--text-sub)');
+    document.getElementById('sc-gir-val').innerText = girStr;
+    document.getElementById('sc-gir-val').style.color = girStr === 'YES' ? 'var(--accent-green)' : (girStr === 'NO' ? 'var(--accent-red)' : 'var(--text-sub)');
+
+    document.getElementById('btn-save-score').innerHTML = currentHole === 18 ? "<i class='ph-bold ph-flag-checkered'></i> FINALIZE ROUND" : "<i class='ph-bold ph-check-circle'></i> CONFIRM & LOG";
+  }
+  
+  function adjustValue(id, dir) { const el=document.getElementById(id); el.innerText = Math.max(0, parseInt(el.innerText)+dir); }
+
+  async function saveScoreToDB() {
+    if (!currentUser || !currentUser.id) return alert("Session error: Missing User ID. Please login again.");
+    const score = parseInt(document.getElementById('score-val').innerText);
+    const putts = parseInt(document.getElementById('putts-val').innerText);
+    
+    const btn = document.getElementById('btn-save-score'); const originalText = btn.innerHTML;
+    btn.innerHTML = 'SYNCING DATA...';
+
+    try {
+      if (!currentSessionId) {
+          const { data: newSession, error: sErr } = await sb.from('sessions').insert({ user_id: currentUser.id, course_id: activeCourse.id }).select().single();
+          if(sErr) throw sErr; currentSessionId = newSession.id;
       }
-
-      document.getElementById('prof-avg-score').innerText = userSessions.reduce((acc, s) => acc + s.holes.reduce((sum, h)=>sum+h.score, 0), 0); 
-      
-      const courseCounts = {};
-      userSessions.forEach(s => {
-        if (!courseCounts[s.course_id]) courseCounts[s.course_id] = { name: s.courses.name, rounds: 0, totalScore: 0 };
-        if (s.holes.length > 0) { courseCounts[s.course_id].rounds++; courseCounts[s.course_id].totalScore += s.holes.reduce((sum, h)=>sum+h.score, 0); }
-      });
-      
-      let homeCourseId = Object.keys(courseCounts).sort((a,b) => courseCounts[b].rounds - courseCounts[a].rounds)[0];
-      let homeData = courseCounts[homeCourseId];
-      let avgScoreAtHome = homeData.rounds > 0 ? (homeData.totalScore / homeData.rounds).toFixed(1) : 0;
-      let bustaCap = (avgScoreAtHome - (4.0 * 18)).toFixed(1); 
-      
-      document.getElementById('prof-home-course-label').innerText = homeData.name.toUpperCase().substring(0,15);
-      document.getElementById('prof-busta-cap').innerText = (bustaCap > 0 ? "+" : "") + bustaCap;
-
-      let minScore = 999; let minPutts = 999;
-      userSessions.forEach(s => {
-        let sc = 0; let pt = 0;
-        s.holes.forEach(h => { sc+=h.score; pt+=h.putts; });
-        if(sc > 0 && sc < minScore) minScore = sc;
-        if(pt > 0 && pt < minPutts) minPutts = pt;
-      });
-      document.getElementById('acc-low-score').innerText = minScore !== 999 ? minScore : "--";
-      document.getElementById('acc-low-putts').innerText = minPutts !== 999 ? minPutts : "--";
-      document.getElementById('acc-fav-course').innerText = homeData.name;
-
-      const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000); 
-      const latestSession = userSessions[0];
-      if(new Date(latestSession.created_at) > fiveHoursAgo) {
-         activeProfileLiveSessionId = latestSession.id; activeProfileLiveCourseName = latestSession.courses.name;
-         document.getElementById('prof-live-btn').style.display = 'flex';
+      await sb.from('holes').delete().eq('session_id', currentSessionId).eq('hole_number', currentHole);
+      const { data: savedHole, error: hErr } = await sb.from('holes').insert({ session_id: currentSessionId, user_id: currentUser.id, course_id: activeCourse.id, hole_number: currentHole, score: score, putts: putts }).select().single();
+      if(hErr) throw hErr;
+      if(currentShots.length > 0) {
+        await sb.from('shots').insert(currentShots.map(s => ({ hole_id: savedHole.id, session_id: currentSessionId, user_id: currentUser.id, course_id: activeCourse.id, hole_number: currentHole, shot_type: (s.shot_type || s.type), lie: s.lie, lat: s.lat, lng: s.lng })));
       }
+      if(currentHole === 18) { openRoundScorecard(currentSessionId, 'screen-course-select'); } 
+      else { loadHole(currentHole + 1); switchScreen('screen-game'); }
+    } catch(e) { alert("Error: " + e.message); } finally { btn.innerHTML = originalText; }
+  }
 
-      document.getElementById('profile-history-container').innerHTML = userSessions.slice(0, 10).map(s => {
-        let tSc = 0; s.holes.forEach(h=>tSc+=h.score);
-        return `
-        <div class="course-card" onclick='document.getElementById("profile-modal").style.display="none"; openRoundScorecard("${s.id}", "screen-social")'>
-          <div>
-            <strong style="display:block; color:var(--text-primary); font-size:15px;">${s.courses.name}</strong>
-            <span style="font-size:12px; color:var(--text-muted);">${new Date(s.created_at).toLocaleDateString()} • ${s.holes.length} Holes</span>
+  async function confirmQuit() {
+    if(!confirm("Are you sure you want to abort? This purges all data for this incomplete round.")) return;
+    if(currentSessionId) { await sb.from('sessions').delete().eq('id', currentSessionId); }
+    currentSessionId = null; activeCourse = null; switchScreen('screen-course-select', document.getElementById('nav-home'));
+  }
+
+  // ==========================================
+  // ROUND REVIEW / SOCIAL SCORECARD
+  // ==========================================
+  async function openRoundScorecard(sessionId, backScreen) {
+    if(!sessionId) return;
+    reviewOriginScreen = backScreen || 'screen-course-select';
+    switchScreen('screen-round-review');
+    document.getElementById('rr-total-score').innerText = "--";
+    document.getElementById('rr-course-name').innerText = "LOADING DATABASE...";
+    
+    const { data: session } = await sb.from('sessions').select(`id, course_id, courses(name), user_id`).eq('id', sessionId).single();
+    const { data: sessionHoles } = await sb.from('holes').select('*').eq('session_id', sessionId).order('hole_number', {ascending:true});
+    const { data: sessionShots } = await sb.from('shots').select('*').eq('session_id', sessionId);
+    
+    document.getElementById('rr-course-name').innerText = session.courses.name;
+    
+    let totalScore = 0, totalPutts = 0, scramblingOpps = 0, scrambles = 0;
+    sessionHoles.forEach(hole => { 
+      totalScore += hole.score; totalPutts += hole.putts; 
+      const hShots = sessionShots.filter(s => s.hole_id === hole.id).sort((a,b)=>new Date(a.created_at)-new Date(b.created_at));
+      const approachIndex = hShots.findIndex(s => s.shot_type === 'Putt' || s.lie === 'Green');
+      if (approachIndex > 2) { scramblingOpps++; if (hole.score <= 4) scrambles++; }
+    });
+
+    document.getElementById('rr-total-score').innerText = totalScore;
+    document.getElementById('rr-relation').innerText = `Holes Logged: ${sessionHoles.length}`;
+    document.getElementById('rr-putts').innerText = totalPutts;
+    document.getElementById('rr-scramble').innerText = scramblingOpps > 0 ? Math.round((scrambles/scramblingOpps)*100)+"%" : "N/A";
+    
+    document.getElementById('rr-watch-btn').onclick = () => loadRecapMap(sessionId, session.courses.name, "Vector Track");
+    document.getElementById('rr-delete-btn').style.display = (session.user_id === currentUser.id) ? 'flex' : 'none';
+  }
+  
+  function closeRoundReview() { switchScreen(reviewOriginScreen); }
+
+  async function deleteCurrentSession() {
+    if(!confirm("Are you SURE? This will permanently delete this round and all GPS plotted shots.")) return;
+    try { await sb.from('sessions').delete().eq('id', currentSessionId); currentSessionId = null; switchScreen('screen-course-select'); } 
+    catch (e) { alert("Delete failed: " + e.message); }
+  }
+
+  // ==========================================
+  // ADVANCED PERFORMANCE (ANALYTICS)
+  // ==========================================
+  async function openPerformance(userId) {
+    switchScreen('screen-performance');
+    document.getElementById('perf-username').innerText = "Loading...";
+    const { data: pData } = await sb.from('profiles').select('username').eq('id', userId).single();
+    document.getElementById('perf-username').innerText = pData.username;
+    
+    const { data: userSessions } = await sb.from('sessions').select(`id, course_id`).eq('user_id', userId);
+    if(!userSessions || userSessions.length === 0) {
+       document.getElementById('perf-stats-grid').innerHTML = `<p style="grid-column:1/-1; text-align:center; font-family:'DM Mono'; font-size:12px; color:var(--text-sub);">No deployment data recorded.</p>`;
+       return;
+    }
+    
+    const sessionIds = userSessions.map(s=>s.id);
+    const { data: allHoles } = await sb.from('holes').select('*').in('session_id', sessionIds);
+    const { data: allShots } = await sb.from('shots').select('*').in('session_id', sessionIds).order('created_at', {ascending:true});
+    
+    let totalScore = 0, totalPutts = 0;
+    let fairwaysHit = 0, fairwaysPossible = 0;
+    let greensHit = 0, greensPossible = allHoles.length;
+    let missL=0, missR=0, missS=0, missLong=0;
+    
+    let bustaCap = "N/A";
+    if(allHoles.length > 0) {
+        totalScore = allHoles.reduce((acc, h) => acc + h.score, 0);
+        let avgScore = (totalScore / (allHoles.length / 18)).toFixed(1); 
+        bustaCap = (avgScore - 72).toFixed(1); 
+    }
+    document.getElementById('perf-busta').innerText = (bustaCap > 0 ? "+" : "") + bustaCap;
+
+    allHoles.forEach(hole => {
+        totalPutts += hole.putts;
+        const hShots = allShots.filter(s => s.hole_id === hole.id);
+        if(hShots.length === 0) return;
+
+        if (hShots.length > 1 && hShots[0].shot_type === 'Tee') {
+            fairwaysPossible++;
+            if(hShots[1].lie === 'Fairway' || hShots[1].lie === 'Green') fairwaysHit++;
+        }
+
+        const firstPuttIndex = hShots.findIndex(s => s.shot_type === 'Putt' || s.lie === 'Green');
+        if (firstPuttIndex !== -1 && firstPuttIndex <= 2) greensHit++; 
+        else {
+          const tee = hShots.find(s => s.shot_type === 'Tee');
+          const putts = hShots.filter(s => s.shot_type === 'Putt');
+          const approachIndex = firstPuttIndex > 0 ? firstPuttIndex - 1 : hShots.length - 1; 
+          const approach = hShots[approachIndex];
+
+          if (tee && putts.length > 0 && approach && approach.shot_type !== 'Tee' && approach.shot_type !== 'Putt') {
+            const greenCenter = { lat: putts[0].lat, lng: putts[0].lng };
+            const bearingToPin = calculateBearing(tee.lat, tee.lng, greenCenter.lat, greenCenter.lng);
+            const bearingToMiss = calculateBearing(tee.lat, tee.lng, approach.lat, approach.lng);
+            let angleDiff = bearingToMiss - bearingToPin;
+            if (angleDiff > 180) angleDiff -= 360; if (angleDiff < -180) angleDiff += 360;
+            const distToPin = calcDistMeters(tee.lat, tee.lng, greenCenter.lat, greenCenter.lng);
+            const distToMiss = calcDistMeters(tee.lat, tee.lng, approach.lat, approach.lng);
+
+            if (angleDiff < -4) missL++; else if (angleDiff > 4) missR++; else if (distToMiss < distToPin - 10) missS++; else missLong++;
+          }
+        }
+    });
+
+    document.getElementById('perf-stats-grid').innerHTML = `
+      <div class="stat-box"><div class="stat-value">${allHoles.length}</div><div class="stat-label">Holes Played</div></div>
+      <div class="stat-box"><div class="stat-value">${(totalPutts/(allHoles.length/18)).toFixed(1)}</div><div class="stat-label">Avg Putts/18</div></div>
+      <div class="stat-box"><div class="stat-value" style="color:var(--accent-green);">${greensPossible > 0 ? Math.round((greensHit/greensPossible)*100) : 0}%</div><div class="stat-label">GIR</div></div>
+      <div class="stat-box"><div class="stat-value" style="color:var(--accent-green);">${fairwaysPossible > 0 ? Math.round((fairwaysHit/fairwaysPossible)*100) : 0}%</div><div class="stat-label">FIR</div></div>
+    `;
+
+    document.getElementById('perf-miss-left').innerText = missL; document.getElementById('perf-miss-right').innerText = missR;
+    document.getElementById('perf-miss-short').innerText = missS; document.getElementById('perf-miss-long').innerText = missLong;
+  }
+
+  // ==========================================
+  // PAST ROUNDS (ARCHIVE)
+  // ==========================================
+  async function loadRecapListForUser(userId, title) {
+    if(!userId) return;
+    switchScreen('screen-archive'); document.getElementById('archive-title').innerText = title || "Past Rounds";
+    const container = document.getElementById('archive-list-container');
+    container.innerHTML = "<p style='text-align:center; font-family:DM Mono; font-size:12px;'>Loading Database...</p>";
+    
+    const { data: userSessions } = await sb.from('sessions').select(`id, created_at, courses(name), holes(score)`).eq('user_id', userId).order('created_at', {ascending: false});
+    if(!userSessions || userSessions.length === 0) return container.innerHTML = "<p style='text-align:center; color:var(--text-sub);'>No rounds recorded yet.</p>";
+
+    container.innerHTML = userSessions.map(s => {
+      let tSc = 0; s.holes.forEach(h=>tSc+=h.score);
+      return `
+      <div class="cad-card" style="margin:0 0 15px 0; display:flex; justify-content:space-between; align-items:center; cursor:pointer;" onclick='openRoundScorecard("${s.id}", "screen-archive")'>
+        <div>
+          <strong style="display:block; color:var(--blueprint); font-size:16px;">${s.courses.name}</strong>
+          <span style="font-size:12px; color:var(--text-sub); font-family:'DM Mono';">${new Date(s.created_at).toLocaleDateString()} • ${s.holes.length} Holes</span>
+        </div>
+        <div style="text-align:right;">
+           <span style="display:block; font-family:'Syne'; font-size:28px; font-weight:800; color:var(--brass);">${tSc}</span>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // ==========================================
+  // SOCIAL CLUBHOUSE
+  // ==========================================
+  async function openSocialFeed() {
+    switchScreen('screen-clubhouse'); 
+    document.getElementById('friends-list-container').innerHTML = "<p style='text-align:center; font-family:DM Mono; font-size:12px;'>Fetching Intercepts...</p>";
+    
+    const {data: follows} = await sb.from('friends').select('followed_id').eq('follower_id', currentUser.id);
+    const friendIds = follows ? follows.map(f => f.followed_id) : []; friendIds.push(currentUser.id); 
+
+    const {data: feedSessions} = await sb.from('sessions').select(`id, created_at, user_id, profiles(username), courses(name), holes(score, putts), hypes(id, user_id)`).in('user_id', friendIds).order('created_at', {ascending: false}).limit(20);
+    if(!feedSessions || !feedSessions.length) return document.getElementById('friends-list-container').innerHTML = "<p style='text-align:center; color:var(--text-sub);'>The Feed is Quiet. Deploy more architects.</p>";
+
+    const fiveHoursAgo = new Date(Date.now() - 5 * 60 * 60 * 1000);
+    let html = '';
+    feedSessions.forEach(s => {
+      let totalScore = 0; let totalPutts = 0;
+      s.holes.forEach(h => { totalScore += h.score; totalPutts += h.putts; });
+      const badgeHtml = (new Date(s.created_at) > fiveHoursAgo) ? `<div class="live-badge"><i class="ph-fill ph-record"></i> LIVE Hole ${s.holes.length}</div>` : '';
+      const myHype = s.hypes.find(h => h.user_id === currentUser.id);
+      const hypeBtnClass = myHype ? 'hype-btn hyped' : 'hype-btn';
+      
+      html += `
+      <div class="cad-card" style="margin-bottom:15px; padding:20px;">
+        <div class="feed-header" style="cursor:pointer;" onclick="openPerformance('${s.user_id}')">
+          <div style="display:flex; align-items:center;">
+            <div class="feed-avatar">${s.profiles.username.charAt(0).toUpperCase()}</div>
+            <div>
+              <div class="feed-title">${s.profiles.username} <span style="font-weight:normal; color:var(--text-sub); font-family:'DM Sans'; font-size:12px;">deployed to</span> ${s.courses.name}</div>
+              <div style="font-size:11px; color:var(--text-sub); font-family:'DM Mono'; margin-top:4px;">${new Date(s.created_at).toLocaleDateString()} ${badgeHtml}</div>
+            </div>
           </div>
-          <div style="text-align:right;">
-             <span style="display:block; font-family:'Syne'; font-size:24px; font-weight:800; color:var(--brand-primary);">${tSc}</span>
-             <span style="color:var(--brand-accent); font-family:'Syne'; font-size:10px; font-weight:800; letter-spacing:1px;">REVIEW <i class="ph-bold ph-arrow-right"></i></span>
-          </div>
-        </div>`;
-      }).join('');
+        </div>
+        <div style="display:flex; gap:12px; background:var(--paper); padding:12px; border-radius:4px; border:1px solid var(--line-faint);">
+          <div style="flex:1; text-align:center;"><div style="font-family:'DM Mono'; font-size:20px; font-weight:800; color:var(--blueprint);">${totalScore || '--'}</div><div class="stat-label">Strokes</div></div>
+          <div style="flex:1; text-align:center;"><div style="font-family:'DM Mono'; font-size:20px; font-weight:800; color:var(--blueprint);">${s.holes.length}</div><div class="stat-label">Holes</div></div>
+          <div style="flex:1; text-align:center;"><div style="font-family:'DM Mono'; font-size:20px; font-weight:800; color:var(--blueprint);">${totalPutts || '--'}</div><div class="stat-label">Putts</div></div>
+        </div>
+        <div class="feed-actions">
+          <button id="hype-btn-${s.id}" class="${hypeBtnClass}" onclick="toggleHype('${s.id}')"><i class="${myHype ? 'ph-fill' : 'ph-bold'} ph-hand-fist" style="font-size:16px;"></i> Hype (${s.hypes.length})</button>
+          <button class="btn-primary" style="flex:2; padding:10px; font-size:11px; margin:0;" onclick="openRoundScorecard('${s.id}', 'screen-clubhouse')"><i class="ph-bold ph-magnifying-glass" style="font-size:16px;"></i> AUDIT DATA</button>
+        </div>
+      </div>`;
+    });
+    document.getElementById('friends-list-container').innerHTML = html;
+  }
+
+  async function searchFriends() {
+    const q = document.getElementById('friend-search').value; if(!q) return;
+    document.getElementById('friend-search-results').innerHTML = "<p style='text-align:center; font-size:12px; font-family:DM Mono;'>Querying...</p>";
+    const {data} = await sb.from('profiles').select('*').or(`username.ilike.%${q}%,email.ilike.%${q}%`).neq('id', currentUser.id).limit(10);
+    const res = document.getElementById('friend-search-results');
+    if(!data || !data.length) return res.innerHTML = "<p style='color:var(--accent-red); text-align:center; font-size:12px;'>No records found.</p>";
+    const {data: follows} = await sb.from('friends').select('followed_id').eq('follower_id', currentUser.id);
+    const followingIds = follows ? follows.map(f => f.followed_id) : [];
+    res.innerHTML = data.map(p => `
+      <div class="cad-card" style="margin:0 0 10px 0; padding:15px; display:flex; justify-content:space-between; align-items:center;">
+        <div><strong style="display:block; color:var(--blueprint); font-size:15px;">${p.username}</strong><span style="font-size:11px; color:var(--text-sub);">${p.email || ''}</span></div>
+        ${followingIds.includes(p.id) ? `<span style="font-size:12px; color:var(--accent-green); font-weight:800; font-family:'DM Mono';">ACTIVE</span>` : `<button class="nav-btn-subtle" style="color:var(--brass); border-color:var(--brass);" onclick="followUser('${p.id}')">LINK</button>`}
+      </div>`).join('');
+  }
+  async function followUser(id) { await sb.from('friends').insert({follower_id: currentUser.id, followed_id: id}); openSocialFeed(); }
+  async function toggleHype(sessionId) {
+      const btn = document.getElementById(`hype-btn-${sessionId}`);
+      const isHyped = btn.classList.contains('hyped');
+      btn.classList.toggle('hyped');
+      const currentCount = parseInt(btn.innerText.match(/\d+/)[0]);
+      btn.innerHTML = `<i class="${!isHyped ? 'ph-fill' : 'ph-bold'} ph-hand-fist" style="font-size:16px;"></i> Hype (${isHyped ? currentCount - 1 : currentCount + 1})`;
+      if (isHyped) { await sb.from('hypes').delete().eq('session_id', sessionId).eq('user_id', currentUser.id); } 
+      else { await sb.from('hypes').insert({ session_id: sessionId, user_id: currentUser.id }); }
+  }
+
+  // ==========================================
+  // MOVIE MODE (THE TIME MACHINE)
+  // ==========================================
+  async function loadRecapMap(sessionId, courseName, title) {
+    if(!sessionId) return;
+    switchScreen('screen-recap-map');
+    document.getElementById('recap-map-title').innerText = title || courseName || "Vector Archive";
+    
+    if(!recapMap) {
+      recapMap = L.map('recap-map-container',{zoomControl:false});
+      L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 }).addTo(recapMap);
+      recapLinesLayer = L.layerGroup().addTo(recapMap); 
+      recapMarkersLayer = L.layerGroup().addTo(recapMap);
     }
+    
+    clearRecapMap();
+    const { data: holes } = await sb.from('holes').select('*').eq('session_id', sessionId).order('hole_number', {ascending:true});
+    const { data: shots } = await sb.from('shots').select('*').eq('session_id', sessionId).order('created_at', {ascending:true});
+    
+    recapHoleData = {};
+    holes.forEach(h => { recapHoleData[h.hole_number] = { details: h, shots: shots ? shots.filter(s => s.hole_id === h.id) : [] }; });
+    if (holes.length > 0) activeCourse = { id: holes[0].course_id };
+    
+    currentRecapHole = Object.keys(recapHoleData).sort((a,b)=>a-b)[0];
+    if(currentRecapHole) drawRecapHole(currentRecapHole);
+  }
 
-    function jumpToLiveMap() { document.getElementById('profile-modal').style.display = 'none'; loadRecapMap(activeProfileLiveSessionId, activeProfileLiveCourseName, "LIVE FEED"); }
+  function clearRecapMap() { if(movieTimeout) clearTimeout(movieTimeout); if(recapLinesLayer) recapLinesLayer.clearLayers(); if(recapMarkersLayer) recapMarkersLayer.clearLayers(); }
 
-    async function loadRecapListForUser(userId, title) {
-      if(!userId) return;
-      switchScreen('screen-recap-list'); document.getElementById('recap-list-title').innerText = title || "Round History";
-      document.getElementById('recap-list-container').innerHTML = "<div style='text-align:center; padding:40px;'><i class='ph-bold ph-spinner ph-spin' style='font-size:32px; color:var(--brand-primary);'></i></div>";
-      
-      const { data: userSessions } = await sb.from('sessions').select(`id, created_at, courses(name), holes(score)`).eq('user_id', userId).order('created_at', {ascending: false});
-      if(!userSessions || userSessions.length === 0) return document.getElementById('recap-list-container').innerHTML = "<p style='text-align:center; font-weight:600; color:var(--text-muted);'>No rounds recorded yet.</p>";
-
-      document.getElementById('recap-list-container').innerHTML = userSessions.map(s => {
-        let tSc = 0; s.holes.forEach(h=>tSc+=h.score);
-        return `
-        <div class="course-card" onclick='openRoundScorecard("${s.id}", "screen-recap-list")'>
-          <div>
-            <strong style="display:block; color:var(--text-primary); font-size:15px;">${s.courses.name}</strong>
-            <span style="font-size:12px; color:var(--text-muted);">${new Date(s.created_at).toLocaleDateString()} • ${s.holes.length} Holes</span>
-          </div>
-          <div style="text-align:right;">
-             <span style="display:block; font-family:'Syne'; font-size:24px; font-weight:800; color:var(--brand-primary);">${tSc}</span>
-             <span style="color:var(--brand-accent); font-family:'Syne'; font-size:10px; font-weight:800; letter-spacing:1px;">REVIEW <i class="ph-bold ph-arrow-right"></i></span>
-          </div>
-        </div>`;
-      }).join('');
-    }
-
-    // ==========================================
-    // IMMERSIVE STORYTELLING (MOVIE MODE)
-    // ==========================================
-    async function loadRecapMap(sessionId, courseName, title) {
-      if(!sessionId) return;
-      switchScreen('screen-recap-map');
-      document.getElementById('recap-map-title').innerText = title || courseName || "Round Recap";
-      
-      if(!recapMap) {
-        recapMap = L.map('recap-map-container',{zoomControl:false});
-        L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 22, maxNativeZoom: 18 }).addTo(recapMap);
-        recapLinesLayer = L.layerGroup().addTo(recapMap); 
-        recapMarkersLayer = L.layerGroup().addTo(recapMap);
-      }
-      
-      clearRecapMap();
-      const { data: holes } = await sb.from('holes').select('*').eq('session_id', sessionId).order('hole_number', {ascending:true});
-      const { data: shots } = await sb.from('shots').select('*').eq('session_id', sessionId).order('created_at', {ascending:true});
-      
-      recapHoleData = {};
-      holes.forEach(h => { recapHoleData[h.hole_number] = { details: h, shots: shots ? shots.filter(s => s.hole_id === h.id) : [] }; });
-      if (holes.length > 0) activeCourse = { id: holes[0].course_id };
-      
-      currentRecapHole = Object.keys(recapHoleData).sort((a,b)=>a-b)[0];
-      if(currentRecapHole) drawRecapHole(currentRecapHole);
-    }
-
-    function clearRecapMap() { 
-      if(movieTimeout) clearTimeout(movieTimeout); 
-      if(recapLinesLayer) recapLinesLayer.clearLayers(); 
-      if(recapMarkersLayer) recapMarkersLayer.clearLayers(); 
-    }
-
-    function drawRecapHole(holeNum) {
-      if(!recapHoleData[holeNum]) return;
-      clearRecapMap();
-      document.getElementById('recap-hole-indicator').innerText = `Hole ${holeNum}`;
-      const data = recapHoleData[holeNum];
-      
-      document.getElementById('recap-stat-score').innerText = data.details.score;
-      document.getElementById('recap-stat-putts').innerText = data.details.putts;
-      
-      if(data.shots.length > 0) {
-        const latlngs = data.shots.map(s => [s.lat, s.lng]);
-        L.polyline(latlngs, {color: 'var(--brand-primary)', weight: 4, dashArray: '6, 12'}).addTo(recapLinesLayer);
-        data.shots.forEach((s, i) => {
-          const icon = L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`, html: `<div style="color:var(--text-primary); font-family:'DM Mono'; font-size:10px; position:absolute; top:-18px; left:-6px; font-weight:800; background:rgba(255,255,255,0.9); border-radius:6px; padding:2px 6px; box-shadow:var(--shadow-sm);">${i+1}</div>`});
-          L.marker([s.lat, s.lng], {icon}).addTo(recapMarkersLayer);
-        });
-        recapMap.fitBounds(L.polyline(latlngs).getBounds(), {padding: [50, 50]});
-      }
-      
-      const activeBtn = document.querySelector('#recap-layer-menu .layer-btn.active');
-      if(activeBtn) setOverlay(activeOverlayType, activeBtn);
-    }
-
-    function playMovieMode() {
-      const data = recapHoleData[currentRecapHole];
-      if(!data || data.shots.length === 0) {
-          movieTimeout = setTimeout(() => { changeRecapHole(1); setTimeout(playMovieMode, 500); }, 1500);
-          return;
-      }
-      clearRecapMap();
+  function drawRecapHole(holeNum) {
+    if(!recapHoleData[holeNum]) return;
+    clearRecapMap();
+    document.getElementById('recap-hole-indicator').innerText = `Hole ${holeNum}`;
+    const data = recapHoleData[holeNum];
+    
+    document.getElementById('recap-stat-score').innerText = data.details.score;
+    document.getElementById('recap-stat-putts').innerText = data.details.putts;
+    
+    if(data.shots.length > 0) {
       const latlngs = data.shots.map(s => [s.lat, s.lng]);
-      recapMap.fitBounds(L.polyline(latlngs).getBounds(), {padding: [60, 60]});
-
-      let currentShotIndex = 0;
-      function showNextShot() {
-        if (currentShotIndex >= data.shots.length) {
-            movieTimeout = setTimeout(() => {
-                const availableHoles = Object.keys(recapHoleData).map(Number).sort((a,b)=>a-b);
-                const currIdx = availableHoles.indexOf(Number(currentRecapHole));
-                if (currIdx + 1 < availableHoles.length) { changeRecapHole(1); movieTimeout = setTimeout(playMovieMode, 500); } 
-                else { drawRecapHole(currentRecapHole); }
-            }, 2500);
-            return; 
-        }
-        const s = data.shots[currentShotIndex];
-        const icon = L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`, html: `<div style="color:var(--text-primary); font-family:'DM Mono'; font-size:10px; position:absolute; top:-18px; left:-6px; font-weight:800; background:rgba(255,255,255,0.9); border-radius:6px; padding:2px 6px; box-shadow:var(--shadow-sm);">${currentShotIndex+1}</div>`});
+      L.polyline(latlngs, {color: 'var(--brass)', weight: 3, dashArray: '6, 12'}).addTo(recapLinesLayer);
+      data.shots.forEach((s, i) => {
+        const icon = L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`, html: `<div style="color:var(--blueprint); font-family:'DM Mono'; font-size:10px; position:absolute; top:-18px; left:-6px; font-weight:800; background:rgba(255,255,255,0.95); border-radius:4px; padding:2px 6px; box-shadow:var(--shadow-cad); border:1px solid var(--brass);">${i+1}</div>`});
         L.marker([s.lat, s.lng], {icon}).addTo(recapMarkersLayer);
-        if (currentShotIndex > 0) {
-          const prevS = data.shots[currentShotIndex - 1];
-          L.polyline([[prevS.lat, prevS.lng], [s.lat, s.lng]], {color: 'var(--brand-primary)', weight: 4, dashArray: '6, 12'}).addTo(recapLinesLayer);
-        }
-        currentShotIndex++; movieTimeout = setTimeout(showNextShot, 1200); 
+      });
+      recapMap.fitBounds(L.polyline(latlngs).getBounds(), {padding: [50, 50]});
+    }
+  }
+
+  function playMovieMode() {
+    const data = recapHoleData[currentRecapHole];
+    if(!data || data.shots.length === 0) { movieTimeout = setTimeout(() => { changeRecapHole(1); setTimeout(playMovieMode, 500); }, 1500); return; }
+    clearRecapMap();
+    const latlngs = data.shots.map(s => [s.lat, s.lng]);
+    recapMap.fitBounds(L.polyline(latlngs).getBounds(), {padding: [60, 60]});
+
+    let currentShotIndex = 0;
+    function showNextShot() {
+      if (currentShotIndex >= data.shots.length) {
+          movieTimeout = setTimeout(() => {
+              const availableHoles = Object.keys(recapHoleData).map(Number).sort((a,b)=>a-b);
+              const currIdx = availableHoles.indexOf(Number(currentRecapHole));
+              if (currIdx + 1 < availableHoles.length) { changeRecapHole(1); movieTimeout = setTimeout(playMovieMode, 500); } 
+              else { drawRecapHole(currentRecapHole); }
+          }, 2500); return; 
       }
-      showNextShot();
-    }
+      const s = data.shots[currentShotIndex];
+      const icon = L.divIcon({className: `shot-pin pin-${s.shot_type || s.type}`, html: `<div style="color:var(--blueprint); font-family:'DM Mono'; font-size:10px; position:absolute; top:-18px; left:-6px; font-weight:800; background:rgba(255,255,255,0.95); border-radius:4px; padding:2px 6px; box-shadow:var(--shadow-cad); border:1px solid var(--brass);">${currentShotIndex+1}</div>`});
+      L.marker([s.lat, s.lng], {icon}).addTo(recapMarkersLayer);
 
-    function changeRecapHole(dir) {
-      const availableHoles = Object.keys(recapHoleData).map(Number).sort((a,b)=>a-b);
-      const currIdx = availableHoles.indexOf(Number(currentRecapHole));
-      const nextIdx = currIdx + dir;
-      if(nextIdx >= 0 && nextIdx < availableHoles.length) { currentRecapHole = availableHoles[nextIdx]; drawRecapHole(currentRecapHole); }
+      if (currentShotIndex > 0) {
+        const prevS = data.shots[currentShotIndex - 1];
+        L.polyline([[prevS.lat, prevS.lng], [s.lat, s.lng]], {color: 'var(--brass)', weight: 3, dashArray: '6, 12'}).addTo(recapLinesLayer);
+      }
+      currentShotIndex++; movieTimeout = setTimeout(showNextShot, 1200); 
     }
+    showNextShot();
+  }
+
+  function changeRecapHole(dir) {
+    const availableHoles = Object.keys(recapHoleData).map(Number).sort((a,b)=>a-b);
+    const currIdx = availableHoles.indexOf(Number(currentRecapHole));
+    const nextIdx = currIdx + dir;
+    if(nextIdx >= 0 && nextIdx < availableHoles.length) { currentRecapHole = availableHoles[nextIdx]; drawRecapHole(currentRecapHole); }
+  }
+  function closeRecapMap() { clearRecapMap(); switchScreen('screen-round-review'); }
+
+  // ==========================================
+  // HUD OVERLAYS & STHO MATRIX
+  // ==========================================
+  function setOverlay(type, btnElement) {
+    activeOverlayType = type;
+    const menu = btnElement.closest('.sub-tabs');
+    if(menu) menu.querySelectorAll('.sub-tab').forEach(b => b.classList.remove('active'));
+    btnElement.classList.add('active');
+    const isRecap = document.getElementById('screen-recap-map').style.display === 'flex';
+    const targetHole = isRecap ? currentRecapHole : currentHole;
+    const targetUser = activeProfileUserId || currentUser.id;
+    renderSTHO(targetHole, targetUser, isRecap);
+  }
+
+  async function renderSTHO(holeNum, targetUserId, isRecap = false) {
+    if(!activeCourse) return;
+    const targetMap = isRecap ? recapMap : map;
+    if(!targetMap) return;
     
-    function closeRecapMap() { clearRecapMap(); switchScreen('screen-round-review'); }
+    if(!overlayLayer) overlayLayer = L.layerGroup().addTo(targetMap);
+    overlayLayer.clearLayers();
 
-    // ==========================================
-    // STHO & BLUEPRINT VECTOR (CAD DATA ENGINE)
-    // ==========================================
-    function setOverlay(type, btnElement) {
-      activeOverlayType = type;
-      const menu = btnElement.closest('.integrated-layers') || btnElement.closest('.layer-menu');
-      menu.querySelectorAll('.layer-btn').forEach(b => b.classList.remove('active'));
-      btnElement.classList.add('active');
-      const isRecap = document.getElementById('screen-recap-map').style.display === 'flex';
-      const targetHole = isRecap ? currentRecapHole : currentHole;
-      const targetUser = activeProfileUserId || currentUser.id;
-      renderSTHO(targetHole, targetUser, isRecap);
-    }
+    if (activeOverlayType === 'none') return;
 
-    async function renderSTHO(holeNum, targetUserId, isRecap = false) {
-      if(!activeCourse) return;
-      const targetMap = isRecap ? recapMap : map;
-      if(!targetMap) return;
-      
-      if(!overlayLayer) overlayLayer = L.layerGroup().addTo(targetMap);
-      if(!vectorLayer) vectorLayer = L.layerGroup().addTo(targetMap);
-      overlayLayer.clearLayers(); vectorLayer.clearLayers();
+    try {
+      if (activeOverlayType === 'stho_personal') {
+        const { data: holes } = await sb.from('holes').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', holeNum).eq('user_id', targetUserId);
+        await processAndDrawSTHOGrid(holes, 'var(--brass)', targetMap); 
+      } 
+      else if (activeOverlayType === 'stho_community') {
+        const { data: holes } = await sb.from('holes').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', holeNum);
+        await processAndDrawSTHOGrid(holes, 'var(--blueprint)', targetMap); 
+      }
+    } catch(e) { console.log("Overlay error", e); }
+  }
 
-      if (activeOverlayType === 'none') return;
+  async function processAndDrawSTHOGrid(holesArray, colorCode, targetMap) {
+      if(!holesArray || holesArray.length === 0) return;
+      const holeScores = {}; holesArray.forEach(h => holeScores[h.id] = h.score);
+      const holeIds = Object.keys(holeScores);
+      const { data: shots } = await sb.from('shots').select('lat, lng, hole_id, created_at').in('hole_id', holeIds).order('created_at', {ascending: true});
+      if(!shots) return;
 
-      try {
-        if (activeOverlayType === 'blueprint_vector') {
-           // The "DECADE" Killer: Predict dispersion cone based on community data
-           const { data: commShots } = await sb.from('shots').select('lat, lng, shot_type').eq('course_id', activeCourse.id).eq('hole_number', holeNum);
-           if(commShots && commShots.length > 0) {
-               const tees = commShots.filter(s => s.shot_type === 'Tee');
-               const putts = commShots.filter(s => s.shot_type === 'Putt');
-               if(tees.length > 0 && putts.length > 0) {
-                   const avgTee = { lat: tees.reduce((s,t)=>s+t.lat,0)/tees.length, lng: tees.reduce((s,t)=>s+t.lng,0)/tees.length };
-                   const avgPutt = { lat: putts.reduce((s,t)=>s+t.lat,0)/putts.length, lng: putts.reduce((s,t)=>s+t.lng,0)/putts.length };
-                   drawDispersionCone(avgTee.lat, avgTee.lng, avgPutt.lat, avgPutt.lng, targetMap);
-               }
-           }
-        }
-        else if (activeOverlayType === 'stho_personal') {
-          const { data: holes } = await sb.from('holes').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', holeNum).eq('user_id', targetUserId);
-          await processAndDrawSTHOGrid(holes, 'var(--brand-accent)', targetMap); 
-        } 
-        else if (activeOverlayType === 'stho_community') {
-          const { data: holes } = await sb.from('holes').select('id, score').eq('course_id', activeCourse.id).eq('hole_number', holeNum);
-          await processAndDrawSTHOGrid(holes, 'var(--brand-primary)', targetMap); 
-        }
-      } catch(e) { console.log("Overlay error", e); }
-    }
-    
-    function drawDispersionCone(tLat, tLng, pLat, pLng, targetMap) {
-        // Calculate bearing from Tee to Green
-        const bearing = calculateBearing(tLat, tLng, pLat, pLng);
-        // Draw Center Target Line (250 yds = ~228 meters)
-        const targetDist = 228; 
-        const centerPoint = destinationPoint(tLat, tLng, targetDist, bearing);
-        L.polyline([[tLat, tLng], [centerPoint.lat, centerPoint.lng]], {color: 'var(--brand-primary)', weight: 2, dashArray: '5, 5'}).addTo(vectorLayer);
-        
-        // Calculate 15 degree dispersion cone
-        const leftPoint = destinationPoint(tLat, tLng, targetDist, bearing - 15);
-        const rightPoint = destinationPoint(tLat, tLng, targetDist, bearing + 15);
-        
-        // Draw Blueprint Cone
-        L.polygon([ [tLat, tLng], [leftPoint.lat, leftPoint.lng], [rightPoint.lat, rightPoint.lng] ], {
-            color: 'var(--brand-accent)', fillColor: 'var(--brand-accent)', fillOpacity: 0.15, weight: 1, dashArray: '4, 4'
-        }).addTo(vectorLayer);
-    }
+      const shotsByHole = {};
+      shots.forEach(s => { if(!shotsByHole[s.hole_id]) shotsByHole[s.hole_id] = []; shotsByHole[s.hole_id].push(s); });
 
-    async function processAndDrawSTHOGrid(holesArray, colorCode, targetMap) {
-        if(!holesArray || holesArray.length === 0) return;
-        const holeScores = {}; holesArray.forEach(h => holeScores[h.id] = h.score);
-        const holeIds = Object.keys(holeScores);
-        const { data: shots } = await sb.from('shots').select('lat, lng, hole_id, created_at').in('hole_id', holeIds).order('created_at', {ascending: true});
-        if(!shots) return;
+      const grid = {};
+      Object.keys(shotsByHole).forEach(hId => {
+          const holeShots = shotsByHole[hId]; const totalScore = holeScores[hId];
+          holeShots.forEach((shot, index) => {
+              const stho = totalScore - index;
+              const gridLat = (Math.round(shot.lat * 10000) / 10000).toFixed(4);
+              const gridLng = (Math.round(shot.lng * 10000) / 10000).toFixed(4);
+              const key = `${gridLat},${gridLng}`;
+              if(!grid[key]) grid[key] = { sum: 0, count: 0, lat: parseFloat(gridLat), lng: parseFloat(gridLng) };
+              grid[key].sum += stho; grid[key].count += 1;
+          });
+      });
 
-        const shotsByHole = {};
-        shots.forEach(s => { if(!shotsByHole[s.hole_id]) shotsByHole[s.hole_id] = []; shotsByHole[s.hole_id].push(s); });
-
-        const grid = {};
-        Object.keys(shotsByHole).forEach(hId => {
-            const holeShots = shotsByHole[hId]; const totalScore = holeScores[hId];
-            holeShots.forEach((shot, index) => {
-                const stho = totalScore - index;
-                const gridLat = (Math.round(shot.lat * 10000) / 10000).toFixed(4);
-                const gridLng = (Math.round(shot.lng * 10000) / 10000).toFixed(4);
-                const key = `${gridLat},${gridLng}`;
-                if(!grid[key]) grid[key] = { sum: 0, count: 0, lat: parseFloat(gridLat), lng: parseFloat(gridLng) };
-                grid[key].sum += stho; grid[key].count += 1;
-            });
-        });
-
-        Object.values(grid).forEach(cell => {
-            const avgSTHO = (cell.sum / cell.count).toFixed(2);
-            const icon = L.divIcon({ className: 'stho-cad-icon', html: avgSTHO });
-            L.marker([cell.lat, cell.lng], {icon, interactive: false}).addTo(overlayLayer);
-        });
-    }
-  </script>
+      Object.values(grid).forEach(cell => {
+          const avgSTHO = (cell.sum / cell.count).toFixed(2);
+          const icon = L.divIcon({ className: 'stho-cad-icon', html: `<span style="color:${colorCode};">${avgSTHO}</span>`});
+          L.marker([cell.lat, cell.lng], {icon, interactive: false}).addTo(overlayLayer);
+      });
+  }
+</script>
 </body>
 </html>
